@@ -44,19 +44,27 @@ export function AuthShell({
               <ChevronLeft size={16} strokeWidth={1.75} aria-hidden />
               Home
             </Link>
-            <span>
-              <span className="@max-[560px]:hidden">
-                {register ? "Already have an account? " : "New to Escapture? "}
+            {register && (
+              <span>
+                <span className="@max-[560px]:hidden">Already have an account? </span>
+                <Link href="/sign-in" className={topLink}>
+                  Sign in
+                </Link>
               </span>
-              <Link href={register ? "/sign-in" : "/sign-up"} className={topLink}>
-                {register ? "Sign in" : "Create an account"}
-              </Link>
-            </span>
+            )}
           </div>
 
           <div className="flex flex-1 items-center justify-center @max-[560px]:items-start">
             <div className="flex w-full max-w-[420px] flex-col gap-6 @max-[560px]:[&_h1]:text-[28px] @max-[560px]:[&_h1]:leading-9">
               {children}
+              {!register && (
+                <p className="flex flex-wrap items-center justify-center gap-x-1 text-center text-[15px] leading-[22px] text-muted">
+                  New to Escapture?
+                  <Link href="/sign-up" className={topLink}>
+                    Create an account
+                  </Link>
+                </p>
+              )}
             </div>
           </div>
 
