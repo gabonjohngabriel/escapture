@@ -1,9 +1,9 @@
 "use client";
 
 import { ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { PillTabs } from "@/components/ui/pill-tabs";
 import { cn } from "@/lib/cn";
 import { vaultHref, type VaultView } from "@/lib/vault-view";
 
@@ -57,36 +57,17 @@ export function VaultToolbar({
         <div className="flex flex-col gap-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
                 {/* Pill Tabs */}
-                <nav
-                    aria-label="Vault tabs"
-                    className="inline-flex items-center rounded-full bg-white p-1.5 shadow-soft">
-                    {tabs.map((t) => {
-                        const active = view.tab === t.key;
-                        return (
-                            <Link
-                                key={t.key}
-                                href={vaultHref({ tab: t.key, q: view.q })}
-                                aria-current={active ? "page" : undefined}
-                                className={cn(
-                                    "flex items-center gap-2.5 rounded-full px-5 py-2 text-sm font-semibold transition-all duration-200 select-none",
-                                    active
-                                        ? "bg-brand-600 text-white shadow-xs"
-                                        : "text-muted hover:text-brand-700",
-                                )}>
-                                <span>{t.label}</span>
-                                <span
-                                    className={cn(
-                                        "flex size-5 items-center justify-center rounded-full text-xs font-bold transition-colors",
-                                        active
-                                            ? "bg-white text-brand-700"
-                                            : "bg-brand-100 text-brand-800",
-                                    )}>
-                                    {t.count}
-                                </span>
-                            </Link>
-                        );
-                    })}
-                </nav>
+                <PillTabs
+                    label="Vault tabs"
+                    variant="white"
+                    tabs={tabs.map((t) => ({
+                        key: t.key,
+                        label: t.label,
+                        count: t.count,
+                        active: view.tab === t.key,
+                        href: vaultHref({ tab: t.key, q: view.q }),
+                    }))}
+                />
 
                 {/* Search & Filter Controls */}
                 {showControls && (
