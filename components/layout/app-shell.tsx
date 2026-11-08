@@ -19,7 +19,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { createContext, useContext, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+    createContext,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+    useSyncExternalStore,
+} from "react";
 import { Menu } from "@/components/ui/menu";
 import { api } from "@/lib/client-api";
 import { cn } from "@/lib/cn";
@@ -179,7 +186,11 @@ export function AppShell({
         items.find((item) => item.match(pathname)) ??
         items[0];
 
-    const collapsed = useSyncExternalStore(subscribeSidebar, getSidebarCollapsed, getServerSidebarCollapsed);
+    const collapsed = useSyncExternalStore(
+        subscribeSidebar,
+        getSidebarCollapsed,
+        getServerSidebarCollapsed,
+    );
     const [menuOpen, setMenuOpen] = useState(false);
     const drawer = useRef<HTMLDialogElement>(null);
 
@@ -212,26 +223,34 @@ export function AppShell({
     return (
         <div
             data-density={user.role === "student" ? "comfortable" : "compact"}
-            className="app-shell min-h-screen bg-canvas ml-8">
+            className="app-shell min-h-screen bg-canvas">
             {/* Desktop Collapsible Sidebar */}
             <aside
                 aria-label="Sidebar"
                 className={cn(
-                    "fixed inset-y-0 left-0 z-40 hidden flex-col justify-between border-r border-border bg-card transition-all duration-200 ease-out lg:flex overflow-x-hidden",
+                    "fixed inset-y-0 left-0 z-40 hidden flex-col justify-between border-r border-border bg-card transition-all duration-200 ease-out lg:flex overflow-visible",
                     collapsed ? "w-[86px] px-3 py-6" : "w-[294px] px-4 py-6",
                 )}>
                 <div className="flex flex-col gap-6">
                     {/* Header */}
-                    <div className="flex h-12 items-center justify-between">
+                    <div
+                        className={cn(
+                            "flex h-12 items-center justify-between",
+                            collapsed && "group relative",
+                        )}>
                         <Link
                             href={home}
-                            className="flex items-center overflow-hidden rounded-md focus-visible:outline-brand-700"
+                            className={cn(
+                                "flex items-center overflow-hidden rounded-md transition-opacity duration-200",
+                                collapsed &&
+                                    "group-hover:opacity-0 group-focus-within:opacity-0",
+                            )}
                             title="Escapture">
                             <Logo
                                 size={36}
                                 withName={!collapsed}
-                                animateName={false}
-                                nameClassName="text-[22px] font-bold text-brand-700 ml-1"
+                                animateName={true}
+                                nameClassName="text-[22px] font-bold text-brand-500 ml-1"
                             />
                         </Link>
                         {!collapsed && (
@@ -240,7 +259,7 @@ export function AppShell({
                                 onClick={toggleCollapsed}
                                 aria-label="Collapse sidebar"
                                 title="Collapse sidebar"
-                                className="flex size-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-brand-50 hover:text-brand-800 focus-visible:outline-brand-700">
+                                className="flex size-9 items-center justify-center rounded-xl text-muted transition-colors hover:bg-brand-50 hover:text-brand-800 focus-visible:outline-brand-700">
                                 <PanelLeftClose
                                     size={18}
                                     strokeWidth={2}
@@ -248,25 +267,26 @@ export function AppShell({
                                 />
                             </button>
                         )}
-                    </div>
-
-                    {/* Expand Button */}
-                    {collapsed && (
-                        <div className="flex justify-center -mt-2">
+                        {collapsed && (
                             <button
                                 type="button"
                                 onClick={toggleCollapsed}
-                                aria-label="Expand sidebar"
-                                title="Expand sidebar"
-                                className="flex size-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-brand-50 hover:text-brand-800 focus-visible:outline-brand-700">
+                                aria-label="Open sidebar"
+                                title="Open sidebar"
+                                className="absolute inset-0 z-10 flex items-center justify-center rounded-xl text-muted opacity-0 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 hover:bg-brand-50 hover:text-brand-800 focus-visible:outline-brand-700">
                                 <PanelLeftOpen
                                     size={18}
                                     strokeWidth={2}
                                     aria-hidden
                                 />
+                                <span
+                                    aria-hidden
+                                    className="pointer-events-none absolute top-1/2 left-full z-50 ml-8 -translate-y-1/2 whitespace-nowrap rounded-full bg-card px-3 py-1.5 text-sm font-medium text-ink opacity-0 shadow-raised transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                                    Open sidebar
+                                </span>
                             </button>
-                        </div>
-                    )}
+                        )}
+                    </div>
 
                     {/* Navigation Section */}
                     <nav aria-label="Main" className="mt-1">
@@ -309,6 +329,13 @@ export function AppShell({
                                                             : "text-brand-700 group-hover:text-brand-800",
                                                     )}
                                                 />
+                                                {collapsed && (
+                                                    <span
+                                                        aria-hidden
+                                                        className="pointer-events-none absolute top-1/2 left-full z-50 ml-8 -translate-y-1/2 whitespace-nowrap rounded-full bg-card px-3 py-1.5 text-sm font-medium text-ink opacity-0 shadow-raised transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                                                        {label}
+                                                    </span>
+                                                )}
                                             </div>
                                             {!collapsed && (
                                                 <span className="truncate text-[18px] font-semibold leading-none">

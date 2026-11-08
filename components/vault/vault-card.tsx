@@ -33,9 +33,9 @@ export function VaultCard({
     return (
         <Link
             href={`/vault/${item.id}`}
-            className="group relative flex flex-col overflow-hidden rounded-2xl border-2 border-brand-500 bg-card shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-brand-700">
+            className="group relative flex flex-col overflow-hidden rounded-2xl border-2 border-brand-500 bg-card shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-brand-500">
             {/* Top Banner */}
-            <div className="flex items-center justify-between bg-brand-600 px-6 py-4 text-white">
+            <div className="flex items-center justify-between bg-brand-500 px-6 py-4 text-white">
                 <div className="flex min-w-0 items-center gap-3.5">
                     <div className="flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-white/60 bg-white/10 font-bold text-white text-sm">
                         {initial}

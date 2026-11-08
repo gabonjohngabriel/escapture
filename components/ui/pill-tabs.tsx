@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { FocusLink } from "@/components/ui/search-focus";
 import { cn } from "@/lib/cn";
 
 export interface PillTabItem {
@@ -70,14 +70,14 @@ export function PillTabs({
 
         if (tab.href && !tab.disabled) {
           return (
-            <Link
+            <FocusLink
               key={tab.key}
               href={tab.href}
               aria-current={tab.active ? "page" : undefined}
               className={tabStyles}
             >
               {content}
-            </Link>
+            </FocusLink>
           );
         }
 

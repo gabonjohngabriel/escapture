@@ -8,7 +8,8 @@ import {
     X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { FocusLink, useSearchFocus } from "@/components/ui/search-focus";
+import { PillTabs } from "@/components/ui/pill-tabs";
+import { useSearchFocus } from "@/components/ui/search-focus";
 import { cn } from "@/lib/cn";
 import { vaultHref, type VaultView } from "@/lib/vault-view";
 
@@ -89,37 +90,17 @@ export function VaultToolbar({
     return (
         <div className="flex flex-col gap-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
-                {/* Pill Tabs */}
-                <nav
-                    aria-label="Vault tabs"
-                    className="inline-flex items-center rounded-full bg-white p-1.5 shadow-soft">
-                    {tabs.map((t) => {
-                        const active = view.tab === t.key;
-                        return (
-                            <FocusLink
-                                key={t.key}
-                                href={vaultHref({ tab: t.key, q: view.q })}
-                                aria-current={active ? "page" : undefined}
-                                className={cn(
-                                    "flex items-center gap-2.5 rounded-full px-5 py-2 text-sm font-semibold transition-all duration-200 select-none",
-                                    active
-                                        ? "bg-brand-600 text-white shadow-xs"
-                                        : "text-muted hover:text-brand-700",
-                                )}>
-                                <span>{t.label}</span>
-                                <span
-                                    className={cn(
-                                        "flex size-5 items-center justify-center rounded-full text-xs font-bold transition-colors",
-                                        active
-                                            ? "bg-white text-brand-700"
-                                            : "bg-brand-100 text-brand-800",
-                                    )}>
-                                    {t.count}
-                                </span>
-                            </FocusLink>
-                        );
-                    })}
-                </nav>
+                <PillTabs
+                    variant="white"
+                    label="Vault tabs"
+                    tabs={tabs.map((t) => ({
+                        key: t.key,
+                        label: t.label,
+                        count: t.count,
+                        active: view.tab === t.key,
+                        href: vaultHref({ tab: t.key, q: view.q }),
+                    }))}
+                />
 
                 {/* Search & Filter Controls */}
                 {showControls && (
@@ -137,7 +118,7 @@ export function VaultToolbar({
                         )}
 
                         {/* Rounded Pill Search Bar */}
-                        <div className="relative min-w-[240px] md:w-[320px]">
+                        <div className="relative min-w-[240px] md:w-[320px] ">
                             <Search
                                 size={18}
                                 strokeWidth={2}
@@ -167,7 +148,7 @@ export function VaultToolbar({
                                 }}
                                 maxLength={120}
                                 placeholder="Search captures, titles, or hashes..."
-                                className="h-11 w-full rounded-full border border-border bg-brand-50 pr-9 pl-11 text-sm text-ink placeholder:text-muted transition-colors focus:border-brand-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-600/20"
+                                className="h-11 w-full rounded-full border border-border bg-brand-50 pr-9 pl-11 text-sm text-ink placeholder:text-muted transition-colors focus:border-brand-600 focus:bg-card focus:outline-none focus:ring-2 focus:ring-brand-600/20"
                             />
                             {isPending && (
                                 <Loader2
@@ -185,7 +166,7 @@ export function VaultToolbar({
                                 onClick={() => setFilterOpen((o) => !o)}
                                 aria-expanded={filterOpen}
                                 className={cn(
-                                    "flex h-11 items-center gap-2 rounded-full border border-border bg-card px-5 text-sm font-medium transition-colors hover:bg-brand-50",
+                                    "flex h-11 items-center gap-2 rounded-full border border-brand-500 bg-card px-5 text-sm font-medium transition-colors hover:bg-brand-50",
                                     Boolean(view.kind || view.sort) ||
                                         filterOpen
                                         ? "border-brand-600 bg-brand-50 text-brand-700"
