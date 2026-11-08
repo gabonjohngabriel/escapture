@@ -61,7 +61,7 @@ export default async function EvidencePage({ params, searchParams }: PageProps<"
 
   return (
     <div className="flex flex-col gap-6">
-      <PageCrumbs title={ev.label} />
+      <PageCrumbs title={ev.label} sensitive={sensitive} />
       <div>
         <Link
           href={
@@ -111,7 +111,10 @@ export default async function EvidencePage({ params, searchParams }: PageProps<"
             Captured <span className="tnum font-semibold text-ink">{formatDateTime(ev.capturedAt)}</span>
           </span>
         </div>
-        <header className="min-w-0 pt-1">
+        <header
+          data-privacy-sensitive={sensitive ? "true" : undefined}
+          className="min-w-0 pt-1"
+        >
           {ev.isOwner && !ev.locked ? (
             <>
               {/* The name is a field for its owner; the page still needs a heading. */}

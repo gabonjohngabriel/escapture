@@ -16,7 +16,13 @@ export type ReportItem = {
 /**
  * Report Card
  */
-export function ReportCard({ item }: { item: ReportItem }) {
+export function ReportCard({
+    item,
+    sensitive = false,
+}: {
+    item: ReportItem;
+    sensitive?: boolean;
+}) {
     const sharingText =
         item.collaboratorCount > 0
             ? `${item.collaboratorCount} ${item.collaboratorCount === 1 ? "collaborator" : "collaborators"}`
@@ -44,7 +50,9 @@ export function ReportCard({ item }: { item: ReportItem }) {
                                 ? "Your report"
                                 : `Shared by ${item.ownerName}`}
                         </span>
-                        <h3 className="truncate text-base font-bold text-white group-hover:underline leading-snug">
+                        <h3
+                            data-privacy-sensitive={sensitive ? "true" : undefined}
+                            className="truncate text-base font-bold text-white group-hover:underline leading-snug">
                             {item.title}
                         </h3>
                     </div>

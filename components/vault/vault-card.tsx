@@ -6,9 +6,11 @@ import type { VaultItem } from "./vault-table";
 export function VaultCard({
     item,
     shared,
+    sensitive = false,
 }: {
     item: VaultItem;
     shared: boolean;
+    sensitive?: boolean;
 }) {
     const isPost = item.kind === "facebook_post";
     const inReports =
@@ -47,6 +49,7 @@ export function VaultCard({
                                 : "Captured by you"}
                         </span>
                         <h3
+                            data-privacy-sensitive={sensitive ? "true" : undefined}
                             className="truncate text-[16px] font-bold text-white group-hover:underline tracking-tight leading-snug">
                             {item.label || "Untitled capture"}
                         </h3>

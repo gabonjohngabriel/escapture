@@ -11,6 +11,7 @@ import {
     ReviewerForm,
     ReviewerRowActions,
 } from "@/components/admin/reviewer-form";
+import { StudentPasskeyReset } from "@/components/admin/student-passkey-reset";
 import { Badge } from "@/components/ui/badge";
 import { buttonClass } from "@/components/ui/button";
 import { Card, PageHeader } from "@/components/ui/card";
@@ -25,6 +26,7 @@ import { LinkTabs } from "@/components/ui/tabs";
 import { formatDate, formatDateTime, initials } from "@/lib/format";
 import { pageUser } from "@/server/page-auth";
 import { listReviewers, type ReviewerStatus } from "@/server/services/admin";
+import { listStudentsWithPasskeys } from "@/server/services/passkeys";
 
 // Per-user page: allowed to wait for the server on navigation.
 export const instant = false;
@@ -81,7 +83,10 @@ export default async function ReviewerAccountsPage({
     const params = await searchParams;
     const q = first(params.q).trim().slice(0, 120);
     const tab = TABS.find((t) => t.key === first(params.status)) ?? TABS[0];
-    const all = await listReviewers(user, { q: q || undefined });
+    const [all, students] = await Promise.all([
+        listReviewers(user, { q: q || undefined }),
+        listStudentsWithPasskeys(user),
+    ]);
     const reviewers = all.filter((r) => tab.match(r.status));
     const href = (status: string, query = q) => {
         const s = new URLSearchParams();
@@ -285,6 +290,8 @@ export default async function ReviewerAccountsPage({
                     <ReviewerForm />
                 </Card>
             </div>
+
+            <StudentPasskeyReset students={students} />
         </>
     );
 }

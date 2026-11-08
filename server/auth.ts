@@ -11,7 +11,13 @@ import { db, schema } from "./db";
 import { forbidden, unauthorized } from "./errors";
 
 export type Role = "student" | "reviewer" | "admin";
-export type Actor = { id: string; email: string; name: string; role: Role };
+export type Actor = {
+  id: string;
+  email: string;
+  name: string;
+  role: Role;
+  sessionId?: string;
+};
 
 // Lets server/services/admin.ts create reviewer and admin accounts past the
 // email-domain gate. It applies only to the call it wraps, so a public sign-up
@@ -20,6 +26,19 @@ export const signupBypass = new AsyncLocalStorage<boolean>();
 
 const appUrl =
   process.env.BETTER_AUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+export function webauthnConfig() {
+  const base =
+    process.env.BETTER_AUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const parsed = new URL(base);
+  return {
+    rpName: "Escapture",
+    rpID: process.env.WEBAUTHN_RP_ID?.trim() || parsed.hostname,
+    origin: process.env.WEBAUTHN_ORIGIN?.trim() || parsed.origin,
+    appUrl: parsed.origin,
+    requireCapturePasskey: process.env.REQUIRE_CAPTURE_PASSKEY !== "false",
+  };
+}
 
 export const auth = betterAuth({
   baseURL: appUrl,
@@ -90,7 +109,13 @@ export async function getUser(): Promise<Actor | null> {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return null;
   const u = session.user as typeof session.user & { role?: Role };
-  return { id: u.id, email: u.email, name: u.name, role: u.role ?? "student" };
+  return {
+    id: u.id,
+    email: u.email,
+    name: u.name,
+    role: u.role ?? "student",
+    sessionId: session.session.id,
+  };
 }
 
 /** Every handler and server component that touches data calls this first. */

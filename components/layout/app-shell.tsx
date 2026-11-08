@@ -7,6 +7,7 @@ import {
     Columns3,
     FolderOpen,
     Inbox,
+    KeyRound,
     LayoutDashboard,
     LockKeyhole,
     LogOut,
@@ -125,19 +126,24 @@ const ROLE: Record<Role, { label: string; group: string }> = {
     },
 };
 
-type Crumb = { path: string; title: string; section?: string };
+type Crumb = { path: string; title: string; section?: string; sensitive?: boolean };
 const CrumbContext = createContext<(crumb: Crumb) => void>(() => {});
 
 export function PageCrumbs({
     title,
     section,
+    sensitive,
 }: {
     title: string;
     section?: string;
+    sensitive?: boolean;
 }) {
     const set = useContext(CrumbContext);
     const path = usePathname();
-    useEffect(() => set({ path, title, section }), [set, path, title, section]);
+    useEffect(
+        () => set({ path, title, section, sensitive }),
+        [set, path, title, section, sensitive],
+    );
     return null;
 }
 
@@ -163,11 +169,13 @@ export function AppShell({
     user,
     unread,
     counts = {},
+    initialBlur = false,
     children,
 }: {
     user: { name: string; email: string; role: Role };
     unread: number;
     counts?: Record<string, number>;
+    initialBlur?: boolean;
     children: React.ReactNode;
 }) {
     const pathname = usePathname();
@@ -225,7 +233,7 @@ export function AppShell({
     }, []);
 
     return (
-        <PrivacyBlurProvider>
+        <PrivacyBlurProvider initialBlur={initialBlur}>
             <div
                 data-density={
                     user.role === "student" ? "comfortable" : "compact"
@@ -518,7 +526,11 @@ export function AppShell({
                                 />
                             </button>
                             {mine && (
-                                <span className="text-sm font-medium text-muted truncate max-w-[240px] sm:max-w-md">
+                                <span
+                                    data-privacy-sensitive={
+                                        mine.sensitive ? "true" : undefined
+                                    }
+                                    className="text-sm font-medium text-muted truncate max-w-[240px] sm:max-w-md">
                                     {mine.title}
                                 </span>
                             )}
@@ -571,6 +583,24 @@ export function AppShell({
                                     </div>
                                 }
                                 items={[
+                                    ...(user.role === "student"
+                                        ? [
+                                              {
+                                                  label: "Passkeys & security",
+                                                  icon: (
+                                                      <KeyRound
+                                                          size={18}
+                                                          strokeWidth={1.75}
+                                                          aria-hidden
+                                                      />
+                                                  ),
+                                                  onSelect: () =>
+                                                      router.push(
+                                                          "/account/security",
+                                                      ),
+                                              },
+                                          ]
+                                        : []),
                                     {
                                         label: "Sign out",
                                         icon: (

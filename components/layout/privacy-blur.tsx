@@ -1,7 +1,12 @@
 "use client";
 
 import { Eye, EyeOff } from "lucide-react";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useSyncExternalStore,
+} from "react";
 import { cn } from "@/lib/cn";
 
 interface PrivacyBlurContextValue {
@@ -17,27 +22,55 @@ const PrivacyBlurContext = createContext<PrivacyBlurContextValue>({
 });
 
 const STORAGE_KEY = "escapture:privacy-blur";
+const COOKIE_NAME = "escapture_privacy_blur";
 
-function getInitialBlur(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return sessionStorage.getItem(STORAGE_KEY) === "true";
-  } catch {
-    return false;
-  }
+const blurListeners = new Set<() => void>();
+
+function subscribeBlur(callback: () => void) {
+  blurListeners.add(callback);
+  return () => {
+    blurListeners.delete(callback);
+  };
 }
 
-export function PrivacyBlurProvider({ children }: { children: React.ReactNode }) {
-  const [blurred, setBlurred] = useState(getInitialBlur);
+function getClientBlur(fallback: boolean): boolean {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const stored = sessionStorage.getItem(STORAGE_KEY);
+    if (stored !== null) return stored === "true";
+  } catch {}
+  return fallback;
+}
+
+export function PrivacyBlurProvider({
+  initialBlur = false,
+  children,
+}: {
+  initialBlur?: boolean;
+  children: React.ReactNode;
+}) {
+  const blurred = useSyncExternalStore(
+    subscribeBlur,
+    () => getClientBlur(initialBlur),
+    () => initialBlur,
+  );
 
   const setBlur = (val: boolean) => {
-    setBlurred(val);
     try {
       sessionStorage.setItem(STORAGE_KEY, String(val));
+      document.cookie = `${COOKIE_NAME}=${val}; path=/; max-age=31536000; SameSite=Lax`;
     } catch {}
+    blurListeners.forEach((l) => l());
   };
 
   const toggleBlur = () => setBlur(!blurred);
+
+  // Keep cookie in sync with current blur state for SSR consistency on reloads
+  useEffect(() => {
+    try {
+      document.cookie = `${COOKIE_NAME}=${blurred}; path=/; max-age=31536000; SameSite=Lax`;
+    } catch {}
+  }, [blurred]);
 
   // Global keyboard shortcuts: Alt+P or double-tap Escape within 500ms
   useEffect(() => {
@@ -53,14 +86,14 @@ export function PrivacyBlurProvider({ children }: { children: React.ReactNode })
 
       if (e.altKey && (e.key === "p" || e.key === "P")) {
         e.preventDefault();
-        toggleBlur();
+        setBlur(!blurred);
         return;
       }
 
       if (e.key === "Escape" && !isInput) {
         const now = Date.now();
         if (now - lastEsc < 500) {
-          toggleBlur();
+          setBlur(!blurred);
           lastEsc = 0;
         } else {
           lastEsc = now;

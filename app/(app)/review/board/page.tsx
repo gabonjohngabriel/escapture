@@ -340,6 +340,12 @@ export default async function ReviewBoardPage({
                             </div>
                         </div>
 
+                        <ActiveFilters
+                            countText={plural(board.total, "case", "cases")}
+                            chips={activeChips}
+                            clearHref={clear}
+                        />
+
                         <SearchFocusArea
                             fallback={<TableSkeleton />}
                             className="flex min-w-0 flex-col gap-4 [&>*]:min-w-0">

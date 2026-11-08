@@ -16,13 +16,76 @@ import {
 
 const APP_URL = __APP_URL__;
 
-type Stored = { token?: string; name?: string; email?: string; lastCapture?: LastCapture; history?: CaptureRecord[] };
+type Stored = {
+  token?: string;
+  name?: string;
+  email?: string;
+  lastCapture?: LastCapture;
+  history?: CaptureRecord[];
+  unlockedTabs?: Record<string, number>;
+};
+
+const sessionStore = chrome.storage.session ?? chrome.storage.local;
 
 const store = {
   get: () => chrome.storage.local.get(["token", "name", "email", "lastCapture", "history"]) as Promise<Stored>,
   set: (v: Partial<Stored>) => chrome.storage.local.set(v),
-  clearAuth: () => chrome.storage.local.remove(["token", "name", "email", "lastCapture", "history"]),
+  clearAuth: async () => {
+    await chrome.storage.local.remove(["token", "name", "email", "lastCapture", "history"]);
+    await sessionStore.remove(["unlockedTabs"]).catch(() => {});
+  },
 };
+
+async function getUnlockedTabs(): Promise<Record<string, number>> {
+  const data = (await sessionStore.get(["unlockedTabs"]).catch(() => ({}))) as {
+    unlockedTabs?: Record<string, number>;
+  };
+  return data.unlockedTabs ?? {};
+}
+
+async function getTabUnlock(tabId: number): Promise<number | null> {
+  const map = await getUnlockedTabs();
+  const key = String(tabId);
+  const exp = map[key];
+  if (!exp) return null;
+  if (exp <= Date.now()) {
+    delete map[key];
+    await sessionStore.set({ unlockedTabs: map }).catch(() => {});
+    return null;
+  }
+  return exp;
+}
+
+async function setTabUnlock(tabId: number, expiresAtMs: number): Promise<void> {
+  const map = await getUnlockedTabs();
+  map[String(tabId)] = expiresAtMs;
+  await sessionStore.set({ unlockedTabs: map }).catch(() => {});
+}
+
+async function clearTabUnlock(tabId?: number): Promise<void> {
+  if (tabId === undefined) {
+    await sessionStore.remove(["unlockedTabs"]).catch(() => {});
+    return;
+  }
+  const map = await getUnlockedTabs();
+  const key = String(tabId);
+  if (key in map) {
+    delete map[key];
+    await sessionStore.set({ unlockedTabs: map }).catch(() => {});
+  }
+}
+
+// Per-tab unlock lifecycle: closing a tab or leaving Facebook relocks it.
+chrome.tabs.onRemoved.addListener((tabId) => {
+  void clearTabUnlock(tabId);
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  const nextUrl = changeInfo.url ?? tab.url;
+  if (nextUrl && !captureHost(nextUrl)) {
+    void clearTabUnlock(tabId);
+  }
+});
 
 async function appFetch(path: string, init: RequestInit = {}, token?: string) {
   const headers = new Headers(init.headers);
@@ -76,6 +139,7 @@ async function signIn(email: string, password: string): Promise<Reply<{ auth: Au
   const token = res.headers.get("set-auth-token");
   const body = await res.json().catch(() => null);
   if (!token || !body?.user) return { ok: false, error: "We couldn't sign you in. Please try again." };
+  await clearTabUnlock();
   await store.set({ token, name: body.user.name, email: body.user.email });
   return { ok: true, auth: { signedIn: true, name: body.user.name, email: body.user.email } };
 }
@@ -86,6 +150,175 @@ async function signOut() {
   await store.clearAuth();
 }
 
+async function injectAndStartPicker(tabId: number): Promise<Reply> {
+  try {
+    await chrome.scripting.executeScript({ target: { tabId }, files: ["content.js"] });
+    await chrome.tabs.sendMessage(tabId, { type: "picker:start" });
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "We couldn't start on this page. Reload it and try again." };
+  }
+}
+
+type GrantRequestReply =
+  | { status: "granted"; expiresAt: string }
+  | { status: "needs_enrollment"; reason: string; enrollUrl: string }
+  | { status: "pending"; requestId: string; verifyUrl: string };
+
+async function waitForGrant(
+  requestId: string,
+  targetTabId: number,
+  verifyWinId: number | undefined,
+  token: string,
+): Promise<{ ok: boolean; error?: string }> {
+  for (let attempt = 0; attempt < 90; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const res = await appFetch(
+        `/api/capture-grant/status?req=${encodeURIComponent(requestId)}`,
+        {},
+        token,
+      );
+      if (!res.ok) {
+        if (res.status === 404) return { ok: false, error: "Verification request expired." };
+        continue;
+      }
+      const data = (await res.json()) as {
+        status?: "granted" | "pending" | "expired";
+        expiresAt?: string;
+      };
+      if (data.status === "granted" && data.expiresAt) {
+        await setTabUnlock(targetTabId, new Date(data.expiresAt).getTime());
+        if (verifyWinId !== undefined) {
+          await chrome.windows.remove(verifyWinId).catch(() => {});
+        }
+        await chrome.tabs.update(targetTabId, { active: true }).catch(() => {});
+        const targetTab = await chrome.tabs.get(targetTabId).catch(() => null);
+        if (targetTab?.windowId !== undefined) {
+          await chrome.windows.update(targetTab.windowId, { focused: true }).catch(() => {});
+        }
+        return { ok: true };
+      }
+      if (data.status === "expired") {
+        if (verifyWinId !== undefined) {
+          await chrome.windows.remove(verifyWinId).catch(() => {});
+        }
+        return { ok: false, error: "Verification timed out. Try again when ready." };
+      }
+    } catch {
+      // Transient network hiccup
+    }
+  }
+  return { ok: false, error: "Verification timed out. Try again when ready." };
+}
+
+async function ensureTabCaptureGrant(
+  tabId: number,
+  token: string,
+  forceVerify = false,
+  awaitGrant = true,
+): Promise<{ ok: boolean; error?: string; passkeyRequired?: boolean; needsEnrollment?: boolean }> {
+  const unlockedUntil = await getTabUnlock(tabId);
+  if (!forceVerify && unlockedUntil && unlockedUntil > Date.now()) {
+    return { ok: true };
+  }
+
+  let grantRes: Response;
+  try {
+    grantRes = await appFetch(
+      "/api/capture-grant/request",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ forceVerify: true }),
+      },
+      token,
+    );
+  } catch {
+    return {
+      ok: false,
+      error: "We couldn't reach Escapture. Check your connection and try again.",
+    };
+  }
+
+  if (grantRes.status === 401) {
+    await store.clearAuth();
+    return { ok: false, error: "Your Escapture session ended. Sign in again." };
+  }
+  if (!grantRes.ok) {
+    return {
+      ok: false,
+      error: await errorText(grantRes, "We couldn't verify your capture permission. Please try again."),
+    };
+  }
+
+  const grant = (await grantRes.json()) as GrantRequestReply;
+
+  if (grant.status === "needs_enrollment") {
+    await chrome.tabs.create({
+      url: grant.enrollUrl || `${APP_URL}/account/security`,
+      active: true,
+    });
+    return {
+      ok: false,
+      error: "Set up your passkey on the Escapture Security page before capturing evidence.",
+      needsEnrollment: true,
+      passkeyRequired: true,
+    };
+  }
+
+  if (grant.status === "granted") {
+    await setTabUnlock(tabId, new Date(grant.expiresAt).getTime());
+    return { ok: true };
+  }
+
+  // status === "pending": notify the tab, open the verification window, and poll until approved.
+  await chrome.tabs.sendMessage(tabId, {
+    type: "capture:status",
+    status: "verifying",
+    message: "Confirm with your passkey in the opened window to save this capture...",
+  }).catch(() => {});
+
+  const popupWidth = 460;
+  const popupHeight = 620;
+  const currentWin = await chrome.windows.getCurrent().catch(() => null);
+  const left = currentWin?.left !== undefined && currentWin?.width !== undefined
+    ? Math.round(currentWin.left + (currentWin.width - popupWidth) / 2)
+    : undefined;
+  const top = currentWin?.top !== undefined && currentWin?.height !== undefined
+    ? Math.round(currentWin.top + (currentWin.height - popupHeight) / 2)
+    : undefined;
+
+  const verifyWin = await chrome.windows.create({
+    url: grant.verifyUrl,
+    type: "popup",
+    width: popupWidth,
+    height: popupHeight,
+    left,
+    top,
+    focused: true,
+  });
+
+  if (awaitGrant) {
+    const waitResult = await waitForGrant(grant.requestId, tabId, verifyWin?.id, token);
+    if (!waitResult.ok) {
+      return {
+        ok: false,
+        error: waitResult.error ?? "Passkey verification was cancelled or timed out.",
+        passkeyRequired: true,
+      };
+    }
+  } else {
+    void waitForGrant(grant.requestId, tabId, verifyWin?.id, token).then((res) => {
+      if (res.ok) {
+        void injectAndStartPicker(tabId);
+      }
+    });
+  }
+
+  return { ok: true };
+}
+
 async function startCapture(): Promise<Reply> {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id || !tab.url || !captureHost(tab.url)) {
@@ -94,13 +327,19 @@ async function startCapture(): Promise<Reply> {
       error: "Open the Facebook post or Messenger conversation you want to keep, then try again.",
     };
   }
-  if (!(await store.get()).token) return { ok: false, error: "Sign in to Escapture first." };
-  try {
-    await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
-    await chrome.tabs.sendMessage(tab.id, { type: "picker:start" });
-  } catch {
-    return { ok: false, error: "We couldn't start on this page. Reload it and try again." };
+  const { token } = await store.get();
+  if (!token) return { ok: false, error: "Sign in to Escapture first." };
+
+  const unlockedUntil = await getTabUnlock(tab.id);
+  if (unlockedUntil && unlockedUntil > Date.now()) {
+    return injectAndStartPicker(tab.id);
   }
+
+  const grantResult = await ensureTabCaptureGrant(tab.id, token, true, false);
+  if (!grantResult.ok) {
+    return { ok: false, error: grantResult.error ?? "Verification failed." };
+  }
+
   return { ok: true };
 }
 
@@ -184,16 +423,30 @@ async function measureCapture(html: string): Promise<Reply<{ fit: { w: number; h
   }
 }
 
-async function upload(msg: Extract<Message, { type: "capture:upload" }>): Promise<Reply<{ result: LastCapture }>> {
+async function upload(
+  msg: Extract<Message, { type: "capture:upload" }>,
+  senderTabId?: number,
+): Promise<Reply<{ result: LastCapture }>> {
   const at = new Date().toISOString();
-  const fail = async (message: string, refused = false) => {
-    const result: LastCapture = { ok: false, refused, message, at };
+  const fail = async (message: string, refused = false, passkeyRequired = false) => {
+    const result: LastCapture = { ok: false, refused, message, at, passkeyRequired };
     await store.set({ lastCapture: result });
     return { ok: true as const, result };
   };
 
   const { token } = await store.get();
   if (!token) return fail("Sign in to Escapture in the extension, then capture again.");
+
+  // If the sender tab is known and not unlocked, auto-prompt passkey verification before sending
+  if (senderTabId !== undefined) {
+    const unlockCheck = await getTabUnlock(senderTabId);
+    if (!unlockCheck || unlockCheck <= Date.now()) {
+      const grantRes = await ensureTabCaptureGrant(senderTabId, token, true);
+      if (!grantRes.ok) {
+        return fail(grantRes.error ?? "Passkey verification required.", false, grantRes.passkeyRequired ?? true);
+      }
+    }
+  }
 
   // The hash is of the exact bytes the server will store: the HTML itself.
   const bytes = new TextEncoder().encode(msg.html);
@@ -204,25 +457,59 @@ async function upload(msg: Extract<Message, { type: "capture:upload" }>): Promis
   const packed = await gzip(bytes);
   if (packed.byteLength > MAX_UPLOAD_BYTES) return fail("This capture is too large. Select a smaller area.", true);
 
-  const form = new FormData();
-  form.set("file", new File([packed as BlobPart], "capture.html.gz", { type: "application/gzip" }));
-  form.set("encoding", "gzip");
-  form.set("sha256", sha256);
-  form.set("kind", msg.kind);
-  form.set("sourceUrl", msg.sourceUrl);
-  form.set("clientCapturedAt", msg.clientCapturedAt);
-  form.set("tamperReport", JSON.stringify({ ...msg.tamperReport, extensionVersion: __EXT_VERSION__ }));
-  form.set("extensionVersion", __EXT_VERSION__);
+  const makeForm = () => {
+    const form = new FormData();
+    form.set("file", new File([packed as BlobPart], "capture.html.gz", { type: "application/gzip" }));
+    form.set("encoding", "gzip");
+    form.set("sha256", sha256);
+    form.set("kind", msg.kind);
+    form.set("sourceUrl", msg.sourceUrl);
+    form.set("clientCapturedAt", msg.clientCapturedAt);
+    form.set("tamperReport", JSON.stringify({ ...msg.tamperReport, extensionVersion: __EXT_VERSION__ }));
+    form.set("extensionVersion", __EXT_VERSION__);
+    return form;
+  };
 
   let res: Response;
   try {
-    res = await appFetch("/api/evidence", { method: "POST", body: form }, token);
+    res = await appFetch("/api/evidence", { method: "POST", body: makeForm() }, token);
   } catch {
     return fail("We couldn't reach Escapture, so nothing was saved. Check your connection and capture again.");
   }
   if (res.status === 401) {
     await store.clearAuth();
     return fail("Your Escapture session ended. Sign in again in the extension, then capture again.");
+  }
+  if (res.status === 403) {
+    const errBody = await res.json().catch(() => null);
+    if (errBody?.error?.code === "passkey_required") {
+      await clearTabUnlock(senderTabId);
+      if (senderTabId !== undefined) {
+        const retryGrant = await ensureTabCaptureGrant(senderTabId, token, true);
+        if (retryGrant.ok) {
+          try {
+            const retryRes = await appFetch("/api/evidence", { method: "POST", body: makeForm() }, token);
+            if (retryRes.ok) {
+              const saved = await retryRes.json();
+              const result: LastCapture = { ok: true, id: saved.id, label: saved.label, url: `${APP_URL}/vault/${saved.id}`, at };
+              const history = [{ id: saved.id, label: saved.label, url: result.url, at }, ...((await store.get()).history ?? [])];
+              await store.set({ lastCapture: result, history: history.slice(0, HISTORY_SIZE) });
+              return { ok: true, result };
+            }
+          } catch {
+            return fail("We couldn't reach Escapture after verification. Please try again.");
+          }
+        } else {
+          return fail(retryGrant.error ?? "Passkey verification required.", false, true);
+        }
+      }
+      return fail(
+        "Verify with your passkey before capturing evidence.",
+        false,
+        true,
+      );
+    }
+    return fail(errBody?.error?.message ?? "You don't have permission to save this capture.");
   }
   if (!res.ok) return fail(await errorText(res, "We couldn't save this capture. Please try again."));
   const saved = await res.json();
@@ -232,15 +519,19 @@ async function upload(msg: Extract<Message, { type: "capture:upload" }>): Promis
   return { ok: true, result };
 }
 
-async function handle(msg: Message): Promise<unknown> {
+async function handle(msg: Message, sender: chrome.runtime.MessageSender): Promise<unknown> {
   switch (msg.type) {
-    case "auth:status":
+    case "auth:status": {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      const tabUnlockedUntil = tab?.id ? await getTabUnlock(tab.id) : null;
       return {
         ok: true,
         auth: await authStatus(),
         lastCapture: (await store.get()).lastCapture ?? null,
         history: (await store.get()).history ?? [],
+        tabUnlockedUntil,
       };
+    }
     case "auth:signIn":
       return signIn(msg.email, msg.password);
     case "auth:signOut":
@@ -258,14 +549,14 @@ async function handle(msg: Message): Promise<unknown> {
     case "capture:measure":
       return measureCapture(msg.html);
     case "capture:upload":
-      return upload(msg);
+      return upload(msg, sender.tab?.id);
   }
 }
 
 chrome.runtime.onMessage.addListener((msg: Message, sender, sendResponse) => {
   // Only this extension's own pages and content scripts may talk to the worker.
   if (sender.id !== chrome.runtime.id) return false;
-  handle(msg).then(sendResponse, (e) =>
+  handle(msg, sender).then(sendResponse, (e) =>
     sendResponse({ ok: false, error: e instanceof Error ? e.message : "Something went wrong." }),
   );
   return true;

@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageSkeleton } from "@/components/ui/feedback";
@@ -13,9 +14,19 @@ export const instant = false;
 // The session is request data, so the shell streams in behind Suspense.
 async function Shell({ children }: { children: React.ReactNode }) {
   const user = await pageUser();
-  const [unread, counts] = await Promise.all([unreadCount(user), navCounts(user)]);
+  const [unread, counts, cookieStore] = await Promise.all([
+    unreadCount(user),
+    navCounts(user),
+    cookies(),
+  ]);
+  const initialBlur = cookieStore.get("escapture_privacy_blur")?.value === "true";
   return (
-    <AppShell user={{ name: user.name, email: user.email, role: user.role }} unread={unread} counts={counts}>
+    <AppShell
+      user={{ name: user.name, email: user.email, role: user.role }}
+      unread={unread}
+      counts={counts}
+      initialBlur={initialBlur}
+    >
       <Suspense fallback={<PageSkeleton />}>{children}</Suspense>
     </AppShell>
   );

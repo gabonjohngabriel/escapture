@@ -81,6 +81,13 @@ const DEFAULT_DOCK: Record<Kind, Dock> = {
 const DOCK_KEY = "toolbarDock";
 
 class Session {
+  private statusText: HTMLElement | null = null;
+
+  updateStatus(message: string) {
+    if (this.statusText) {
+      this.statusText.textContent = message;
+    }
+  }
   private host = document.createElement(HOST_TAG);
   private shadow = this.host.attachShadow({ mode: "open" });
   private highlighter = new Highlighter();
@@ -385,10 +392,11 @@ class Session {
       return;
     }
 
+    this.statusText = h("p", {}, "Saving a copy to your vault. This takes a moment.");
     const { element: capturingEl } = createPanel(
       "Capturing",
       this.close,
-      h("p", {}, "Saving a copy to your vault. This takes a moment."),
+      this.statusText,
     );
     this.ui.replaceChildren(capturingEl);
 
@@ -501,6 +509,27 @@ class Session {
     if (heights?.ok && tamperReport.size)
       tamperReport.size.fit = heights.fit;
 
+    await this.performUpload(html, kind, clientCapturedAt, tamperReport);
+  }
+
+  private async performUpload(
+    html: string,
+    kind: Kind,
+    clientCapturedAt: string,
+    tamperReport: TamperReport,
+  ) {
+    if (!this.statusText) {
+      this.statusText = h("p", {}, "Saving a copy to your vault. This takes a moment.");
+      const { element: capturingEl } = createPanel(
+        "Capturing",
+        this.close,
+        this.statusText,
+      );
+      this.ui.replaceChildren(capturingEl);
+    } else {
+      this.statusText.textContent = "Saving a copy to your vault. This takes a moment.";
+    }
+
     const reply = await send<{ result: LastCapture }>({
       type: "capture:upload",
       html,
@@ -543,16 +572,26 @@ class Session {
       body.append(h("div", { class: "row" }, closeBtn, open));
       this.ui.replaceChildren(element);
     } else {
-      const retry = button("Try again", "primary", () => {
-        this.close();
-        new Session().start();
-      });
-      const { element, body, closeBtn } = createPanel(
+      const closeBtn = button("Close", "ghost", this.close);
+      const actions: HTMLElement[] = [closeBtn];
+      if (result.passkeyRequired) {
+        const verifyBtn = button("Verify passkey & save", "primary", () => {
+          void this.performUpload(html, kind, clientCapturedAt, tamperReport);
+        });
+        actions.push(verifyBtn);
+      } else {
+        const retry = button("Try again", "primary", () => {
+          this.close();
+          new Session().start();
+        });
+        actions.push(retry);
+      }
+      const { element, body } = createPanel(
         "Not saved",
         this.close,
         h("p", { class: "note attention" }, result.message),
       );
-      body.append(h("div", { class: "row" }, closeBtn, retry));
+      body.append(h("div", { class: "row" }, ...actions));
       this.ui.replaceChildren(element);
     }
   }
@@ -562,9 +601,13 @@ if (!window.__safetrailCapture) {
   window.__safetrailCapture = true;
   let session: Session | null = null;
   chrome.runtime.onMessage.addListener(
-    (msg: { type?: string }, sender, sendResponse) => {
-      if (sender.id !== chrome.runtime.id || msg?.type !== "picker:start")
+    (msg: { type?: string; message?: string }, sender, sendResponse) => {
+      if (sender.id !== chrome.runtime.id) return false;
+      if (msg?.type === "capture:status" && msg.message) {
+        session?.updateStatus(msg.message);
         return false;
+      }
+      if (msg?.type !== "picker:start") return false;
       document.querySelector(HOST_TAG)?.remove();
       session = new Session();
       session.start();

@@ -7,9 +7,11 @@ import { VaultCard } from "./vault-card";
 export function VaultCardsGrid({
     items,
     shared,
+    sensitiveMap = {},
 }: {
     items: VaultItem[];
     shared: boolean;
+    sensitiveMap?: Record<string, boolean>;
 }) {
     return (
         <div
@@ -17,7 +19,12 @@ export function VaultCardsGrid({
             aria-busy={false}
             className="grid grid-cols-1 gap-6 xl:grid-cols-2">
             {items.map((item) => (
-                <VaultCard key={item.id} item={item} shared={shared} />
+                <VaultCard
+                    key={item.id}
+                    item={item}
+                    shared={shared}
+                    sensitive={Boolean(sensitiveMap[item.id])}
+                />
             ))}
         </div>
     );

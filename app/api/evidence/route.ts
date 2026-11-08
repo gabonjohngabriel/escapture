@@ -9,6 +9,7 @@ import {
 import { requireUser } from "@/server/auth";
 import { AppError, badRequest } from "@/server/errors";
 import { handle, json } from "@/server/http";
+import { requireCaptureGrant } from "@/server/services/capture-grant";
 import { createEvidence, listEvidence } from "@/server/services/evidence";
 
 const tooLarge = () => new AppError("too_large", 413, "This capture is too large. Select a smaller area.");
@@ -28,6 +29,7 @@ export const GET = handle(async (req) => {
 
 export const POST = handle(async (req) => {
   const user = await requireUser({ roles: ["student"] });
+  await requireCaptureGrant(user);
   // Reject obviously oversized bodies before reading them (64 KB of form overhead allowed).
   if (Number(req.headers.get("content-length") ?? 0) > MAX_UPLOAD_REQUEST_BYTES + 64 * 1024) throw tooLarge();
   const form = await req.formData().catch(() => null);

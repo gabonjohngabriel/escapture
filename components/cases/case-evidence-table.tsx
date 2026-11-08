@@ -55,8 +55,7 @@ export function CaseEvidenceTable({
           return (
             <article
               key={item.id}
-              data-privacy-sensitive="true"
-              className="flex flex-col justify-between overflow-hidden rounded-2xl border border-brand-500/40 bg-card p-4 shadow-soft transition-all duration-150 hover:border-brand-500 hover:shadow-md"
+              className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-brand-500/40 bg-card p-4 shadow-soft transition-all duration-150 hover:border-brand-500 hover:shadow-md"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex items-start gap-3 min-w-0 flex-1">
@@ -75,7 +74,10 @@ export function CaseEvidenceTable({
                         Added by <span className="font-medium text-ink">{item.addedBy}</span>
                       </span>
                     </div>
-                    <h3 className="mt-1 truncate text-base font-bold text-ink">
+                    <h3
+                      data-privacy-sensitive={item.sensitive ? "true" : undefined}
+                      className="mt-1 truncate text-base font-bold text-ink"
+                    >
                       <Link
                         href={`/vault/${item.id}?from=${caseId}`}
                         title={item.label}

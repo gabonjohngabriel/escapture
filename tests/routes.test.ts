@@ -30,12 +30,19 @@ describe("route guards (security checklist)", () => {
     },
   );
 
-  it("only auth, link metadata and the reviewer setup link are public", () => {
+  it("only auth, link metadata, reviewer setup, and passkey auth are public", () => {
     const publicRoutes = files
       .filter((f) => readFileSync(f, "utf8").includes("// public-route"))
       .map((f) => path.relative(api, f).replace(/\\/g, "/"))
       .sort();
-    expect(publicRoutes).toEqual(["auth/[...all]/route.ts", "links/[token]/route.ts", "setup/[token]/route.ts"]);
+    expect(publicRoutes).toEqual([
+      "auth/[...all]/route.ts",
+      "links/[token]/route.ts",
+      "passkeys/auth/info/route.ts",
+      "passkeys/auth/options/route.ts",
+      "passkeys/auth/verify/route.ts",
+      "setup/[token]/route.ts",
+    ]);
   });
 
   it("review routes are for reviewers and administrators only", () => {
@@ -56,6 +63,31 @@ describe("route guards (security checklist)", () => {
       const adminGuards = src.match(/requireUser\(\{ roles: \["admin"\] \}\)/g) ?? [];
       expect(adminGuards.length).toBe(handlers.length);
     }
+  });
+
+  it("passkey and capture-grant management routes are student-only", () => {
+    const studentAuthRoutes = files.filter(
+      (f) =>
+        !f.includes(`${path.sep}admin${path.sep}`) &&
+        !f.includes(`${path.sep}auth${path.sep}`) &&
+        (f.includes(`${path.sep}passkeys${path.sep}`) || f.includes(`${path.sep}capture-grant${path.sep}`)),
+    );
+    expect(studentAuthRoutes.length).toBe(5);
+    for (const f of studentAuthRoutes) {
+      const src = readFileSync(f, "utf8");
+      const handlers = src.match(/export const (GET|POST|PATCH|PUT|DELETE) = handle/g) ?? [];
+      const studentGuards = src.match(/requireUser\(\{ roles: \["student"\] \}\)/g) ?? [];
+      expect(studentGuards.length).toBe(handlers.length);
+    }
+  });
+
+  it("POST /api/evidence enforces requireCaptureGrant before parsing form data", () => {
+    const src = readFileSync(path.join(api, "evidence/route.ts"), "utf8");
+    const postIdx = src.indexOf("export const POST = handle");
+    const grantIdx = src.indexOf("await requireCaptureGrant(user)", postIdx);
+    const formIdx = src.indexOf("req.formData()", postIdx);
+    expect(grantIdx).toBeGreaterThan(postIdx);
+    expect(grantIdx).toBeLessThan(formIdx);
   });
 
   it("creating a reviewer never changes an existing account's role", () => {

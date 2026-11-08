@@ -11,8 +11,10 @@ import {
 } from "@/components/ui/search-focus";
 import { SearchEmptyState } from "@/components/ui/search-empty-state";
 import { SearchResultsSummary } from "@/components/ui/search-results-summary";
+import { findFlaggedWords } from "@/lib/flags";
 import { pageUser } from "@/server/page-auth";
 import { listCases } from "@/server/services/cases";
+import { listWordsPlain } from "@/server/services/flags";
 
 // Per-user page: allowed to wait for the server on navigation.
 export const instant = false;
@@ -34,7 +36,7 @@ const TABS = [
 
 export default async function CasesPage({ searchParams }: PageProps<"/cases">) {
     const user = await pageUser(["student"]);
-    const all = await listCases(user);
+    const [all, bank] = await Promise.all([listCases(user), listWordsPlain()]);
     const params = await searchParams;
     const key = Array.isArray(params.tab) ? params.tab[0] : params.tab;
     const rawQ = (
@@ -66,6 +68,11 @@ export default async function CasesPage({ searchParams }: PageProps<"/cases">) {
                 new Date(b.updatedAt).getTime() -
                 new Date(a.updatedAt).getTime(),
         );
+    }
+
+    const sensitiveMap: Record<string, boolean> = {};
+    for (const c of items) {
+        sensitiveMap[c.id] = findFlaggedWords(c.title, bank).length > 0;
     }
 
     return (
@@ -158,7 +165,10 @@ export default async function CasesPage({ searchParams }: PageProps<"/cases">) {
                                     </SearchEmptyState>
                                 </>
                             ) : (
-                                <ReportCardsGrid items={items} />
+                                <ReportCardsGrid
+                                    items={items}
+                                    sensitiveMap={sensitiveMap}
+                                />
                             )}
                         </SearchFocusArea>
                     </div>

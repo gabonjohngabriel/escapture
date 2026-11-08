@@ -95,7 +95,7 @@ export function EvidenceFrame({
       {sensitive && (
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-3 flex justify-center opacity-0 transition-opacity duration-200 [html[data-privacy-blur='true']_&]:opacity-100 [html[data-privacy-blur='true']_.group\/frame:hover_&]:opacity-0"
+          className="pointer-events-none absolute inset-x-0 top-3 flex justify-center opacity-0 transition-opacity duration-200 [[data-privacy-blur='true']_&]:opacity-100 [[data-privacy-blur='true']_.group\/frame:hover_&]:opacity-0"
         >
           <span className="inline-flex items-center gap-1.5 rounded-full bg-ink/80 px-3 py-1 text-xs font-medium text-white shadow-md backdrop-blur-xs">
             <EyeOff size={13} aria-hidden />

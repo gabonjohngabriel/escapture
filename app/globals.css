@@ -321,7 +321,20 @@ dialog.drawer[open] {
     }
 }
 
-/* Trauma-informed Privacy Blur: only flagged capture preview screenshots */
+/* Trauma-informed Privacy Blur: flagged titles and capture preview screenshots */
+[data-privacy-blur="true"] [data-privacy-sensitive="true"]:not(iframe):not(:has(iframe)) {
+    filter: blur(8px);
+    transition: filter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+}
+
+[data-privacy-blur="true"] .group:hover [data-privacy-sensitive="true"]:not(iframe):not(:has(iframe)),
+[data-privacy-blur="true"] [data-privacy-sensitive="true"]:not(iframe):not(:has(iframe)):hover,
+[data-privacy-blur="true"] [data-privacy-sensitive="true"]:not(iframe):not(:has(iframe)):focus-within {
+    filter: blur(0);
+    user-select: auto;
+}
+
 [data-privacy-blur="true"] [data-privacy-sensitive="true"] iframe {
     filter: blur(14px);
     transition: filter 0.2s cubic-bezier(0.16, 1, 0.3, 1);

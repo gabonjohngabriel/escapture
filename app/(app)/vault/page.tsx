@@ -18,6 +18,8 @@ import { evidenceKind, evidenceSort } from "@/lib/validators";
 import { vaultHref, type VaultView } from "@/lib/vault-view";
 import { pageUser } from "@/server/page-auth";
 import { countEvidence, listEvidence } from "@/server/services/evidence";
+import { listWordsPlain } from "@/server/services/flags";
+import { isSensitive } from "@/server/services/sensitivity";
 
 // Per-user page: allowed to wait for the server on navigation.
 export const instant = false;
@@ -36,13 +38,14 @@ export default async function VaultPage({ searchParams }: PageProps<"/vault">) {
         kind: evidenceKind.safeParse(first(params.kind)).data ?? "",
         sort: evidenceSort.safeParse(first(params.sort)).data ?? "",
     };
-    const [items, counts] = await Promise.all([
+    const [items, counts, bank] = await Promise.all([
         listEvidence(user, view.tab, {
             q: view.q || undefined,
             kind: view.kind || undefined,
             sort: view.sort || undefined,
         }),
         countEvidence(user),
+        listWordsPlain(),
     ]);
     const total = counts[view.tab];
     const pages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
@@ -52,6 +55,14 @@ export default async function VaultPage({ searchParams }: PageProps<"/vault">) {
     );
     const shown = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
     const narrowed = Boolean(view.q || view.kind);
+
+    const sensitivityEntries = await Promise.all(
+        shown.map(async (item) => {
+            const sensitive = await isSensitive(user, item, bank);
+            return [item.id, sensitive] as const;
+        }),
+    );
+    const sensitiveMap = Object.fromEntries(sensitivityEntries);
 
     return (
         <div className="flex flex-col gap-6">
@@ -125,6 +136,7 @@ export default async function VaultPage({ searchParams }: PageProps<"/vault">) {
                             <VaultCardsGrid
                                 items={shown}
                                 shared={view.tab === "shared"}
+                                sensitiveMap={sensitiveMap}
                             />
                         )}
 

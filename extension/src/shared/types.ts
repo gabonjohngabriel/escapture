@@ -22,7 +22,7 @@ export const FIT_WIDTHS = [360, 480, 600];
 
 export type LastCapture =
   | { ok: true; id: string; label: string; url: string; at: string }
-  | { ok: false; refused: boolean; message: string; at: string };
+  | { ok: false; refused: boolean; message: string; at: string; passkeyRequired?: boolean };
 
 /** One saved capture, remembered in this browser for the popup's list. */
 export type CaptureRecord = { id: string; label: string; url: string; at: string };

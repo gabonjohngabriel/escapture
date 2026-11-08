@@ -10,6 +10,7 @@ type Status = {
     auth: AuthState;
     lastCapture: LastCapture | null;
     history: CaptureRecord[];
+    tabUnlockedUntil?: number | null;
 };
 
 const send = <T>(msg: unknown) =>
@@ -96,18 +97,23 @@ btnSignout.addEventListener("click", async () => {
 });
 
 btnCapture.addEventListener("click", async () => {
+    const previousText = btnCapture.textContent;
     btnCapture.disabled = true;
+    btnCapture.textContent = "Verifying with passkey...";
+    showError(undefined);
     const reply = await send({ type: "capture:start" });
     if (reply.ok) {
         window.close();
     } else {
         showError(reply.error);
+        btnCapture.textContent = previousText || "Capture this page";
         btnCapture.disabled = false;
     }
 });
 
 async function setupReadyView(
     auth: Extract<AuthState, { signedIn: true }>,
+    tabUnlockedUntil?: number | null,
     error?: string,
 ) {
     showView("ready");
@@ -121,19 +127,29 @@ async function setupReadyView(
 
     // Greeting
     const firstName = auth.name?.trim() ? auth.name.split(" ")[0] : "User";
-    userGreeting.textContent = `Hello, ${firstName}!`;
+    const minsLeft =
+        tabUnlockedUntil && tabUnlockedUntil > Date.now()
+            ? Math.max(1, Math.ceil((tabUnlockedUntil - Date.now()) / 60_000))
+            : null;
+    userGreeting.textContent = minsLeft
+        ? `Hello, ${firstName}! · Unlocked (${minsLeft}m left)`
+        : `Hello, ${firstName}!`;
 
     // Dynamic heading & capture button state based on current page
     if (supported) {
         captureHeading.className = "heading-default";
         captureHeading.textContent = "Capture evidence?";
         btnCapture.className = "btn-capture active";
+        btnCapture.textContent = minsLeft
+            ? "Capture this page"
+            : "Verify & capture this page";
         btnCapture.disabled = false;
     } else {
         captureHeading.className = "heading-unable";
         captureHeading.textContent =
             "Open Facebook posts, stories, or conversations you want to keep, then open this again.";
         btnCapture.className = "btn-capture disabled";
+        btnCapture.textContent = "Capture this page";
         btnCapture.disabled = true;
     }
 }
@@ -155,7 +171,7 @@ async function render() {
     if (!reply.auth.signedIn) {
         setupSignedOutView();
     } else {
-        await setupReadyView(reply.auth);
+        await setupReadyView(reply.auth, reply.tabUnlockedUntil);
     }
 }
 
