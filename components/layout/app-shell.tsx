@@ -272,17 +272,6 @@ export function AppShell({
 
                     {/* Navigation Section */}
                     <nav aria-label="Main" className="mt-2">
-                        <div
-                            className={cn(
-                                "overflow-hidden transition-all duration-250 ease-out",
-                                isExpanded
-                                    ? "max-h-8 opacity-100 mb-4"
-                                    : "max-h-0 opacity-0 pointer-events-none mb-0",
-                            )}>
-                            <p className="px-3 text-[16px] font-medium text-[#5F856E] whitespace-nowrap">
-                                {role.group}
-                            </p>
-                        </div>
                         <ul className="flex flex-col gap-2">
                             {items.map(({ href, label, Icon }) => {
                                 const active = href === section.href;
@@ -296,10 +285,10 @@ export function AppShell({
                                                 active ? "page" : undefined
                                             }
                                             className={cn(
-                                                "group relative flex h-14 w-full items-center rounded-full transition-all duration-250 ease-out overflow-hidden select-none",
+                                                "group relative flex h-14 w-full items-center justify-center rounded-full border-4 transition-all duration-250 ease-out overflow-hidden select-none",
                                                 active
-                                                    ? "bg-[#52946B] text-white shadow-sm"
-                                                    : "text-[#52946B] hover:bg-[#F2F7F4]",
+                                                    ? "bg-[#52946B] text-white shadow-sm border-[#E5E8E6]"
+                                                    : "border-transparent text-[#52946B] hover:bg-[#F2F7F4]",
                                             )}
                                             title={label}>
                                             <div className="flex size-14 shrink-0 items-center justify-center">
@@ -327,13 +316,13 @@ export function AppShell({
                                             {counts[href] !== undefined && (
                                                 <span
                                                     className={cn(
-                                                        "tnum ml-auto whitespace-nowrap overflow-hidden rounded-full text-xs font-bold transition-all duration-250 ease-out mr-3",
+                                                        "tnum ml-auto whitespace-nowrap overflow-hidden rounded-full text-lg font-bold transition-all duration-250 ease-out",
                                                         isExpanded
-                                                            ? "max-w-[50px] opacity-100 px-2.5 py-0.5"
+                                                            ? "max-w-[50px] opacity-100 px-2.5 py-0.5 mr-4"
                                                             : "max-w-0 opacity-0 pointer-events-none p-0",
                                                         active
-                                                            ? "bg-white/25 text-white"
-                                                            : "bg-[#F2F7F4] text-[#52946B]",
+                                                            ? "text-white"
+                                                            : "text-[#52946B]",
                                                     )}>
                                                     {counts[href]}
                                                 </span>
@@ -343,7 +332,7 @@ export function AppShell({
                                                     className={cn(
                                                         "size-2.5 rounded-full bg-[#D97706] transition-all duration-250",
                                                         isExpanded
-                                                            ? "ml-auto mr-3"
+                                                            ? "ml-auto mr-6"
                                                             : "absolute top-2.5 right-2.5",
                                                     )}
                                                     aria-hidden
