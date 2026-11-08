@@ -16,6 +16,53 @@ const Row = ({ title, meta, children }: { title: string; meta: string; children:
   </div>
 );
 
+/**
+ * High-fidelity vault mock matching Figma Home Page node 4:1817.
+ */
+export function HeroVaultWindow() {
+  return (
+    <div className="w-full max-w-[480px] rounded-2xl border border-border/80 bg-[#F1F4F6] p-3.5 sm:p-4 shadow-[0_12px_36px_rgba(0,0,0,0.06)]">
+      {/* Window title bar */}
+      <div className="flex items-center gap-3 pb-3 px-1">
+        <div className="flex items-center gap-1.5" aria-hidden>
+          <div className="size-2.5 rounded-full bg-white border border-border" />
+          <div className="size-2.5 rounded-full bg-white border border-border" />
+          <div className="size-2.5 rounded-full bg-white border border-border" />
+        </div>
+        <div className="flex-1 max-w-[240px] rounded-md bg-white px-3 py-1 text-xs text-brand-800/60 shadow-xs border border-border/50 font-mono tracking-tight">
+          escapture.app/vault
+        </div>
+      </div>
+
+      {/* Inner App Window White Sheet */}
+      <div className="rounded-xl bg-white p-4 sm:p-5 shadow-xs border border-border/60 flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Lock className="size-5 text-brand-700" />
+            <h3 className="font-bold text-brand-900 text-lg">Your Vault</h3>
+          </div>
+          <div className="flex items-center gap-1.5 bg-brand-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-xs">
+            <FileCheck2 className="size-3.5" />
+            <span>Capture evidence</span>
+          </div>
+        </div>
+
+        {/* Vault Item */}
+        <div className="rounded-xl border border-border/70 p-3.5 flex items-center justify-between gap-3 bg-card hover:bg-canvas/50 transition">
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold text-brand-900">Group chat, Nov 6</span>
+            <span className="text-xs text-muted">Messenger · 12 messages</span>
+          </div>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 border border-brand-200/80 px-2.5 py-1 text-[11px] font-semibold text-brand-800 shrink-0">
+            <CircleCheck className="size-3.5 text-brand-600" />
+            Captured with tamper checks
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function VaultVisual() {
   return (
     <ProductFrame url="escapture.app/vault" label="The Escapture vault, showing three saved captures">

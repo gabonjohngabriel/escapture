@@ -1,14 +1,13 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Logo } from "@/components/layout/logo";
-import { buttonClass } from "@/components/ui/button";
 import { allowedEmailDomain } from "@/lib/email-domain";
 import { getUser, homeFor } from "@/server/auth";
 
 /** The address new accounts must use; the same setting the sign-up gate reads. */
 export const emailDomain = allowedEmailDomain;
 
-const ghost = buttonClass("ghost", "mk-nav-signin");
+const ghost = "px-4 py-2 text-[15px] font-semibold text-brand-700 hover:text-brand-800 transition rounded-full";
 
 // Reads the session, so it streams in behind Suspense and the rest of the page stays static.
 async function Account() {
@@ -23,38 +22,51 @@ async function Account() {
 }
 const SignIn = () => (
   <Link href="/sign-in" className={ghost}>
-    Sign in
+    Sign In
   </Link>
 );
 
 const links = [
-  { label: "How it works", href: "/#how" },
-  { label: "Privacy", href: "/#privacy" },
-  { label: "For reviewers", href: "/#reviewers" },
+  { label: "How It Works", href: "/#how" },
+  { label: "Verification & Privacy", href: "/#trust" },
+  { label: "For Authorities", href: "/#authorities" },
   { label: "FAQ", href: "/#faq" },
 ];
 
 export function SiteNav() {
   return (
-    <header className="mk-nav">
-      <div className="mk-wrap">
-        <Link href="/" className="rounded-md py-1">
-          <Logo />
-        </Link>
-        <nav aria-label="On this page" className="mk-nav-links">
-          {links.map((link) => (
-            <Link key={link.href} href={link.href}>
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="mk-nav-actions">
-          <Suspense fallback={<SignIn />}>
-            <Account />
-          </Suspense>
-          <Link href="/sign-up" className={buttonClass("primary")}>
-            Start your vault
+    <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b border-border/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-6">
+        <div className="flex items-center gap-8 lg:gap-12">
+          <Link href="/" className="flex items-center gap-2 group transition" aria-label="Escapture home">
+            <Logo size={42} />
           </Link>
+
+          <nav aria-label="Main Navigation" className="hidden md:flex items-center gap-6 lg:gap-8">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-[16px] font-medium text-brand-700 hover:text-brand-900 transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+
+        <div className="flex items-center">
+          <div className="bg-card border border-brand-200/60 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)] rounded-full p-1.5 flex items-center gap-2">
+            <Suspense fallback={<SignIn />}>
+              <Account />
+            </Suspense>
+            <Link
+              href="/sign-up"
+              className="bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-[15px] px-6 py-2.5 rounded-full shadow-sm transition-all text-center whitespace-nowrap"
+            >
+              Start Your Vault
+            </Link>
+          </div>
         </div>
       </div>
     </header>
@@ -65,10 +77,10 @@ const columns = [
   {
     title: "Product",
     links: [
-      { label: "How it works", href: "/#how" },
+      { label: "How It Works", href: "/#how" },
       // There is no store listing yet: the install steps are in the vault, under "How to capture".
       { label: "Escapture extension", href: "/vault" },
-      { label: "For reviewers", href: "/#reviewers" },
+      { label: "For Reviewers & Authorities", href: "/#authorities" },
     ],
   },
   {
@@ -89,8 +101,8 @@ const columns = [
 
 export function SiteFooter() {
   return (
-    <footer className="mk-footer">
-      <div className="mk-wrap">
+    <footer className="mk-footer border-t border-border mt-auto bg-card">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="mk-footer-grid">
           <div className="flex flex-col items-start gap-3">
             <Logo size={28} />
