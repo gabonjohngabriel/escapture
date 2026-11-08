@@ -14,15 +14,15 @@ export type ButtonVariant =
     | "ghost-on-dark";
 
 const base =
-    "inline-flex h-[var(--control-h)] items-center justify-center gap-2 rounded-full px-6 text-[15px] leading-5 font-bold whitespace-nowrap shadow-xs transition-colors duration-150 ease-out disabled:cursor-not-allowed disabled:border-transparent disabled:bg-disabled-bg disabled:text-disabled-fg";
+    "inline-flex h-[var(--control-h)] items-center justify-center gap-2 rounded-full px-6 text-[15px] leading-5 font-bold whitespace-nowrap shadow-xs transition-colors duration-150 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 disabled:cursor-not-allowed disabled:border-transparent disabled:bg-disabled-bg disabled:text-disabled-fg";
 
 const variants: Record<ButtonVariant, string> = {
-    primary: "bg-[#52946B] text-white hover:bg-[#437C58]",
+    primary: "bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800",
     secondary:
-        "border border-[#DCE5DF] bg-white text-[#3F7855] hover:bg-[#F2F7F4]",
-    soft: "bg-[#F2F7F4] text-[#52946B] hover:bg-[#E3EFE7]",
-    ghost: "text-[#52946B] hover:bg-[#F2F7F4]",
-    weighty: "bg-[#203E2C] text-white hover:bg-[#122419]",
+        "border border-border bg-card text-brand-800 hover:bg-brand-50 active:bg-brand-100",
+    soft: "bg-brand-50 text-brand-800 hover:bg-brand-100 active:bg-brand-200",
+    ghost: "text-brand-700 hover:bg-brand-50 hover:text-brand-800",
+    weighty: "bg-brand-900 text-white hover:bg-brand-950",
     danger: "border border-danger-solid bg-card text-danger-solid hover:bg-danger-bg",
     "danger-solid": "bg-danger-solid text-white hover:bg-danger-fg",
     // For brand-900 bands only.

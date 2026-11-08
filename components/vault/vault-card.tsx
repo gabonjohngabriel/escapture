@@ -1,4 +1,4 @@
-import { FileText, MessageSquare } from "lucide-react";
+import { FileCheck2, FileText, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { formatDateTime } from "@/lib/format";
 import type { VaultItem } from "./vault-table";
@@ -14,7 +14,7 @@ export function VaultCard({
     const inReports =
         item.caseCount && item.caseCount > 0
             ? item.caseCount === 1
-                ? "In a report"
+                ? "In 1 report"
                 : `In ${item.caseCount} reports`
             : "Not in a report";
 
@@ -26,27 +26,33 @@ export function VaultCard({
             ? "Password link"
             : "Private";
 
+    const initial = (item.label || item.ownerName || "E")
+        .slice(0, 1)
+        .toUpperCase();
+
     return (
         <Link
             href={`/vault/${item.id}`}
-            className="group relative flex flex-col overflow-hidden rounded-[24px] border-[2px] border-(--brand-500) bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-(--brand-500)">
+            className="group relative flex flex-col overflow-hidden rounded-2xl border-2 border-brand-500 bg-card shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-brand-700">
             {/* Top Banner */}
-            <div className="flex items-center justify-between bg-(--brand-500) px-6 py-4 text-white">
+            <div className="flex items-center justify-between bg-brand-600 px-6 py-4 text-white">
                 <div className="flex min-w-0 items-center gap-3.5">
-                    <div className="size-10 shrink-0 rounded-full border-2 border-white flex items-center justify-center bg-white/10 text-white font-bold text-md">
-                        {/* {item.label ? item.label.slice(0, 1).toUpperCase() : ""} */}
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-white/60 bg-white/10 font-bold text-white text-sm">
+                        {initial}
                     </div>
                     <div className="min-w-0">
-                        <span className="block text-[18px] font-bold text-white leading-tight">
-                            {shared ? "Shared by" : "Group"}
+                        <span className="block text-xs font-regular text-white/80 leading-tight">
+                            {shared
+                                ? `Shared by ${item.ownerName}`
+                                : "Captured by you"}
                         </span>
-                        <h3 className="truncate text-[14px] font-normal text-white group-hover:underline leading-snug">
-                            {item.label || "N/A"}
+                        <h3 className="truncate text-[16px] font-bold text-white group-hover:underline tracking-tight leading-snug">
+                            {item.label || "Untitled capture"}
                         </h3>
                     </div>
                 </div>
 
-                <div className="ml-3 flex shrink-0 items-center gap-2 px-2 text-[18px] text-white">
+                <div className="ml-2 flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[16px] font-medium text-white backdrop-blur-xs">
                     {isPost ? (
                         <>
                             <div className="inline-flex items-center justify-center bg-white/5 rounded-xl p-2 backdrop-blur-xs">
@@ -74,32 +80,42 @@ export function VaultCard({
             </div>
 
             {/* Bottom Information */}
-            <div className="grid grid-cols-2 gap-4 px-6 py-4 sm:grid-cols-3 sm:gap-6 bg-white">
+            <div className="grid grid-cols-2 gap-4 px-6 py-4 sm:grid-cols-4 sm:gap-4 bg-card border-t border-border/40">
                 <div>
-                    <p className="text-[18px] font-bold text-[#3F7855] leading-tight">
+                    <p className="text-xs font-bold text-muted uppercase tracking-wider">
                         Captured
                     </p>
-                    <p className="tnum text-[14px] font-normal text-[#3F7855] leading-tight">
+                    <p className="tnum mt-0.5 text-sm font-semibold text-ink leading-tight">
                         {formatDateTime(item.capturedAt)}
                     </p>
                 </div>
 
                 <div>
-                    <p className="text-[18px] font-bold text-[#3F7855] leading-tight">
-                        In Reports
+                    <p className="text-xs font-bold text-muted uppercase tracking-wider">
+                        In reports
                     </p>
-                    <p className="truncate text-[14px] font-normal text-[#3F7855] leading-tight">
+                    <p className="mt-0.5 truncate text-sm font-semibold text-ink leading-tight">
                         {inReports}
                     </p>
                 </div>
 
                 <div>
-                    <p className="text-[18px] font-bold text-[#3F7855] leading-tight">
+                    <p className="text-xs font-bold text-muted uppercase tracking-wider">
                         Sharing
                     </p>
-                    <p className="truncate text-[14px] font-normal text-[#3F7855] leading-tight">
+                    <p className="mt-0.5 truncate text-sm font-semibold text-ink leading-tight">
                         {sharingText}
                     </p>
+                </div>
+
+                <div>
+                    <p className="text-xs font-bold text-muted uppercase tracking-wider">
+                        Integrity
+                    </p>
+                    <span className="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold text-tamper-fg">
+                        <FileCheck2 size={14} strokeWidth={2} aria-hidden />
+                        Tamper-checked
+                    </span>
                 </div>
             </div>
         </Link>

@@ -4,8 +4,8 @@ import { TrailRegister } from "@/components/auth/illustrations/trail-register";
 import { TrailSignIn } from "@/components/auth/illustrations/trail-sign-in";
 import { Logo } from "@/components/layout/logo";
 
-const topLink = "inline-flex min-h-10 items-center rounded-full text-[14px] font-bold text-[#52946B] hover:text-[#356246] transition-colors";
-const footLink = "inline-flex min-h-10 items-center text-[13px] text-[#5F856E] hover:text-[#52946B] hover:underline transition-colors";
+const topLink = "inline-flex min-h-10 items-center rounded-full text-sm font-bold text-brand-700 hover:text-brand-800 transition-colors";
+const footLink = "inline-flex min-h-10 items-center text-xs text-muted hover:text-brand-700 hover:underline transition-colors";
 
 /**
  * The split layout for sign in and register: a brand panel beside the form.

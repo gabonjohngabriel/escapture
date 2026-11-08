@@ -105,12 +105,12 @@ export default async function CasePage({ params }: PageProps<"/cases/[id]">) {
     </Section>
   );
   const people = (
-    <Section title="People on this case">
+    <Section title="People on this report">
       <Card className="flex flex-col gap-4">
         <ul className="flex flex-col gap-2 text-sm leading-[22px]">
           <li>
             <span className="font-semibold">{c.owner.name}</span>{" "}
-            <span className="text-muted">{c.owner.email} · Reported this case</span>
+            <span className="text-muted">{c.owner.email} · Started this report</span>
           </li>
           {c.collaborators.map((p) => (
             <li key={p.id} className="flex flex-wrap items-center justify-between gap-x-3">
@@ -129,15 +129,15 @@ export default async function CasePage({ params }: PageProps<"/cases/[id]">) {
             <EmailShareButton
               endpoint={`/api/cases/${c.id}/collaborators`}
               buttonLabel="Add someone by email"
-              title="Add someone to this case"
-              risk="You are choosing to share this case. The person you add will see the case and its evidence, can edit the details and can add their own evidence. Reviewers will see their name and email. You can remove them while the case is a draft."
+              title="Add someone to this report"
+              risk="You are choosing to share this report. The person you add will see the report and its evidence, can edit the details and can add their own evidence. Reviewers will see their name and email. You can remove them while the report is a draft."
               confirmLabel="I understand, add them"
-              successText="They have been added to the case."
+              successText="They have been added to the report."
             />
             <LinkShareButton
               endpoint={`/api/cases/${c.id}/links`}
-              title="Create a password link to this case"
-              risk="Any student who has this link, its password and a Escapture account can join this case, see its evidence and add their own. Reviewers will see their name and email."
+              title="Create a password link to this report"
+              risk="Any student who has this link, its password and an Escapture account can join this report, see its evidence and add their own. Reviewers will see their name and email."
             />
           </div>
         )}
@@ -159,7 +159,7 @@ export default async function CasePage({ params }: PageProps<"/cases/[id]">) {
       <div>
         <Link href="/cases" className="link inline-flex items-center gap-1 text-sm">
           <ArrowLeft size={16} strokeWidth={1.75} aria-hidden />
-          Back to cases
+          Back to reports
         </Link>
       </div>
       <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
@@ -183,7 +183,7 @@ export default async function CasePage({ params }: PageProps<"/cases/[id]">) {
           )}
           <p className="flex flex-wrap items-center gap-2 text-muted">
             <StatusBadge status={c.status} />
-            {!owner && `Case by ${c.owner.name}`}
+            {!owner && `Report by ${c.owner.name}`}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-3">
@@ -203,12 +203,12 @@ export default async function CasePage({ params }: PageProps<"/cases/[id]">) {
             <Lock size={16} strokeWidth={1.75} aria-hidden />
             Locked since <span className="tnum">{formatDateTime(c.escalatedAt)}</span>.
           </span>{" "}
-          Reviewers and administrators can see this case. It can&apos;t be edited or withdrawn, and its evidence can&apos;t be deleted.
+          Reviewers and administrators can see this report as a university case. It can&apos;t be edited or withdrawn, and its evidence can&apos;t be deleted.
         </Banner>
       )}
       {draft && !owner && (
         <Banner tone="info">
-          {c.owner.name} added you to this case. You can edit the details and add your own evidence. Only{" "}
+          {c.owner.name} added you to this report. You can edit the details and add your own evidence. Only{" "}
           {c.owner.name} can escalate it.
         </Banner>
       )}

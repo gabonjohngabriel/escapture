@@ -48,19 +48,15 @@ export default async function VaultPage({ searchParams }: PageProps<"/vault">) {
     const shown = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
     const narrowed = Boolean(view.q || view.kind);
 
-    const firstName = user.name ? user.name.split(" ")[0] : "User";
-
     return (
         <div className="flex flex-col gap-6">
             {/* Header */}
-            <div className="flex flex-col">
-                <h1
-                    className="text-[42px] font-bold tracking-tight text-[#52946B] leading-tight"
-                    style={{ fontFamily: "var(--font-heading)" }}>
-                    Welcome back, {firstName}!
+            <div className="flex flex-col gap-1">
+                <h1 className="text-3xl font-bold tracking-tight text-brand-700 sm:text-4xl">
+                    Your vault
                 </h1>
-                <p className="text-[16px] font-normal text-[#5F856E]">
-                    Only you can control what is shared within the university.
+                <p className="text-base text-muted">
+                    Private to you. Nothing reaches university reviewers unless you escalate a report.
                 </p>
             </div>
 
@@ -74,13 +70,13 @@ export default async function VaultPage({ searchParams }: PageProps<"/vault">) {
                 {narrowed && total > 0 && (
                     <p
                         aria-live="polite"
-                        className="text-sm font-medium text-[#55665C]">
+                        className="text-sm font-medium text-muted">
                         Showing{" "}
-                        <span className="tnum font-bold text-[#203E2C]">
+                        <span className="tnum font-bold text-ink">
                             {items.length}
                         </span>{" "}
                         of{" "}
-                        <span className="tnum font-bold text-[#203E2C]">
+                        <span className="tnum font-bold text-ink">
                             {total}
                         </span>
                         {view.q && <> for “{view.q}”</>}.{" "}

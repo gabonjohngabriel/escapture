@@ -25,10 +25,10 @@ export function CasesCard({
 }) {
   return (
     <Card className="flex flex-col gap-4">
-      <h3>Cases</h3>
+      <h3>{reviewer ? "Cases" : "Reports"}</h3>
       {attached.length === 0 ? (
         <p className="text-sm leading-[22px] text-muted">
-          {reviewer ? "Not attached to any case yet." : "Not in a case yet."}
+          {reviewer ? "Not attached to any case yet." : "Not in a report yet."}
         </p>
       ) : (
         <ul className="flex flex-col gap-3 text-sm leading-[22px]">

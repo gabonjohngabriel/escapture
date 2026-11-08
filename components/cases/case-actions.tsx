@@ -8,7 +8,6 @@ import { TamperBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Banner, Skeleton } from "@/components/ui/feedback";
-import { Input } from "@/components/ui/field";
 import { Menu } from "@/components/ui/menu";
 import { useToast } from "@/components/ui/toast";
 import { api, ApiError, errorMessage } from "@/lib/client-api";
@@ -122,17 +121,17 @@ export function CaseMenu({
   return (
     <>
       <Menu
-        label="More actions for this case"
+        label="More actions for this report"
         items={[
           owner
             ? {
-                label: "Delete case",
+                label: "Delete report",
                 icon: <Trash2 size={18} strokeWidth={1.75} aria-hidden />,
                 danger: true,
                 onSelect: () => setOpen(true),
               }
             : {
-                label: "Leave case",
+                label: "Leave report",
                 icon: <LogOut size={18} strokeWidth={1.75} aria-hidden />,
                 onSelect: () => setOpen(true),
               },
@@ -142,25 +141,25 @@ export function CaseMenu({
         <ConfirmDialog
           open={open}
           onClose={() => setOpen(false)}
-          title="Delete this case?"
+          title="Delete this report?"
           description={`“${title}” will be deleted for everyone on it, and you won't be able to get it back. The evidence stays in each person's vault.`}
-          confirmLabel="Delete case"
+          confirmLabel="Delete report"
           danger
           run={async () => {
             await api(`/api/cases/${caseId}`, { method: "DELETE" });
-            leavePage("Case deleted.");
+            leavePage("Report deleted.");
           }}
         />
       ) : (
         <ConfirmDialog
           open={open}
           onClose={() => setOpen(false)}
-          title="Leave this case?"
+          title="Leave this report?"
           description={`You will no longer be able to open it, and the evidence you added will be removed from it. Your evidence stays in your vault. ${ownerName} will be told that you left.`}
-          confirmLabel="Leave case"
+          confirmLabel="Leave report"
           run={async () => {
             await api(`/api/cases/${caseId}/collaborators/me`, { method: "DELETE" });
-            leavePage("You left the case.");
+            leavePage("You left the report.");
           }}
         />
       )}
@@ -271,7 +270,7 @@ export function EscalateButton({ caseId, hasEvidence }: { caseId: string; hasEvi
     try {
       await api(`/api/cases/${caseId}/escalate`, { body: { digest: preview.digest, confirm: true } });
       close();
-      toast("Your case has been escalated to reviewers.");
+      toast("Your report has been escalated to university reviewers.");
       router.refresh();
     } catch (err) {
       setLoading(false);
@@ -306,7 +305,7 @@ export function EscalateButton({ caseId, hasEvidence }: { caseId: string; hasEvi
         open={open && hasEvidence}
         onClose={close}
         wide
-        title="Review your case"
+        title="Review what reviewers will see"
         footer={
           <>
             <Button variant="ghost" onClick={close}>
@@ -324,35 +323,35 @@ export function EscalateButton({ caseId, hasEvidence }: { caseId: string; hasEvi
           <>
             {!preview.description && (
               <Banner tone="info">
-                This case has no description. You can escalate without one, but reviewers will only have the evidence
+                This report has no description. You can escalate without one, but reviewers will only have the evidence
                 to go on.
               </Banner>
             )}
-            <div className="rounded-md bg-subtle p-4">
-              <p className="text-[13px] leading-[18px] font-semibold text-muted">Case</p>
+            <div className="rounded-2xl bg-subtle p-4">
+              <p className="text-xs font-bold text-muted uppercase tracking-wider">Report</p>
               <h4 className="mt-1">{preview.title}</h4>
               <p className="mt-1 max-w-prose text-sm leading-[22px] whitespace-pre-wrap wrap-anywhere">
                 {preview.description || "No description was added."}
               </p>
             </div>
-            <div className="rounded-md bg-subtle p-4">
-              <h4>People reviewers will see ({preview.collaborators.length + 1})</h4>
+            <div className="rounded-2xl bg-subtle p-4">
+              <h4 className="text-sm font-bold">People reviewers will see ({preview.collaborators.length + 1})</h4>
               <ul className="mt-1 flex flex-col gap-1 text-sm leading-[22px]">
                 <li>
-                  {preview.owner.name} <span className="text-muted">{preview.owner.email} · Reported this case</span>
+                  {preview.owner.name} <span className="text-muted">{preview.owner.email} · Started this report</span>
                 </li>
                 {preview.collaborators.map((p) => (
                   <li key={p.id}>
-                    {p.name} <span className="text-muted">{p.email} · Added to this case</span>
+                    {p.name} <span className="text-muted">{p.email} · Added to this report</span>
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="rounded-md bg-subtle p-4">
-              <h4>Attached evidence ({preview.evidence.length})</h4>
-              <ul className="mt-1 flex flex-col gap-2">
+            <div className="rounded-2xl bg-subtle p-4">
+              <h4 className="text-sm font-bold">Attached evidence ({preview.evidence.length})</h4>
+              <ul className="mt-2 flex flex-col gap-2">
                 {preview.evidence.map((e) => (
-                  <li key={e.id} className="rounded-md bg-card p-3 text-sm leading-[22px]">
+                  <li key={e.id} className="rounded-xl border border-border bg-card p-3 text-sm leading-[22px]">
                     <p className="font-semibold">{e.label}</p>
                     <p className="text-muted">
                       {kindLabel(e.kind)} · Captured <span className="tnum">{formatDateTime(e.capturedAt)}</span> ·
@@ -366,19 +365,19 @@ export function EscalateButton({ caseId, hasEvidence }: { caseId: string; hasEvi
                 ))}
               </ul>
             </div>
-            <div className="flex items-start gap-2 rounded-md bg-brand-50 p-4 text-sm leading-[22px]">
+            <div className="flex items-start gap-2.5 rounded-2xl border border-brand-200 bg-brand-50 p-4 text-sm leading-[22px]">
               <Lock size={18} strokeWidth={1.75} aria-hidden className="mt-0.5 shrink-0 text-brand-800" />
-              <p>
-                Once you escalate, this case is locked. You can&apos;t edit or withdraw it, and attached evidence
+              <p className="text-brand-900">
+                Once you escalate, this report is locked as an official university case. You can&apos;t edit or withdraw it, and attached evidence
                 can&apos;t be deleted.
               </p>
             </div>
-            <label className="flex items-start gap-3 text-sm leading-[22px] font-semibold">
+            <label className="flex items-start gap-3 text-sm leading-[22px] font-semibold text-ink cursor-pointer">
               <input
                 type="checkbox"
                 checked={understood}
                 onChange={(e) => setUnderstood(e.target.checked)}
-                className="mt-1 size-4 accent-[var(--brand-700)]"
+                className="mt-1 size-4 accent-[var(--brand-700)] cursor-pointer"
               />
               I understand this can&apos;t be undone.
             </label>

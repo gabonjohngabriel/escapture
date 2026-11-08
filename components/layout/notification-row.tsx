@@ -134,35 +134,35 @@ export function NotificationCard({
   const href = notificationHref(n, role) ?? "/vault";
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border-2 border-[#52946B] bg-card p-5 shadow-sm transition-all sm:flex-row sm:items-center sm:justify-between sm:gap-4 hover:shadow-md">
+    <div className="flex flex-col gap-3 rounded-2xl border-2 border-brand-500 bg-card p-5 shadow-xs transition-all sm:flex-row sm:items-center sm:justify-between sm:gap-4 hover:shadow-md">
       <div className="flex items-start gap-4 sm:items-center">
-        <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#EBF4EE] text-[#52946B]">
+        <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-700">
           <Icon size={22} strokeWidth={2} />
         </div>
         <div className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base font-bold text-[#203E2C]">{n.title}</h3>
+            <h3 className="text-base font-bold text-ink">{n.title}</h3>
             {unread && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-[#FEF3C7] px-2.5 py-0.5 text-xs font-semibold text-[#D97706]">
-                <span className="size-1.5 rounded-full bg-[#D97706]" />
+              <span className="inline-flex items-center gap-1 rounded-full bg-escalated-bg px-2.5 py-0.5 text-xs font-semibold text-escalated-fg">
+                <span className="size-1.5 rounded-full bg-escalated-solid" />
                 Unread
               </span>
             )}
           </div>
-          {n.body && <p className="text-sm leading-relaxed text-[#55665C]">{n.body}</p>}
+          {n.body && <p className="text-sm leading-relaxed text-muted">{n.body}</p>}
         </div>
       </div>
 
       <div className="flex shrink-0 items-center justify-between gap-4 border-t border-border pt-2 sm:flex-col sm:items-end sm:border-0 sm:pt-0">
-        <span className="tnum text-xs font-medium text-[#55665C]">
+        <span className="tnum text-xs font-medium text-muted">
           {timeAgo(n.createdAt)}
         </span>
         <Link
           href={href}
-          className="inline-flex items-center gap-1 text-xs font-bold text-[#52946B] hover:underline"
+          className="inline-flex items-center gap-1 text-xs font-bold text-brand-700 hover:text-brand-800 hover:underline"
         >
-          <span>{n.caseId ? "View report" : "View shared evidence"}</span>
-          <ArrowRight size={14} strokeWidth={2.5} />
+          <span>{n.caseId ? (role === "student" ? "View report" : "View case") : "View evidence"}</span>
+          <ArrowRight size={14} strokeWidth={2} />
         </Link>
       </div>
     </div>

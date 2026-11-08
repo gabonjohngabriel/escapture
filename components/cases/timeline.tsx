@@ -12,12 +12,12 @@ type Event = {
 
 // For an assignment the note is the reviewer's name. Only staff are ever sent these two.
 const TEXT: Record<Event["type"], (note: string | null) => string> = {
-  created: () => "Case started as a private draft",
-  escalated: () => "Escalated to reviewers",
-  status_changed: () => "Reviewers started looking at this case",
-  closed: () => "Reviewers closed this case",
+  created: () => "Started as a private draft",
+  escalated: () => "Escalated to university reviewers",
+  status_changed: () => "Reviewers started looking at this report",
+  closed: () => "Reviewers closed this report",
   assigned: (name) => `${name ?? "A reviewer"} was assigned`,
-  unassigned: (name) => `${name ?? "A reviewer"} was taken off this case`,
+  unassigned: (name) => `${name ?? "A reviewer"} was unassigned`,
 };
 
 /** Simple vertical timeline, ending with the closing note. */

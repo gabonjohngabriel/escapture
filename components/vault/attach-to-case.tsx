@@ -11,16 +11,16 @@ import { useToast } from "@/components/ui/toast";
 import { api, errorMessage } from "@/lib/client-api";
 
 const COPY = {
-  // The owner adds their own evidence to one of their draft cases.
+  // The owner adds their own evidence to one of their draft reports.
   owner: {
-    button: "Add to a case",
-    compactButton: "Add to case",
-    none: "You have no draft cases to add this to.",
-    title: "Add to a case",
+    button: "Add to a report",
+    compactButton: "Add to report",
+    none: "You have no draft reports to add this to.",
+    title: "Add to a report",
     description:
-      "It will be added to that draft case. Reviewers can see a case and its evidence only after you escalate it.",
+      "It will be added to that draft report. Reviewers can see a report and its evidence only after you escalate it.",
     submit: "Add",
-    done: "Added to the case.",
+    done: "Added to the report.",
     endpoint: (caseId: string) => `/api/cases/${caseId}/evidence`,
   },
   // A reviewer attaches evidence that was shared with them to an open case.

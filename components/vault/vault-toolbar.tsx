@@ -3,7 +3,7 @@
 import { ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 import { vaultHref, type VaultView } from "@/lib/vault-view";
 
@@ -23,13 +23,22 @@ export function VaultToolbar({
     const [filterOpen, setFilterOpen] = useState(false);
 
     const tabs = [
-        { key: "mine" as const, label: "My Evidences", count: counts.mine },
+        { key: "mine" as const, label: "My evidence", count: counts.mine },
         {
             key: "shared" as const,
             label: "Shared with me",
             count: counts.shared,
         },
     ];
+
+    useEffect(() => {
+        if (!filterOpen) return;
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setFilterOpen(false);
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [filterOpen]);
 
     function apply(form: HTMLFormElement) {
         const data = new FormData(form);
@@ -59,18 +68,18 @@ export function VaultToolbar({
                                 href={vaultHref({ tab: t.key, q: view.q })}
                                 aria-current={active ? "page" : undefined}
                                 className={cn(
-                                    "flex items-center gap-2.5 rounded-full px-5 py-2 text-sm font-semibold transitio n-all duration-200 select-none",
+                                    "flex items-center gap-2.5 rounded-full px-5 py-2 text-sm font-semibold transition-all duration-200 select-none",
                                     active
-                                        ? "bg-[#52946B] text-white shadow-sm"
-                                        : "text-[#5F856E] hover:text-[#52946B]",
+                                        ? "bg-brand-600 text-white shadow-xs"
+                                        : "text-muted hover:text-brand-700",
                                 )}>
                                 <span>{t.label}</span>
                                 <span
                                     className={cn(
-                                        "flex size-5 items-center justify-center rounded-full text-md font-bold transition-colors",
+                                        "flex size-5 items-center justify-center rounded-full text-xs font-bold transition-colors",
                                         active
-                                            ? "bg-white text-[#52946B]"
-                                            : "text-[#5F856E]",
+                                            ? "bg-white text-brand-700"
+                                            : "bg-brand-100 text-brand-800",
                                     )}>
                                     {t.count}
                                 </span>
@@ -101,15 +110,15 @@ export function VaultToolbar({
                                 size={18}
                                 strokeWidth={2}
                                 aria-hidden
-                                className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[#5F856E]"
+                                className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-muted"
                             />
                             <input
                                 type="search"
                                 name="q"
                                 defaultValue={view.q}
                                 maxLength={120}
-                                placeholder="Search captures, hashes, cases..."
-                                className="h-11 w-full rounded-full border border-[#DCE5DF] bg-[#F2F7F4] pr-4 pl-11 text-sm text-[#1E2A22] placeholder:text-[#5F856E] transition-colors focus:border-[#52946B] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#52946B]/20"
+                                placeholder="Search captures, titles, or hashes..."
+                                className="h-11 w-full rounded-full border border-border bg-brand-50 pr-4 pl-11 text-sm text-ink placeholder:text-muted transition-colors focus:border-brand-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-600/20"
                             />
                         </div>
 
@@ -120,11 +129,11 @@ export function VaultToolbar({
                                 onClick={() => setFilterOpen((o) => !o)}
                                 aria-expanded={filterOpen}
                                 className={cn(
-                                    "flex h-11 items-center gap-2 rounded-full border border-[#DCE5DF] bg-white px-5 text-sm font-medium transition-colors hover:bg-[#F2F7F4]",
+                                    "flex h-11 items-center gap-2 rounded-full border border-border bg-card px-5 text-sm font-medium transition-colors hover:bg-brand-50",
                                     Boolean(view.kind || view.sort) ||
                                         filterOpen
-                                        ? "border-[#52946B] bg-[#F2F7F4] text-[#52946B]"
-                                        : "text-[#3F7855]",
+                                        ? "border-brand-600 bg-brand-50 text-brand-700"
+                                        : "text-brand-800",
                                 )}>
                                 <SlidersHorizontal
                                     size={17}
@@ -136,7 +145,7 @@ export function VaultToolbar({
                                     size={15}
                                     strokeWidth={2}
                                     className={cn(
-                                        "transition-transform duration-200 text-[#5F856E]",
+                                        "transition-transform duration-200 text-muted",
                                         filterOpen && "rotate-180",
                                     )}
                                     aria-hidden
@@ -147,8 +156,8 @@ export function VaultToolbar({
                             {filterOpen && (
                                 <div className="absolute right-0 z-30 mt-2 w-72 rounded-2xl border border-border bg-card p-4 shadow-xl">
                                     <div className="mb-3 flex items-center justify-between border-b border-border pb-2">
-                                        <span className="text-sm font-bold text-[#203E2C]">
-                                            Filter & Sort
+                                        <span className="text-sm font-bold text-ink">
+                                            Filter & sort
                                         </span>
                                         <button
                                             type="button"
@@ -163,13 +172,13 @@ export function VaultToolbar({
                                             <label
                                                 htmlFor="filter-kind"
                                                 className="block text-xs font-bold text-muted">
-                                                Evidence Kind
+                                                Evidence kind
                                             </label>
                                             <select
                                                 id="filter-kind"
                                                 name="kind"
                                                 defaultValue={view.kind}
-                                                className="mt-1 h-9 w-full rounded-lg border border-border bg-card px-3 text-xs font-medium text-ink focus:border-[#52946B] focus:outline-none">
+                                                className="mt-1 h-9 w-full rounded-lg border border-border bg-card px-3 text-xs font-medium text-ink focus:border-brand-600 focus:outline-none">
                                                 <option value="">
                                                     All kinds
                                                 </option>
@@ -186,13 +195,13 @@ export function VaultToolbar({
                                             <label
                                                 htmlFor="filter-sort"
                                                 className="block text-xs font-bold text-muted">
-                                                Sort Order
+                                                Sort order
                                             </label>
                                             <select
                                                 id="filter-sort"
                                                 name="sort"
                                                 defaultValue={view.sort}
-                                                className="mt-1 h-9 w-full rounded-lg border border-border bg-card px-3 text-xs font-medium text-ink focus:border-[#52946B] focus:outline-none">
+                                                className="mt-1 h-9 w-full rounded-lg border border-border bg-card px-3 text-xs font-medium text-ink focus:border-brand-600 focus:outline-none">
                                                 {view.tab === "shared" ? (
                                                     <>
                                                         <option value="">
@@ -233,7 +242,7 @@ export function VaultToolbar({
                                             </button>
                                             <button
                                                 type="submit"
-                                                className="rounded-full bg-[#52946B] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#427A56]">
+                                                className="rounded-full bg-brand-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-brand-700">
                                                 Apply
                                             </button>
                                         </div>

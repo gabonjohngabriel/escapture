@@ -142,30 +142,30 @@ export default async function ReviewDashboardPage({ searchParams }: PageProps<"/
     <div className="flex flex-col gap-8 pb-12">
       {/* Page Header Greeting */}
       <header className="flex flex-col gap-1">
-        <h1 className="font-heading text-3xl font-extrabold tracking-tight text-brand-700 sm:text-4xl">
-          Welcome back, {user.name}!
+        <h1 className="text-3xl font-bold tracking-tight text-brand-700 sm:text-4xl">
+          Review dashboard
         </h1>
         <p className="text-sm font-medium text-muted sm:text-base">
-          Review reports shared with the university, at a glance.
+          Cases escalated to the university, at a glance.
         </p>
       </header>
 
       {/* Top 3 KPI Summary Tiles (Figma Screens 1 to 5) */}
       <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatTile
-          label="Awaiting Acknowledgement"
-          note={summary.newThisWeek > 0 ? `${summary.newThisWeek} New Cases` : "No New Cases"}
+          label="Awaiting acknowledgement"
+          note={summary.newThisWeek > 0 ? `${summary.newThisWeek} new cases` : "No new cases"}
           value={summary.escalated}
           Icon={Clock}
           variant="amber"
         />
 
         <StatTile
-          label="Under Review"
+          label="Under review"
           note={
             summary.assignedToMe > 0
-              ? `${summary.assignedToMe} Cases Assigned to You`
-              : "No Cases Assigned to You"
+              ? `${summary.assignedToMe} cases assigned to you`
+              : "No cases assigned to you"
           }
           value={summary.underReview}
           Icon={SearchExclamationIcon}
@@ -173,8 +173,8 @@ export default async function ReviewDashboardPage({ searchParams }: PageProps<"/
         />
 
         <StatTile
-          label="Closed This Month"
-          note="No. of Cases Archived"
+          label="Closed this month"
+          note="Total closed cases"
           value={summary.closedThisMonth}
           Icon={CircleCheck}
           variant="green"

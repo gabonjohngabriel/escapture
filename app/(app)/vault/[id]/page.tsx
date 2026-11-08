@@ -75,13 +75,15 @@ export default async function EvidencePage({ params, searchParams }: PageProps<"
           className="link inline-flex items-center gap-1 text-sm"
         >
           <ArrowLeft size={16} strokeWidth={1.75} aria-hidden />
-          {fromCase || backToReview
-            ? "Back to the case"
-            : reviewer
-              ? ev.sharedWithMe
-                ? "Back to Shared with me"
-                : "Back to the Review Board"
-              : "Back to your vault"}
+          {fromCase
+            ? "Back to your report"
+            : backToReview
+              ? "Back to the case"
+              : reviewer
+                ? ev.sharedWithMe
+                  ? "Back to Shared with me"
+                  : "Back to the Review Board"
+                : "Back to your vault"}
         </Link>
       </div>
       <header className="min-w-0">

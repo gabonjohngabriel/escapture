@@ -127,12 +127,11 @@ export function CreateReportModal({
           <div>
             <h2
               id="create-report-title"
-              className="text-[28px] font-bold tracking-tight text-[#52946B] leading-tight"
-              style={{ fontFamily: "var(--font-heading)" }}
+              className="text-2xl font-bold tracking-tight text-brand-700 leading-tight"
             >
-              Create Report
+              Create report
             </h2>
-            <p className="mt-1 text-[15px] font-normal text-[#5F856E]">
+            <p className="mt-1 text-sm text-muted">
               Bring your captures together in a private report.
             </p>
           </div>
@@ -140,7 +139,7 @@ export function CreateReportModal({
             type="button"
             aria-label="Close dialog"
             onClick={handleClose}
-            className="flex size-8 items-center justify-center rounded-full border border-[#DCE5DF] text-[#55665C] hover:bg-[#F2F7F4] hover:text-[#1E2A22] transition-colors"
+            className="flex size-8 items-center justify-center rounded-full border border-border text-muted hover:bg-brand-50 hover:text-ink transition-colors"
           >
             <X size={16} strokeWidth={2.25} />
           </button>
@@ -157,9 +156,9 @@ export function CreateReportModal({
           <div>
             <label
               htmlFor="report-title-input"
-              className="block text-[14px] font-bold text-[#52946B]"
+              className="block text-sm font-bold text-brand-800"
             >
-              Report title <span className="text-[#52946B]">*</span>
+              Report title <span className="text-brand-700">*</span>
             </label>
             <input
               id="report-title-input"
@@ -169,9 +168,9 @@ export function CreateReportModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Group post record"
-              className="mt-1.5 h-12 w-full rounded-2xl border border-[#DCE5DF] bg-white px-4 text-[15px] text-[#1E2A22] placeholder-[#7D8E83] focus:border-[#52946B] focus:outline-none focus:ring-2 focus:ring-[#52946B]/20"
+              className="mt-1.5 h-12 w-full rounded-2xl border border-border bg-card px-4 text-[15px] text-ink placeholder:text-muted focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20"
             />
-            <span className="mt-1 block text-[13px] text-[#5F856E]">
+            <span className="mt-1 block text-xs text-muted">
               Use a clear title you can find again later.
             </span>
           </div>
@@ -180,7 +179,7 @@ export function CreateReportModal({
           <div>
             <label
               htmlFor="report-desc-input"
-              className="block text-[14px] font-bold text-[#52946B]"
+              className="block text-sm font-bold text-brand-800"
             >
               Description (optional)
             </label>
@@ -191,17 +190,17 @@ export function CreateReportModal({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Posts from BulSU Freshies 2026 saved for my personal record."
-              className="mt-1.5 h-12 w-full rounded-2xl border border-[#DCE5DF] bg-white px-4 text-[15px] text-[#1E2A22] placeholder-[#7D8E83] focus:border-[#52946B] focus:outline-none focus:ring-2 focus:ring-[#52946B]/20"
+              className="mt-1.5 h-12 w-full rounded-2xl border border-border bg-card px-4 text-[15px] text-ink placeholder:text-muted focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20"
             />
           </div>
 
           {/* Captured Evidence Section */}
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-[14px] font-bold text-[#52946B]">
-                Captured evidence <span className="text-[#52946B]">*</span>
+              <span className="text-sm font-bold text-brand-800">
+                Captured evidence <span className="text-brand-700">*</span>
               </span>
-              <span className="text-[13px] font-medium text-[#5F856E]">
+              <span className="text-xs font-medium text-muted">
                 {selectedIds.size > 0 ? `${selectedIds.size} selected` : "1 selected"}
               </span>
             </div>
@@ -268,7 +267,7 @@ export function CreateReportModal({
               </div>
             </div>
 
-            <p className="mt-2 text-[13px] text-[#5F856E]">
+            <p className="mt-2 text-xs text-muted">
               Choose captures from your vault. Original evidence stays unchanged.
             </p>
 
@@ -277,16 +276,16 @@ export function CreateReportModal({
               <button
                 type="button"
                 onClick={() => setShowPicker((p) => !p)}
-                className="inline-flex items-center gap-1.5 text-[14px] font-bold text-[#52946B] hover:underline"
+                className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-700 hover:underline"
               >
                 <Plus size={16} strokeWidth={2.5} />
                 <span>{showPicker ? "Hide evidence list" : "+ Choose more evidence"}</span>
               </button>
 
               {showPicker && (
-                <div className="mt-3 max-h-48 overflow-y-auto rounded-2xl border border-[#DCE5DF] bg-[#FAFBFB] p-2.5">
+                <div className="mt-3 max-h-48 overflow-y-auto rounded-2xl border border-border bg-canvas p-2.5">
                   {evidenceList.length === 0 ? (
-                    <p className="p-3 text-center text-xs text-[#5F856E]">Your vault has no evidence yet.</p>
+                    <p className="p-3 text-center text-xs text-muted">Your vault has no evidence yet.</p>
                   ) : (
                     <ul className="flex flex-col gap-1">
                       {evidenceList.map((item) => {
@@ -296,14 +295,14 @@ export function CreateReportModal({
                             <button
                               type="button"
                               onClick={() => toggleSelect(item.id)}
-                              className="flex w-full items-center justify-between rounded-xl p-2.5 text-left text-xs transition-colors hover:bg-white"
+                              className="flex w-full items-center justify-between rounded-xl p-2.5 text-left text-xs transition-colors hover:bg-card"
                             >
-                              <span className="truncate font-medium text-[#1E2A22]">{item.label}</span>
+                              <span className="truncate font-medium text-ink">{item.label}</span>
                               <div
                                 className={`flex size-4 shrink-0 items-center justify-center rounded border ${
                                   checked
-                                    ? "border-[#52946B] bg-[#52946B] text-white"
-                                    : "border-[#DCE5DF] bg-white"
+                                    ? "border-brand-600 bg-brand-600 text-white"
+                                    : "border-border bg-card"
                                 }`}
                               >
                                 {checked && <Check size={12} strokeWidth={3} />}
@@ -319,10 +318,10 @@ export function CreateReportModal({
             </div>
           </div>
 
-          {/* Privacy Advisory Notice Banner (Figma node 44:1439) */}
-          <div className="flex items-center gap-3.5 rounded-2xl border border-[#C7E0CE] bg-[#F2F7F4] p-4 text-[#3F7855]">
-            <Lock size={18} strokeWidth={2.25} className="shrink-0 text-[#52946B]" />
-            <p className="text-[13px] leading-snug font-medium">
+          {/* Privacy Advisory Notice Banner */}
+          <div className="flex items-center gap-3.5 rounded-2xl border border-brand-200 bg-brand-50 p-4 text-brand-800">
+            <Lock size={18} strokeWidth={2.25} className="shrink-0 text-brand-700" />
+            <p className="text-xs leading-snug font-medium">
               Only you can access this report. Creating it does not share evidence
               or submit anything to university staff.
             </p>
@@ -334,17 +333,17 @@ export function CreateReportModal({
               type="button"
               onClick={handleClose}
               disabled={loading}
-              className="h-11 rounded-full border border-[#DCE5DF] bg-white px-6 text-[14px] font-bold text-[#55665C] hover:bg-[#F2F7F4] transition-colors"
+              className="h-11 rounded-full border border-border bg-card px-6 text-sm font-bold text-muted hover:bg-brand-50 hover:text-ink transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex h-11 items-center gap-2 rounded-full bg-[#52946B] px-7 text-[14px] font-bold text-white shadow-xs hover:bg-[#437C58] transition-colors disabled:opacity-50"
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-brand-600 px-7 text-sm font-bold text-white shadow-xs hover:bg-brand-700 transition-colors disabled:opacity-50"
             >
               <Plus size={16} strokeWidth={2.5} />
-              <span>{loading ? "Creating..." : "Create Report"}</span>
+              <span>{loading ? "Creating..." : "Create report"}</span>
             </button>
           </div>
         </form>

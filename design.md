@@ -25,11 +25,11 @@ Target: **desktop browsers first.** The layout is designed at 1280px. Below 1024
 
 ## 3. Brand and logo
 
-- The logo is a **fingerprint inside a shield**, in a single color: `#66A3BF` (brand-500).
+- The logo is a **fingerprint inside a shield**, in a single color: `#52946B` (brand-500).
 - Use the logo only in brand-500 on light surfaces (`canvas`, `card`, `brand-50`, `brand-100`), or in white on `brand-800` / `brand-900`. Never recolor it, add effects, stretch it or place it on a busy background.
 - Keep clear space equal to the height of the fingerprint's top ridge on all sides. Minimum rendered height: 24px.
 - **Reserve the shield and fingerprint motifs for the logo.** Do not use shield or fingerprint icons elsewhere in the UI (including the tamper-check badge), so the trust claim is never visually confused with the brand mark.
-- Brand-500 is a **fill and brand color**, not a text, border or focus color. See section 4.
+- Brand-500 is a **fill and brand color**, not a body text color. See section 4.
 
 ## 4. Color
 
@@ -37,34 +37,35 @@ Target: **desktop browsers first.** The layout is designed at 1280px. Below 1024
 
 Build everything from these tokens. Do not introduce new hex values in components.
 
-**Brand ramp (hue anchored on #66A3BF)**
+**Brand ramp (Figma green, anchored on #52946B)**
 
 | Token       | Hex       | Primary use                                                     |
 | ----------- | --------- | --------------------------------------------------------------- |
-| `brand-50`  | `#F1F7FA` | Subtle tinted sections                                          |
-| `brand-100` | `#E6F1F6` | Selected rows, soft button background, info banners             |
-| `brand-200` | `#CDE2EC` | Soft hover on tinted surfaces, illustration fills               |
-| `brand-300` | `#AACADB` | Illustration fills, decorative strokes                          |
-| `brand-400` | `#85B8CE` | Progress fills, illustration fills                              |
-| `brand-500` | `#66A3BF` | **Brand.** Logo, large fills, illustrations, decorative accents |
-| `brand-600` | `#4B87A5` | Icons and large UI shapes only (see 4.3)                        |
-| `brand-700` | `#3A6D88` | **Interactive.** Primary button, links, focus ring, active nav  |
-| `brand-800` | `#2D556B` | Hover/pressed for brand-700, text on brand-100                  |
-| `brand-900` | `#223F50` | Escalation button, dark surfaces                                |
+| `brand-50`  | `#F2F7F4` | Subtle tinted sections, pill background                         |
+| `brand-100` | `#E3EFE7` | Selected rows, soft button background, active nav states        |
+| `brand-200` | `#C7E0CE` | Soft hover on tinted surfaces, illustration fills               |
+| `brand-300` | `#9EC9A9` | Illustration fills, decorative accents                          |
+| `brand-400` | `#74AF84` | Progress fills, subtle badges                                   |
+| `brand-500` | `#52946B` | **Brand.** Logo, card banner fills, pill active state, borders  |
+| `brand-600` | `#427A56` | Primary buttons, large UI icons                                 |
+| `brand-700` | `#356246` | **Interactive & Headings.** Button hover, links, focus ring     |
+| `brand-800` | `#294D37` | Hover/pressed for brand-700, text on brand-100                  |
+| `brand-900` | `#203E2C` | Escalation button, dark surfaces, high-contrast headings        |
+| `brand-950` | `#122419` | Deepest dark surface tone                                       |
 
 **Neutrals (cool, lightly tinted toward the brand hue)**
 
 | Token           | Hex       | Use                                                 |
 | --------------- | --------- | --------------------------------------------------- |
-| `canvas`        | `#F7FAFB` | Page background                                     |
+| `canvas`        | `#FAFBFB` | Page background                                     |
 | `card`          | `#FFFFFF` | Cards, modals, popovers, inputs                     |
-| `subtle`        | `#EFF4F7` | Table headers, code/hash blocks, secondary panels   |
-| `border`        | `#DCE6EB` | Card edges, dividers, table rules (decorative only) |
-| `border-strong` | `#7690A0` | Input, checkbox and radio borders (must be visible) |
-| `ink`           | `#1E2A32` | Headings and body text                              |
-| `muted`         | `#55646E` | Secondary text, labels, captions, placeholders      |
-| `disabled-bg`   | `#E6EDF1` | Disabled control background                         |
-| `disabled-fg`   | `#7D8B94` | Disabled control text                               |
+| `subtle`        | `#F0F5F2` | Table headers, code/hash blocks, secondary panels   |
+| `border`        | `#DCE5DF` | Card edges, dividers, table rules (decorative only) |
+| `border-strong` | `#6E8F79` | Input, checkbox and radio borders (must be visible) |
+| `ink`           | `#1E2A22` | Headings and body text                              |
+| `muted`         | `#55665C` | Secondary text, labels, captions, placeholders      |
+| `disabled-bg`   | `#E6EDE8` | Disabled control background                         |
+| `disabled-fg`   | `#7D8E83` | Disabled control text                               |
 
 **Semantic colors (each is a soft background with a dark text/icon color)**
 
@@ -124,53 +125,46 @@ If you add or change a color pair, recompute it and update this table.
 
 ### 5.1 Fonts
 
-- **Headings (H1 to H4): Lora**, weight 600. Elegant, calligraphic and warm.
-- **Everything else: Nunito.** Body, buttons, navigation, forms, labels, tables, captions, helper text. Weights 400, 600, 700.
+- **Headings & Body: DM Sans** (weights 400, 500, 600, 700). Clean, humanist, modern geometric font with excellent readability across dense data and student screens.
 - **Mono (hashes and timestamps only): system mono stack** (`ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`).
-
-Why Nunito and not Quicksand: Quicksand is more geometric than humanist and has thin strokes and a small x-height, which hurts readability in long text and dense reviewer tables. Nunito keeps the rounded, friendly terminals but has sturdier strokes and better small-size legibility. The body font is a single token (`--font-sans`), so switching back to Quicksand is a one-line change, but if you do, never use Quicksand below weight 500 or below 14px.
-
-Load both through `next/font/google` (self-hosted at build time). Do not add any other font family.
 
 ### 5.2 Scale (desktop)
 
-| Role                  | Font   | Size / line height | Weight |
-| --------------------- | ------ | ------------------ | ------ |
-| H1 (page title)       | Lora   | 32 / 40            | 600    |
-| H2 (section)          | Lora   | 24 / 32            | 600    |
-| H3 (card/modal title) | Lora   | 20 / 28            | 600    |
-| H4 (subsection)       | Lora   | 17 / 24            | 600    |
-| Body                  | Nunito | 16 / 26            | 400    |
-| Body small            | Nunito | 14 / 22            | 400    |
-| Label / button / nav  | Nunito | 14-15 / 20         | 600    |
-| Caption / helper      | Nunito | 13 / 18            | 400    |
-| Hash / timestamp      | Mono   | 13 / 20            | 400    |
+| Role                  | Font    | Size / line height | Weight |
+| --------------------- | ------- | ------------------ | ------ |
+| H1 (page title)       | DM Sans | 36 / 44            | 700    |
+| H2 (section)          | DM Sans | 26 / 34            | 700    |
+| H3 (card/modal title) | DM Sans | 20 / 28            | 700    |
+| H4 (subsection)       | DM Sans | 17 / 24            | 700    |
+| Body                  | DM Sans | 16 / 26            | 400    |
+| Body small            | DM Sans | 14 / 22            | 400    |
+| Label / button / nav  | DM Sans | 14-15 / 20         | 600    |
+| Caption / helper      | DM Sans | 13 / 18            | 400    |
+| Hash / timestamp      | Mono    | 13 / 20            | 400    |
 
 ### 5.3 Rules
 
 - Minimum text size is 13px. Never go smaller.
 - Limit prose to about 70 characters per line (`max-w-prose`).
 - Sentence case everywhere, including buttons and headings. No ALL CAPS, no letter-spaced labels.
-- Do not use italic Lora for more than a short phrase. Do not use Lora for body text, buttons or table cells.
+- Role-split vocabulary: students create and manage **reports** (`"Report"`, `"Create report"`, `"People on this report"`); university reviewers manage **cases** (`"Review Board"`, `"Case review"`, `"Close case"`).
 - Use `font-variant-numeric: tabular-nums` for dates, counts and table numbers.
 
 ## 6. Layout, spacing and density
 
 - **Spacing scale (4px base):** 4, 8, 12, 16, 24, 32, 48, 64. Use only these values.
-- **App shell:** a left sidebar (248px, `card` background, 1px right `border`) and a content column on `canvas`. The content column starts with a **header** (64px, `card`, 1px bottom `border`, sticky). The account menu sits at the right of the header, not in the sidebar.
+- **App shell:** a left sidebar (`card` background, 1px right `border`) with default expanded width 248px and a collapse toggle button (collapsing to 86px with tooltip labels and circular active pill indicators, choice remembered in `localStorage`). The content column starts with a **header** (64px, `card`, 1px bottom `border`, sticky).
 - **Sidebar**
-    - Logo. The role is shown once, under the person's name in the header.
-    - A sentence-case group label above the nav ("Your space", "Reviews", "Administration"), 13px 600 `muted`.
-    - Students: Vault, Cases, Notifications.
+    - Logo + collapse toggle button.
+    - Students: Vault, Reports, Notifications.
     - Reviewers: Dashboard, Review Board, Shared with me, Case Archives, Notifications.
     - Administrators: Dashboard, Review Board, Shared with me, Case Archives, Reviewer accounts, Notifications.
-    - Active item: `brand-100` background, `brand-800` text, 10px radius, 44px tall. Unread notifications show a small `brand-700` dot, not a red count badge.
-    - Help, Privacy and Terms links at the bottom. No help card.
+    - Active item: `brand-600` background with white text, or `brand-50` background with `brand-800` text, rounded-full, 44px tall. Unread notifications show a small amber dot.
+    - Help, Privacy and Terms links at the bottom.
 - **Header**
-    - No page title or breadcrumb: every page has its own H1, and a detail page has a back link above it.
-    - Middle: one search field (320px, 40px tall) that searches the role's main list.
-    - Right: Help, the notification bell, a divider, then the account button (avatar initials, name, role) that opens the account menu with Sign out.
-    - Below 1024px the menu button that opens the sidebar drawer joins the header at the far left and the search wraps to its own row. There is never a second bar.
+    - Contextual breadcrumbs or back links on detail pages.
+    - Right: Notification bell, divider, then the account button (avatar initials, name, role) opening the account menu.
+    - Each main page provides its own inline search in its toolbar instead of a duplicate top header search.
 - **Page structure:** H1 on the left (add a sentence under it only when the page can't be understood without one), at most one primary button on the right, then content. Do not stack banners above the header. The page H1 is the page's own title; the header breadcrumb doesn't replace it.
 - **Content width:** students max 1040px, centered. Reviewers use the full width up to 1440px.
 - **Designed for 1024px and wider.** Below 1024px the sidebar collapses into a drawer opened from the header's menu button, page padding tightens, and the Vault table stacks into a list. Other pages need not look designed there, but must not break, overlap or scroll sideways.

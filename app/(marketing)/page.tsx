@@ -34,12 +34,12 @@ const steps = [
     body: "Use the Escapture extension to save a Facebook post or conversation. Each capture is saved with tamper checks.",
   },
   {
-    title: "Build a case",
+    title: "Build a report",
     body: "Choose the evidence that matters, describe what happened in your own words, and invite someone you trust to help.",
   },
   {
     title: "Escalate when you're ready",
-    body: "Review exactly what reviewers will see. Once you escalate, the case is locked and reviewers can see it.",
+    body: "Review exactly what reviewers will see. Once you escalate, the report is locked as a university case and reviewers can see it.",
   },
 ];
 
@@ -65,15 +65,15 @@ const hardDays = [
 const faq = [
   {
     q: "Who can see my vault?",
-    a: "Only you. Nothing reaches reviewers until you escalate a case, and you choose who else can see it.",
+    a: "Only you. Nothing reaches reviewers until you escalate a report, and you choose who else can see it.",
   },
   {
     q: "Do I have to report anything?",
     a: "No. You can keep captures in your vault and never escalate. It's your decision, on your timeline.",
   },
   {
-    q: "Can I withdraw a case?",
-    a: "Before you escalate, you can edit or delete anything. Once you escalate, the case is locked and can't be withdrawn.",
+    q: "Can I withdraw a report?",
+    a: "Before you escalate, you can edit or delete anything. Once you escalate, the report is locked as an official case and can't be withdrawn.",
   },
   {
     q: "What does “captured with tamper checks” mean?",
@@ -100,7 +100,7 @@ export default function LandingPage() {
             <div>
               <h1 className="mk-display-xl">Keep a record of what happened.</h1>
               <p className="mk-lead">
-                Save Facebook posts and messages with tamper checks, build a case in your own time, and share it with
+                Save Facebook posts and messages with tamper checks, build a report in your own time, and share it with
                 university reviewers only when you&apos;re ready.
               </p>
               <div className="mk-actions">

@@ -26,21 +26,21 @@
 
 :root {
     /* Exact Figma palette */
-    --brand-green: #5da36c;
-    --brand-green-hover: #508f5d;
-    --brand-green-light: #e4f1e7;
-    --brand-green-muted: #6ba293;
-    --brand-green-subtle: #f0f7f2;
+    --brand-green: #52946b;
+    --brand-green-hover: #427a56;
+    --brand-green-light: #e3efe7;
+    --brand-green-muted: #6e8f79;
+    --brand-green-subtle: #f2f7f4;
 
     /* Neutrals */
     --canvas: #ffffff;
     --card: #ffffff;
-    --ink: #1e2a32;
-    --muted: #55646e;
-    --border: #dce6eb;
-    --border-strong: #7690a0;
-    --disabled-bg: #e6edf1;
-    --disabled-fg: #7d8b94;
+    --ink: #1e2a22;
+    --muted: #55665c;
+    --border: #dce5df;
+    --border-strong: #6e8f79;
+    --disabled-bg: #e6ede8;
+    --disabled-fg: #7d8e83;
 
     /* Semantic */
     --escalated-bg: #fdf3e1;

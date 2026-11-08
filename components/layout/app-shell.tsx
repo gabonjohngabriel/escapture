@@ -11,21 +11,15 @@ import {
     LockKeyhole,
     LogOut,
     Menu as MenuIcon,
-    Search,
+    PanelLeftClose,
+    PanelLeftOpen,
     Tags,
     Users,
     X,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
-import {
-    createContext,
-    Suspense,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
-} from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { createContext, useContext, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Menu } from "@/components/ui/menu";
 import { api } from "@/lib/client-api";
 import { cn } from "@/lib/cn";
@@ -105,30 +99,18 @@ const NAV: Record<Role, NavItem[]> = {
     ],
 };
 
-const ROLE: Record<
-    Role,
-    { label: string; group: string; search: { action: string; label: string } }
-> = {
+const ROLE: Record<Role, { label: string; group: string }> = {
     student: {
         label: "Student",
-        group: "Your Space",
-        search: { action: "/vault", label: "Search your vault" },
+        group: "Your space",
     },
     reviewer: {
         label: "Case reviewer",
         group: "Reviews",
-        search: {
-            action: "/review/board",
-            label: "Search cases and reporters",
-        },
     },
     admin: {
         label: "Administrator",
         group: "Administration",
-        search: {
-            action: "/review/board",
-            label: "Search cases and reporters",
-        },
     },
 };
 
@@ -148,39 +130,23 @@ export function PageCrumbs({
     return null;
 }
 
-function HeaderSearch({ role, className }: { role: Role; className?: string }) {
-    const { action, label } = ROLE[role].search;
-    const pathname = usePathname();
-    const q = useSearchParams().get("q") ?? "";
-    const current = pathname === action ? q : "";
-    return (
-        <form
-            role="search"
-            action={action}
-            method="get"
-            className={cn("relative", className)}>
-            <Search
-                size={16}
-                strokeWidth={1.75}
-                aria-hidden
-                className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted"
-            />
-            <input
-                key={`${pathname}?${current}`}
-                type="search"
-                name="q"
-                defaultValue={current}
-                aria-label={label}
-                placeholder={label}
-                maxLength={120}
-                className="h-10 w-full rounded-md border border-border-strong bg-card pr-3 pl-[38px] text-[15px] leading-5 text-ink placeholder:text-muted"
-            />
-        </form>
-    );
-}
-
 const iconButton =
-    "relative grid size-11 place-items-center rounded-md text-ink transition-colors duration-150 hover:bg-brand-100 hover:text-brand-800";
+    "relative grid size-10 place-items-center rounded-lg text-ink transition-colors duration-150 hover:bg-brand-50 hover:text-brand-800";
+
+const sidebarListeners = new Set<() => void>();
+function subscribeSidebar(callback: () => void) {
+    sidebarListeners.add(callback);
+    return () => {
+        sidebarListeners.delete(callback);
+    };
+}
+function getSidebarCollapsed() {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("escapture:sidebar-collapsed") === "true";
+}
+function getServerSidebarCollapsed() {
+    return false;
+}
 
 export function AppShell({
     user,
@@ -194,6 +160,7 @@ export function AppShell({
     children: React.ReactNode;
 }) {
     const pathname = usePathname();
+    const router = useRouter();
     const role = ROLE[user.role];
     const items: NavItem[] = [
         ...NAV[user.role],
@@ -212,13 +179,20 @@ export function AppShell({
         items.find((item) => item.match(pathname)) ??
         items[0];
 
-    const [hovered, setHovered] = useState(false);
+    const collapsed = useSyncExternalStore(subscribeSidebar, getSidebarCollapsed, getServerSidebarCollapsed);
     const [menuOpen, setMenuOpen] = useState(false);
     const drawer = useRef<HTMLDialogElement>(null);
 
+    function toggleCollapsed() {
+        const next = !getSidebarCollapsed();
+        localStorage.setItem("escapture:sidebar-collapsed", String(next));
+        sidebarListeners.forEach((l) => l());
+    }
+
     async function signOut() {
         await api("/api/auth/sign-out", { body: {} }).catch(() => {});
-        window.location.href = "/sign-in";
+        router.push("/sign-in");
+        router.refresh();
     }
 
     useEffect(() => {
@@ -235,44 +209,73 @@ export function AppShell({
         return () => wide.removeEventListener("change", onChange);
     }, []);
 
-    const isExpanded = hovered || user.role !== "student";
-
     return (
         <div
             data-density={user.role === "student" ? "comfortable" : "compact"}
-            className="app-shell min-h-screen">
+            className="app-shell min-h-screen bg-canvas ml-8">
             {/* Desktop Collapsible Sidebar */}
             <aside
                 aria-label="Sidebar"
-                onMouseEnter={() => setHovered(true)}
-                onMouseLeave={() => setHovered(false)}
                 className={cn(
-                    "fixed inset-y-0 left-0 z-40 hidden flex-col justify-between border-r border-[#E2EBE5] bg-card px-4 py-6 transition-all duration-250 ease-out lg:flex overflow-x-hidden",
-                    user.role === "student"
-                        ? isExpanded
-                            ? "w-[348px] shadow-2xl"
-                            : "w-[86px] shadow-xs"
-                        : "w-[248px]",
+                    "fixed inset-y-0 left-0 z-40 hidden flex-col justify-between border-r border-border bg-card transition-all duration-200 ease-out lg:flex overflow-x-hidden",
+                    collapsed ? "w-[86px] px-3 py-6" : "w-[294px] px-4 py-6",
                 )}>
                 <div className="flex flex-col gap-6">
-                    {/* Header & Logo */}
-                    <div className="flex h-14 items-center">
+                    {/* Header */}
+                    <div className="flex h-12 items-center justify-between">
                         <Link
                             href={home}
-                            className="flex items-center overflow-hidden rounded-md focus-visible:outline-[#52946B]"
-                            title="Escapture Home">
+                            className="flex items-center overflow-hidden rounded-md focus-visible:outline-brand-700"
+                            title="Escapture">
                             <Logo
-                                size={40}
-                                withName={isExpanded}
-                                animateName={true}
-                                nameClassName="text-[26px] font-bold text-[#52946B]"
+                                size={36}
+                                withName={!collapsed}
+                                animateName={false}
+                                nameClassName="text-[22px] font-bold text-brand-700 ml-1"
                             />
                         </Link>
+                        {!collapsed && (
+                            <button
+                                type="button"
+                                onClick={toggleCollapsed}
+                                aria-label="Collapse sidebar"
+                                title="Collapse sidebar"
+                                className="flex size-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-brand-50 hover:text-brand-800 focus-visible:outline-brand-700">
+                                <PanelLeftClose
+                                    size={18}
+                                    strokeWidth={2}
+                                    aria-hidden
+                                />
+                            </button>
+                        )}
                     </div>
 
+                    {/* Expand Button */}
+                    {collapsed && (
+                        <div className="flex justify-center -mt-2">
+                            <button
+                                type="button"
+                                onClick={toggleCollapsed}
+                                aria-label="Expand sidebar"
+                                title="Expand sidebar"
+                                className="flex size-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-brand-50 hover:text-brand-800 focus-visible:outline-brand-700">
+                                <PanelLeftOpen
+                                    size={18}
+                                    strokeWidth={2}
+                                    aria-hidden
+                                />
+                            </button>
+                        </div>
+                    )}
+
                     {/* Navigation Section */}
-                    <nav aria-label="Main" className="mt-2">
-                        <ul className="flex flex-col gap-2">
+                    <nav aria-label="Main" className="mt-1">
+                        {!collapsed && (
+                            <p className="mb-2 px-3 text-xs font-semibold text-muted">
+                                {role.group}
+                            </p>
+                        )}
+                        <ul className="flex flex-col gap-1.5">
                             {items.map(({ href, label, Icon }) => {
                                 const active = href === section.href;
                                 const showDot =
@@ -285,55 +288,52 @@ export function AppShell({
                                                 active ? "page" : undefined
                                             }
                                             className={cn(
-                                                "group relative flex h-14 w-full items-center justify-center rounded-full border-4 transition-all duration-250 ease-out overflow-hidden select-none",
+                                                "group relative flex h-14 w-full items-center rounded-full transition-colors duration-150 select-none border-4 border-white",
+                                                collapsed
+                                                    ? "justify-center px-0"
+                                                    : "px-4 gap-2",
                                                 active
-                                                    ? "bg-[#52946B] text-white shadow-sm border-[#E5E8E6]"
-                                                    : "border-transparent text-[#52946B] hover:bg-[#F2F7F4]",
+                                                    ? "bg-brand-500 text-white shadow-xs border-[#E5E8E6]"
+                                                    : "text-brand-500 hover:bg-brand-50 hover:text-brand-800",
                                             )}
                                             title={label}>
-                                            <div className="flex size-14 shrink-0 items-center justify-center">
+                                            <div className="flex size-8 shrink-0 items-center justify-center">
                                                 <Icon
-                                                    size={24}
-                                                    strokeWidth={2.25}
+                                                    size={20}
+                                                    strokeWidth={2}
                                                     aria-hidden
                                                     className={cn(
                                                         "shrink-0",
                                                         active
                                                             ? "text-white"
-                                                            : "text-[#52946B]",
+                                                            : "text-brand-700 group-hover:text-brand-800",
                                                     )}
                                                 />
                                             </div>
-                                            <span
-                                                className={cn(
-                                                    "whitespace-nowrap overflow-hidden transition-all duration-250 ease-out text-[22px] font-bold leading-none",
-                                                    isExpanded
-                                                        ? "max-w-[200px] opacity-100 translate-x-0 ml-1"
-                                                        : "max-w-0 opacity-0 -translate-x-3 pointer-events-none ml-0",
-                                                )}>
-                                                {label}
-                                            </span>
-                                            {counts[href] !== undefined && (
-                                                <span
-                                                    className={cn(
-                                                        "tnum ml-auto whitespace-nowrap overflow-hidden rounded-full text-lg font-bold transition-all duration-250 ease-out",
-                                                        isExpanded
-                                                            ? "max-w-[50px] opacity-100 px-2.5 py-0.5 mr-4"
-                                                            : "max-w-0 opacity-0 pointer-events-none p-0",
-                                                        active
-                                                            ? "text-white"
-                                                            : "text-[#52946B]",
-                                                    )}>
-                                                    {counts[href]}
+                                            {!collapsed && (
+                                                <span className="truncate text-[18px] font-semibold leading-none">
+                                                    {label}
                                                 </span>
                                             )}
+                                            {!collapsed &&
+                                                counts[href] !== undefined && (
+                                                    <span
+                                                        className={cn(
+                                                            "tnum ml-auto rounded-full px-2 py-0.5 text-xs font-bold text-[16px]",
+                                                            active
+                                                                ? "text-white"
+                                                                : "text-brand-500 group-hover:text-brand-800",
+                                                        )}>
+                                                        {counts[href]}
+                                                    </span>
+                                                )}
                                             {showDot && (
                                                 <span
                                                     className={cn(
-                                                        "size-2.5 rounded-full bg-[#D97706] transition-all duration-250",
-                                                        isExpanded
-                                                            ? "ml-auto mr-6"
-                                                            : "absolute top-2.5 right-2.5",
+                                                        "size-2.5 rounded-full bg-escalated-solid",
+                                                        collapsed
+                                                            ? "absolute top-2.5 right-2.5"
+                                                            : "ml-auto mr-1",
                                                     )}
                                                     aria-hidden
                                                 />
@@ -347,39 +347,37 @@ export function AppShell({
                 </div>
 
                 {/* Footer Links */}
-                <div className="relative pt-4 overflow-hidden">
-                    <div
-                        className={cn(
-                            "flex items-center justify-between rounded-full border border-[#DCE5DF] bg-[#FAFBFB] p-1.5 shadow-xs whitespace-nowrap transition-all duration-250 ease-out",
-                            isExpanded
-                                ? "opacity-100 translate-y-0"
-                                : "opacity-0 translate-y-4 pointer-events-none",
-                        )}>
-                        <Link
-                            href="/privacy"
-                            tabIndex={isExpanded ? 0 : -1}
-                            className="rounded-full px-4 py-2 text-[14px] font-bold text-[#52946B] transition-colors hover:text-[#356246]">
-                            Privacy Notice
-                        </Link>
-                        <Link
-                            href="/terms"
-                            tabIndex={isExpanded ? 0 : -1}
-                            className="rounded-full bg-[#52946B] px-5 py-2 text-[14px] font-bold text-white shadow-xs transition-colors hover:bg-[#427A56]">
-                            Terms of Service
-                        </Link>
-                    </div>
-
-                    <div
-                        className={cn(
-                            "py-2 text-center transition-all duration-250 ease-out",
-                            !isExpanded
-                                ? "opacity-100"
-                                : "opacity-0 pointer-events-none hidden",
-                        )}>
-                        <span className="text-[10px] font-bold text-[#5F856E] uppercase">
+                <div className="border-t border-border pt-4">
+                    {!collapsed ? (
+                        <div className="flex flex-col gap-2 px-2 text-xs text-muted">
+                            <div className="flex items-center gap-3">
+                                <Link
+                                    href="/privacy"
+                                    className="transition-colors hover:text-brand-700 hover:underline">
+                                    Privacy
+                                </Link>
+                                <span>·</span>
+                                <Link
+                                    href="/terms"
+                                    className="transition-colors hover:text-brand-700 hover:underline">
+                                    Terms
+                                </Link>
+                                <span>·</span>
+                                <Link
+                                    href="/contact"
+                                    className="transition-colors hover:text-brand-700 hover:underline">
+                                    Contact
+                                </Link>
+                            </div>
+                            <p className="text-[11px] text-muted">
+                                Escapture for BulSU
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="flex justify-center text-[11px] font-bold text-muted">
                             v0.1
-                        </span>
-                    </div>
+                        </div>
+                    )}
                 </div>
             </aside>
 
@@ -401,7 +399,7 @@ export function AppShell({
                                     type="button"
                                     aria-label="Close the menu"
                                     onClick={() => setMenuOpen(false)}
-                                    className="flex size-10 items-center justify-center rounded-full text-muted hover:bg-[#E3EFE7]">
+                                    className="flex size-10 items-center justify-center rounded-full text-muted hover:bg-brand-50 hover:text-brand-800">
                                     <X
                                         size={20}
                                         strokeWidth={1.75}
@@ -410,7 +408,7 @@ export function AppShell({
                                 </button>
                             </div>
                             <nav aria-label="Mobile Main">
-                                <p className="mb-2 px-3 text-xs font-bold uppercase tracking-wider text-[#55665C]">
+                                <p className="mb-2 px-3 text-xs font-semibold text-muted">
                                     {role.group}
                                 </p>
                                 <ul className="flex flex-col gap-1.5">
@@ -424,10 +422,10 @@ export function AppShell({
                                                         setMenuOpen(false)
                                                     }
                                                     className={cn(
-                                                        "flex h-12 items-center gap-3 rounded-xl px-4 text-base font-semibold",
+                                                        "flex h-11 items-center gap-3 rounded-full px-4 text-[15px] font-semibold transition-colors",
                                                         active
-                                                            ? "bg-[#52946B] text-white"
-                                                            : "text-[#203E2C] hover:bg-[#E3EFE7]",
+                                                            ? "bg-brand-600 text-white"
+                                                            : "text-brand-700 hover:bg-brand-50 hover:text-brand-800",
                                                     )}>
                                                     <Icon
                                                         size={20}
@@ -441,18 +439,19 @@ export function AppShell({
                                 </ul>
                             </nav>
                         </div>
-                        <div className="flex items-center gap-2 pt-4">
+                        <div className="flex items-center gap-3 pt-4 border-t border-border text-xs text-muted">
                             <Link
                                 href="/privacy"
                                 onClick={() => setMenuOpen(false)}
-                                className="rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold text-[#55665C]">
+                                className="hover:text-brand-700 hover:underline">
                                 Privacy Notice
                             </Link>
+                            <span>·</span>
                             <Link
                                 href="/terms"
                                 onClick={() => setMenuOpen(false)}
-                                className="rounded-full bg-[#52946B] px-3.5 py-1.5 text-xs font-semibold text-white">
-                                Terms of Service
+                                className="hover:text-brand-700 hover:underline">
+                                Terms
                             </Link>
                         </div>
                     </div>
@@ -462,29 +461,30 @@ export function AppShell({
             {/* Main Content Area */}
             <div
                 className={cn(
-                    "flex min-h-screen flex-col transition-all duration-300",
-                    user.role === "student" ? "lg:pl-[86px]" : "lg:pl-[248px]",
+                    "flex min-h-screen flex-col transition-all duration-200",
+                    collapsed ? "lg:pl-[86px]" : "lg:pl-[260px]",
                 )}>
-                <header className="sticky top-0 z-20 flex min-h-16 flex-wrap items-center gap-x-4 gap-y-2 border-b border-[#E2EBE5] bg-card/95 backdrop-blur px-4 py-2 lg:px-8 lg:py-0">
-                    <button
-                        type="button"
-                        aria-label="Open the menu"
-                        aria-haspopup="dialog"
-                        aria-expanded={menuOpen}
-                        onClick={() => setMenuOpen(true)}
-                        className={cn(iconButton, "-ml-2 lg:hidden")}>
-                        <MenuIcon size={22} strokeWidth={1.75} aria-hidden />
-                    </button>
-
-                    <Suspense
-                        fallback={
-                            <div className="order-last h-10 w-full lg:order-none lg:w-[320px]" />
-                        }>
-                        <HeaderSearch
-                            role={user.role}
-                            className="order-last w-full lg:order-none lg:w-[320px]"
-                        />
-                    </Suspense>
+                <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between border-b border-border bg-card/95 backdrop-blur px-4 lg:px-8">
+                    <div className="flex items-center gap-3">
+                        <button
+                            type="button"
+                            aria-label="Open the menu"
+                            aria-haspopup="dialog"
+                            aria-expanded={menuOpen}
+                            onClick={() => setMenuOpen(true)}
+                            className={cn(iconButton, "-ml-2 lg:hidden")}>
+                            <MenuIcon
+                                size={22}
+                                strokeWidth={1.75}
+                                aria-hidden
+                            />
+                        </button>
+                        {mine && (
+                            <span className="text-sm font-medium text-muted truncate max-w-[240px] sm:max-w-md">
+                                {mine.title}
+                            </span>
+                        )}
+                    </div>
 
                     <div className="ml-auto flex items-center gap-1 lg:gap-2">
                         <NotificationPopover unread={unread} role={user.role} />
@@ -494,12 +494,12 @@ export function AppShell({
                         />
                         <Menu
                             label="Account menu"
-                            triggerClassName="flex h-11 items-center gap-3 rounded-md py-0 pr-2 pl-1 text-left text-ink transition-colors duration-150 hover:bg-[#E3EFE7]"
+                            triggerClassName="flex h-11 items-center gap-3 rounded-full py-0 pr-3 pl-1.5 text-left text-ink transition-colors duration-150 hover:bg-brand-50"
                             trigger={
                                 <>
                                     <span
                                         aria-hidden
-                                        className="grid size-8 shrink-0 place-items-center rounded-full bg-[#E3EFE7] text-[13px] leading-none font-bold text-[#203E2C]">
+                                        className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-100 text-[13px] leading-none font-bold text-brand-900">
                                         {initials(user.name)}
                                     </span>
                                     <span className="hidden max-w-[160px] lg:block">

@@ -10,16 +10,16 @@ import { HowToCapture } from "./how-to-capture";
  */
 export function EmptyVaultState() {
   return (
-    <div className="flex flex-col items-center justify-center rounded-[24px] border-[2px] border-[#52946B] bg-white p-12 text-center shadow-xs">
-      <div className="flex size-16 items-center justify-center rounded-full bg-[#F2F7F4] text-[#52946B]">
+    <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-brand-500 bg-card p-12 text-center shadow-xs">
+      <div className="flex size-16 items-center justify-center rounded-full bg-brand-50 text-brand-700">
         <Folder size={32} strokeWidth={2} aria-hidden />
       </div>
 
-      <h2 className="mt-5 text-[24px] font-bold text-[#4A8B63] tracking-tight">
+      <h2 className="mt-5 text-2xl font-bold text-brand-800 tracking-tight">
         Your private vault starts here
       </h2>
 
-      <p className="mt-2.5 max-w-xl text-[15px] leading-relaxed text-[#5F856E]">
+      <p className="mt-2.5 max-w-xl text-base leading-relaxed text-muted">
         Capture evidence when you&apos;re ready. Your captures stay private;
         nothing is shared with the university unless you choose and confirm it.
       </p>
@@ -28,13 +28,13 @@ export function EmptyVaultState() {
         <HowToCapture
           variant="primary"
           hideIcon
-          className="rounded-full bg-[#52946B] px-6 py-2.5 text-[14px] font-bold text-white shadow-xs hover:bg-[#437C58]"
+          className="rounded-full bg-brand-600 px-6 py-2.5 text-sm font-bold text-white shadow-xs hover:bg-brand-700"
           label="Capture evidence"
         />
         <HowToCapture
           variant="secondary"
           hideIcon
-          className="rounded-full border border-[#DCE5DF] bg-white px-6 py-2.5 text-[14px] font-bold text-[#3F7855] hover:bg-[#F2F7F4]"
+          className="rounded-full border border-border bg-card px-6 py-2.5 text-sm font-bold text-brand-800 hover:bg-brand-50"
           label="How to use the extension"
         />
       </div>
@@ -49,26 +49,26 @@ export function EmptySharedState() {
   const router = useRouter();
 
   return (
-    <div className="relative flex flex-col items-center justify-center rounded-[24px] border-[2px] border-[#52946B] bg-white p-12 text-center shadow-xs">
+    <div className="relative flex flex-col items-center justify-center rounded-2xl border-2 border-brand-500 bg-card p-12 text-center shadow-xs">
       <button
         type="button"
         aria-label="Refresh shared items"
         onClick={() => router.refresh()}
-        className="absolute top-6 right-6 flex size-9 items-center justify-center rounded-full bg-[#52946B] text-white shadow-xs transition-colors hover:bg-[#437C58]"
+        className="absolute top-6 right-6 flex size-9 items-center justify-center rounded-full bg-brand-600 text-white shadow-xs transition-colors hover:bg-brand-700"
         title="Refresh"
       >
         <RefreshCcw size={18} strokeWidth={2.25} aria-hidden />
       </button>
 
-      <div className="flex size-16 items-center justify-center rounded-full bg-[#F2F7F4] text-[#52946B]">
+      <div className="flex size-16 items-center justify-center rounded-full bg-brand-50 text-brand-700">
         <Folder size={32} strokeWidth={2} aria-hidden />
       </div>
 
-      <h2 className="mt-5 text-[24px] font-bold text-[#4A8B63] tracking-tight">
+      <h2 className="mt-5 text-2xl font-bold text-brand-800 tracking-tight">
         Nothing has been shared with you yet
       </h2>
 
-      <p className="mt-2.5 max-w-xl text-[15px] leading-relaxed text-[#5F856E]">
+      <p className="mt-2.5 max-w-xl text-base leading-relaxed text-muted">
         Evidence will appear here when someone explicitly shares it with you.
         You can only view items you have permission to access.
       </p>
@@ -76,9 +76,9 @@ export function EmptySharedState() {
       <div className="mt-6">
         <Link
           href="/vault"
-          className="inline-flex items-center justify-center rounded-full bg-[#52946B] px-6 py-2.5 text-[14px] font-bold text-white shadow-xs transition-colors hover:bg-[#437C58]"
+          className="inline-flex items-center justify-center rounded-full bg-brand-600 px-6 py-2.5 text-sm font-bold text-white shadow-xs transition-colors hover:bg-brand-700"
         >
-          Go to My Evidences
+          Go to my evidence
         </Link>
       </div>
     </div>
@@ -92,26 +92,26 @@ export function AccessRevokedState() {
   const router = useRouter();
 
   return (
-    <div className="relative flex flex-col items-center justify-center rounded-[24px] border-[2px] border-[#52946B] bg-white p-12 text-center shadow-xs">
+    <div className="relative flex flex-col items-center justify-center rounded-2xl border-2 border-brand-500 bg-card p-12 text-center shadow-xs">
       <button
         type="button"
         aria-label="Refresh"
         onClick={() => router.refresh()}
-        className="absolute top-6 right-6 flex size-9 items-center justify-center rounded-full bg-[#52946B] text-white shadow-xs transition-colors hover:bg-[#437C58]"
+        className="absolute top-6 right-6 flex size-9 items-center justify-center rounded-full bg-brand-600 text-white shadow-xs transition-colors hover:bg-brand-700"
         title="Refresh"
       >
         <RefreshCcw size={18} strokeWidth={2.25} aria-hidden />
       </button>
 
-      <div className="flex size-16 items-center justify-center rounded-full bg-[#F2F7F4] text-[#52946B]">
+      <div className="flex size-16 items-center justify-center rounded-full bg-brand-50 text-brand-700">
         <FileX size={32} strokeWidth={2} aria-hidden />
       </div>
 
-      <h2 className="mt-5 text-[24px] font-bold text-[#4A8B63] tracking-tight">
+      <h2 className="mt-5 text-2xl font-bold text-brand-800 tracking-tight">
         This shared item is no longer available
       </h2>
 
-      <p className="mt-2.5 max-w-xl text-[15px] leading-relaxed text-[#5F856E]">
+      <p className="mt-2.5 max-w-xl text-base leading-relaxed text-muted">
         Your permission to view this item may have changed. Its content and
         details are not shown to protect the owner&apos;s privacy.
       </p>
@@ -119,7 +119,7 @@ export function AccessRevokedState() {
       <div className="mt-6">
         <Link
           href="/vault?tab=shared"
-          className="inline-flex items-center justify-center rounded-full bg-[#52946B] px-6 py-2.5 text-[14px] font-bold text-white shadow-xs transition-colors hover:bg-[#427A56]"
+          className="inline-flex items-center justify-center rounded-full bg-brand-600 px-6 py-2.5 text-sm font-bold text-white shadow-xs transition-colors hover:bg-brand-700"
         >
           Back to shared evidence
         </Link>

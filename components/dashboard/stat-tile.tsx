@@ -15,20 +15,20 @@ const VARIANTS: Record<
   }
 > = {
   amber: {
-    label: "text-[#B47504]",
-    note: "text-[#D97706]/85",
-    value: "text-[#B47504]",
-    iconBg: "bg-amber-50",
-    iconColor: "text-amber-500",
+    label: "text-escalated-fg",
+    note: "text-escalated-fg/85",
+    value: "text-escalated-fg",
+    iconBg: "bg-escalated-bg",
+    iconColor: "text-escalated-solid",
     iconRing: "ring-amber-200",
   },
   coral: {
-    label: "text-[#D94F4F]",
-    note: "text-[#E05252]/85",
-    value: "text-[#D94F4F]",
-    iconBg: "bg-red-50",
-    iconColor: "text-red-400",
-    iconRing: "ring-red-200",
+    label: "text-brand-800",
+    note: "text-brand-700/85",
+    value: "text-brand-800",
+    iconBg: "bg-brand-100",
+    iconColor: "text-brand-700",
+    iconRing: "ring-brand-200",
   },
   green: {
     label: "text-brand-700",
