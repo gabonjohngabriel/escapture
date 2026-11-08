@@ -1,13 +1,22 @@
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Search } from "lucide-react";
-import Link from "next/link";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { buttonClass } from "@/components/ui/button";
+import { FocusLink } from "@/components/ui/search-focus";
 import { cn } from "@/lib/cn";
+
+export { TableSearch } from "./table-search";
 
 // The reviewer and administrator tables: a `subtle` header row, 44px rows, hover
 // brand-50, no zebra striping. On a narrow screen the table scrolls sideways
 // inside its own box; the page never does.
 
-export const th = "px-4 py-3 text-left text-[13px] leading-[18px] font-semibold whitespace-nowrap text-muted";
+export const th =
+  "px-4 py-3 text-left text-[13px] leading-[18px] font-semibold whitespace-nowrap text-muted";
 export const td = "h-11 px-4 py-2 align-middle text-sm leading-5";
 
 export function TableBox({
@@ -35,7 +44,8 @@ export const headRow = "border-b border-border bg-subtle";
 export const bodyRow =
   "relative border-b border-border transition-colors duration-150 last:border-b-0 focus-within:bg-brand-50 hover:bg-brand-50";
 /** Put on the row's main link: its ::after covers the row, so the whole row opens it. */
-export const rowLink = "font-semibold text-ink after:absolute after:inset-0 after:content-[''] hover:underline";
+export const rowLink =
+  "font-semibold text-ink after:absolute after:inset-0 after:content-[''] hover:underline";
 
 /** A column header that sorts. The link flips the direction; aria-sort says which way it is now. */
 export function SortHeader({
@@ -50,54 +60,36 @@ export function SortHeader({
   direction: "ascending" | "descending" | null;
   align?: "left" | "right";
 }) {
-  const Icon = direction === "ascending" ? ArrowUp : direction === "descending" ? ArrowDown : ArrowUpDown;
+  const Icon =
+    direction === "ascending"
+      ? ArrowUp
+      : direction === "descending"
+        ? ArrowDown
+        : ArrowUpDown;
   return (
-    <th scope="col" aria-sort={direction ?? "none"} className={cn(th, align === "right" && "text-right")}>
-      <Link href={href} className="inline-flex items-center gap-1 rounded-sm py-1 hover:text-brand-800">
+    <th
+      scope="col"
+      aria-sort={direction ?? "none"}
+      className={cn(th, align === "right" && "text-right")}
+    >
+      <FocusLink
+        href={href}
+        className="inline-flex items-center gap-1 rounded-sm py-1 hover:text-brand-800"
+      >
         {label}
-        <Icon size={14} strokeWidth={1.75} aria-hidden className={direction ? "text-brand-700" : undefined} />
+        <Icon
+          size={14}
+          strokeWidth={1.75}
+          aria-hidden
+          className={direction ? "text-brand-700" : undefined}
+        />
         <span className="sr-only">
-          {direction ? `, sorted ${direction}. Activate to reverse.` : ". Activate to sort."}
+          {direction
+            ? `, sorted ${direction}. Activate to reverse.`
+            : ". Activate to sort."}
         </span>
-      </Link>
+      </FocusLink>
     </th>
-  );
-}
-
-/** A search box that filters the list in the address. `keep` carries the other filters along. */
-export function TableSearch({
-  action,
-  label,
-  value,
-  keep = {},
-  className,
-}: {
-  action: string;
-  label: string;
-  value: string;
-  keep?: Record<string, string | undefined>;
-  className?: string;
-}) {
-  return (
-    <form role="search" action={action} method="get" className={cn("relative", className)}>
-      {Object.entries(keep).map(([name, v]) => (v ? <input key={name} type="hidden" name={name} value={v} /> : null))}
-      <Search
-        size={16}
-        strokeWidth={1.75}
-        aria-hidden
-        className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted"
-      />
-      <input
-        key={value}
-        type="search"
-        name="q"
-        defaultValue={value}
-        aria-label={label}
-        placeholder={label}
-        maxLength={120}
-        className="h-10 w-full rounded-md border border-border-strong bg-card pr-3 pl-[38px] text-[15px] leading-5 text-ink placeholder:text-muted"
-      />
-    </form>
   );
 }
 
@@ -115,22 +107,39 @@ export function Pagination({
   unit: string;
 }) {
   if (pages <= 1) return null;
-  const step = (to: number, label: string, Icon: typeof ChevronLeft, before: boolean) =>
+  const step = (
+    to: number,
+    label: string,
+    Icon: typeof ChevronLeft,
+    before: boolean,
+  ) =>
     to >= 1 && to <= pages ? (
-      <Link href={hrefFor(to)} className={buttonClass("secondary", "h-9 px-3 text-sm")}>
+      <FocusLink
+        href={hrefFor(to)}
+        className={buttonClass("secondary", "h-9 px-3 text-sm")}
+      >
         {before && <Icon size={16} strokeWidth={1.75} aria-hidden />}
         {label}
         {!before && <Icon size={16} strokeWidth={1.75} aria-hidden />}
-      </Link>
+      </FocusLink>
     ) : (
-      <span aria-disabled className={buttonClass("secondary", "h-9 cursor-not-allowed border-transparent bg-disabled-bg px-3 text-sm text-disabled-fg hover:bg-disabled-bg")}>
+      <span
+        aria-disabled
+        className={buttonClass(
+          "secondary",
+          "h-9 cursor-not-allowed border-transparent bg-disabled-bg px-3 text-sm text-disabled-fg hover:bg-disabled-bg",
+        )}
+      >
         {before && <Icon size={16} strokeWidth={1.75} aria-hidden />}
         {label}
         {!before && <Icon size={16} strokeWidth={1.75} aria-hidden />}
       </span>
     );
   return (
-    <nav aria-label="Pages" className="flex flex-wrap items-center justify-between gap-3">
+    <nav
+      aria-label="Pages"
+      className="flex flex-wrap items-center justify-between gap-3"
+    >
       <p className="tnum text-sm leading-5 text-muted">
         Page {page} of {pages} · {total} {unit}
       </p>
