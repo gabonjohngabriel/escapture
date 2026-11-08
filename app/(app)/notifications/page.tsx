@@ -1,9 +1,16 @@
 import { Bell } from "lucide-react";
+import { PageToolbar, PageToolbarSearch } from "@/components/ui/page-toolbar";
+import { PillTabs } from "@/components/ui/pill-tabs";
 import { MarkAllRead } from "@/components/layout/notification-actions";
 import { NotificationCard } from "@/components/layout/notification-row";
 import { EmptyState } from "@/components/ui/feedback";
-import { PageToolbar, PageToolbarSearch } from "@/components/ui/page-toolbar";
-import { PillTabs } from "@/components/ui/pill-tabs";
+import {
+    ListSkeleton,
+    SearchFocusArea,
+    SearchFocusProvider,
+} from "@/components/ui/search-focus";
+import { SearchEmptyState } from "@/components/ui/search-empty-state";
+import { SearchResultsSummary } from "@/components/ui/search-results-summary";
 import { pageUser } from "@/server/page-auth";
 import { listNotifications } from "@/server/services/notifications";
 
@@ -17,9 +24,10 @@ export default async function NotificationsPage({
     const params = await searchParams;
     const tabKey =
         (Array.isArray(params.tab) ? params.tab[0] : params.tab) ?? "all";
-    const q = (Array.isArray(params.q) ? params.q[0] : (params.q ?? ""))
-        .trim()
-        .toLowerCase();
+    const rawQ = (
+        Array.isArray(params.q) ? params.q[0] : (params.q ?? "")
+    ).trim();
+    const q = rawQ.toLowerCase();
 
     const { items, unreadCount } = await listNotifications(user);
 
@@ -52,6 +60,7 @@ export default async function NotificationsPage({
         filtered = filtered.filter((n) => n.type.startsWith("case_"));
     }
 
+    const tabTotal = filtered.length;
     if (q) {
         filtered = filtered.filter(
             (n) =>
@@ -84,61 +93,81 @@ export default async function NotificationsPage({
                 {unreadCount > 0 && <MarkAllRead />}
             </div>
 
-            {/* Toolbar */}
-            <PageToolbar>
-                <PillTabs
-                    variant="white"
-                    label="Notification tabs"
-                    tabs={tabs.map((t) => ({
-                        key: t.key,
-                        label: t.label,
-                        count: t.count,
-                        active: tabKey === t.key,
-                        href:
-                            t.key === "all"
-                                ? "/notifications"
-                                : `/notifications?tab=${t.key}`,
-                    }))}
-                />
+            <SearchFocusProvider>
+                {/* Toolbar */}
+                <PageToolbar>
+                    <PillTabs
+                        variant="white"
+                        label="Notification tabs"
+                        tabs={tabs.map((t) => ({
+                            key: t.key,
+                            label: t.label,
+                            count: t.count,
+                            active: tabKey === t.key,
+                            href:
+                                t.key === "all"
+                                    ? "/notifications"
+                                    : `/notifications?tab=${t.key}`,
+                        }))}
+                    />
 
-                <PageToolbarSearch
-                    action="/notifications"
-                    defaultValue={q}
-                    placeholder="Search notifications..."
-                    hiddenFields={
-                        tabKey !== "all" ? { tab: tabKey } : undefined
-                    }
-                />
-            </PageToolbar>
+                    <PageToolbarSearch
+                        action="/notifications"
+                        defaultValue={q}
+                        placeholder="Search notifications..."
+                        hiddenFields={
+                            tabKey !== "all" ? { tab: tabKey } : undefined
+                        }
+                    />
+                </PageToolbar>
 
-            {/* Date Header */}
-            <div className="pt-2">
-                <h2 className="text-sm font-semibold text-muted">
-                    {formattedToday}
-                </h2>
-            </div>
+                <SearchFocusArea
+                    fallback={<ListSkeleton />}
+                    className="flex flex-col gap-5">
+                    {(q || tabKey !== "all") && tabTotal > 0 && (
+                        <SearchResultsSummary
+                            shown={filtered.length}
+                            total={tabTotal}
+                            query={rawQ}
+                            clearHref="/notifications"
+                        />
+                    )}
+                    {/* Date Header */}
+                    <div className="pt-2">
+                        <h2 className="text-sm font-semibold text-muted">
+                            {formattedToday}
+                        </h2>
+                    </div>
 
-            {/* Notifications List */}
-            {items.length === 0 ? (
-                <EmptyState
-                    icon={<Bell size={24} strokeWidth={1.75} />}
-                    title="No notifications yet">
-                    You will receive updates here when evidence or reports are
-                    shared with you.
-                </EmptyState>
-            ) : filtered.length === 0 ? (
-                <EmptyState
-                    icon={<Bell size={24} strokeWidth={1.75} />}
-                    title="No notifications in this view">
-                    There are no items matching this filter.
-                </EmptyState>
-            ) : (
-                <div className="flex flex-col gap-3.5">
-                    {filtered.map((n) => (
-                        <NotificationCard key={n.id} n={n} role={user.role} />
-                    ))}
-                </div>
-            )}
+                    {/* Notifications List */}
+                    {items.length === 0 ? (
+                        <EmptyState
+                            icon={<Bell size={24} strokeWidth={1.75} />}
+                            title="No notifications yet">
+                            You will receive updates here when evidence or
+                            reports are shared with you.
+                        </EmptyState>
+                    ) : filtered.length === 0 ? (
+                        <SearchEmptyState
+                            title="No notifications matched your filters"
+                            clearHref="/notifications"
+                            clearLabel="Clear filters">
+                            Try adjusting your search terms or view a different
+                            tab.
+                        </SearchEmptyState>
+                    ) : (
+                        <div className="flex flex-col gap-3.5">
+                            {filtered.map((n) => (
+                                <NotificationCard
+                                    key={n.id}
+                                    n={n}
+                                    role={user.role}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </SearchFocusArea>
+            </SearchFocusProvider>
         </div>
     );
 }

@@ -1,10 +1,16 @@
 import { FolderOpen } from "lucide-react";
-import Link from "next/link";
 import { CreateReportButton } from "@/components/cases/case-actions";
 import { ReportCardsGrid } from "@/components/cases/report-cards-grid";
 import { ReportSort } from "@/components/cases/report-sort";
 import { PageToolbar, PageToolbarSearch } from "@/components/ui/page-toolbar";
 import { PillTabs } from "@/components/ui/pill-tabs";
+import {
+    CardsGridSkeleton,
+    SearchFocusArea,
+    SearchFocusProvider,
+} from "@/components/ui/search-focus";
+import { SearchEmptyState } from "@/components/ui/search-empty-state";
+import { SearchResultsSummary } from "@/components/ui/search-results-summary";
 import { pageUser } from "@/server/page-auth";
 import { listCases } from "@/server/services/cases";
 
@@ -31,14 +37,16 @@ export default async function CasesPage({ searchParams }: PageProps<"/cases">) {
     const all = await listCases(user);
     const params = await searchParams;
     const key = Array.isArray(params.tab) ? params.tab[0] : params.tab;
-    const q = (Array.isArray(params.q) ? params.q[0] : (params.q ?? ""))
-        .trim()
-        .toLowerCase();
+    const rawQ = (
+        Array.isArray(params.q) ? params.q[0] : (params.q ?? "")
+    ).trim();
+    const q = rawQ.toLowerCase();
     const sort = Array.isArray(params.sort)
         ? params.sort[0]
         : (params.sort ?? "updated");
 
     const tab = TABS.find((t) => t.key === key) ?? TABS[0];
+    const tabItems = all.filter((c) => tab.match(c.status));
     let items = all
         .filter((c) => tab.match(c.status))
         .filter(
@@ -94,58 +102,67 @@ export default async function CasesPage({ searchParams }: PageProps<"/cases">) {
                     </div>
                 </div>
             ) : (
-                <div className="flex flex-col gap-5">
-                    {/* Toolbar */}
-                    <PageToolbar>
-                        <PillTabs
-                            variant="white"
-                            label="Report sections"
-                            tabs={TABS.map((t) => ({
-                                key: t.key,
-                                label: t.label,
-                                count: all.filter((c) => t.match(c.status))
-                                    .length,
-                                active: t.key === tab.key,
-                                href:
-                                    t.key === "all"
-                                        ? "/cases"
-                                        : `/cases?tab=${t.key}`,
-                            }))}
-                        />
+                <SearchFocusProvider>
+                    <div className="flex flex-col gap-5">
+                        {/* Toolbar */}
+                        <PageToolbar>
+                            <PillTabs
+                                variant="white"
+                                label="Report sections"
+                                tabs={TABS.map((t) => ({
+                                    key: t.key,
+                                    label: t.label,
+                                    count: all.filter((c) => t.match(c.status))
+                                        .length,
+                                    active: t.key === tab.key,
+                                    href:
+                                        t.key === "all"
+                                            ? "/cases"
+                                            : `/cases?tab=${t.key}`,
+                                }))}
+                            />
 
-                        <PageToolbarSearch
-                            action="/cases"
-                            defaultValue={q}
-                            placeholder="Search reports..."
-                            hiddenFields={
-                                tab.key !== "all" ? { tab: tab.key } : undefined
-                            }>
-                            <ReportSort defaultValue={sort} />
-                        </PageToolbarSearch>
-                    </PageToolbar>
+                            <PageToolbarSearch
+                                action="/cases"
+                                defaultValue={q}
+                                placeholder="Search reports..."
+                                hiddenFields={
+                                    tab.key !== "all"
+                                        ? { tab: tab.key }
+                                        : undefined
+                                }>
+                                <ReportSort defaultValue={sort} />
+                            </PageToolbarSearch>
+                        </PageToolbar>
 
-                    {/* Cards Grid or Empty Filter */}
-                    {items.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-brand-500/40 bg-card p-12 text-center">
-                            <p className="text-base font-bold text-brand-800">
-                                No reports matched your filters
-                            </p>
-                            <p className="mt-1 text-sm text-muted">
-                                Try adjusting your search terms or view a
-                                different tab.
-                            </p>
-                            <div className="mt-4">
-                                <Link
-                                    href="/cases"
-                                    className="inline-flex items-center rounded-full bg-brand-600 px-5 py-2 text-sm font-semibold text-white hover:bg-brand-700">
-                                    Clear filters
-                                </Link>
-                            </div>
-                        </div>
-                    ) : (
-                        <ReportCardsGrid items={items} />
-                    )}
-                </div>
+                        {/* Cards Grid or Empty Filter */}
+                        <SearchFocusArea
+                            fallback={<CardsGridSkeleton />}
+                            className="flex flex-col gap-5">
+                            {(q || tab.key !== "all") && tabItems.length > 0 && (
+                                <SearchResultsSummary
+                                    shown={items.length}
+                                    total={tabItems.length}
+                                    query={rawQ}
+                                    clearHref="/cases"
+                                />
+                            )}
+                            {items.length === 0 ? (
+                                <>
+                                    <SearchEmptyState
+                                        title="No reports matched your filters"
+                                        clearHref="/cases"
+                                        clearLabel="Clear filters">
+                                        Try adjusting your search terms or view
+                                        a different tab.
+                                    </SearchEmptyState>
+                                </>
+                            ) : (
+                                <ReportCardsGrid items={items} />
+                            )}
+                        </SearchFocusArea>
+                    </div>
+                </SearchFocusProvider>
             )}
         </div>
     );
