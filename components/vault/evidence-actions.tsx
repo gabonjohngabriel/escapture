@@ -1,6 +1,6 @@
 "use client";
 
-import { RefreshCw } from "lucide-react";
+import { CheckCircle2, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -32,17 +32,33 @@ export function VerifyNow({ evidenceId }: { evidenceId: string }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <Button variant="soft" onClick={verify} loading={loading}>
-        {!loading && <RefreshCw size={16} strokeWidth={1.75} aria-hidden />}
-        Verify now
-      </Button>
+      <button
+        type="button"
+        onClick={verify}
+        disabled={loading}
+        className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-brand-600/30 bg-brand-50 px-4 text-xs font-bold text-brand-800 shadow-2xs transition-all hover:bg-brand-100 hover:text-brand-900 focus-visible:outline-2 focus-visible:outline-brand-600 cursor-pointer disabled:opacity-50"
+      >
+        <RefreshCw
+          size={14}
+          strokeWidth={2.25}
+          className={loading ? "animate-spin text-brand-700" : "text-brand-700"}
+          aria-hidden
+        />
+        <span>{loading ? "Recomputing SHA-256 hash..." : "Run live hash verification"}</span>
+      </button>
+
       <div aria-live="polite" className="flex flex-col gap-2">
         {error && <Banner tone="attention">{error}</Banner>}
         {result?.match && (
-          <Banner tone="success">
-            The saved file matches its hash. It hasn&apos;t changed since it was captured. Checked{" "}
-            <span className="tnum">{formatDateTime(result.checkedAt)}</span>.
-          </Banner>
+          <div className="flex items-start gap-2.5 rounded-xl border border-brand-500/30 bg-brand-50 p-3 text-xs text-brand-900">
+            <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-brand-600" aria-hidden />
+            <div className="min-w-0">
+              <p className="font-bold text-brand-800">Hash match verified (100% authentic)</p>
+              <p className="mt-0.5 text-muted leading-relaxed">
+                Storage bytes re-hashed on server at <span className="tnum font-medium text-ink">{formatDateTime(result.checkedAt)}</span>. Byte-for-byte identical to the SHA-256 sealed at capture.
+              </p>
+            </div>
+          </div>
         )}
         {result && !result.match && (
           <Banner tone="attention">

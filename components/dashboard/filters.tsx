@@ -22,7 +22,7 @@ export function FilterChip({
         "inline-flex h-10 items-center gap-1.5 rounded-full border px-4 text-sm leading-5 font-semibold whitespace-nowrap transition-colors duration-150",
         on
           ? "border-transparent bg-brand-100 text-brand-800"
-          : "border-border-strong bg-card text-ink hover:bg-brand-50",
+          : "border-border bg-card text-muted hover:border-brand-500/40 hover:bg-brand-50 hover:text-ink",
       )}
     >
       {on && <Check size={14} strokeWidth={1.75} aria-hidden />}
@@ -56,7 +56,7 @@ export function ParamSelect({
       <select
         value={value}
         onChange={(e) => navigate(hrefs[e.target.value])}
-        className="h-10 rounded-md border border-border-strong bg-card px-3 text-[15px] leading-5 font-normal text-ink"
+        className="h-10 rounded-full border border-border bg-card px-4 text-sm font-medium text-ink transition-colors focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>

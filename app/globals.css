@@ -320,3 +320,16 @@ dialog.drawer[open] {
         transition: none !important;
     }
 }
+
+/* Trauma-informed Privacy Blur: only flagged capture preview screenshots */
+[data-privacy-blur="true"] [data-privacy-sensitive="true"] iframe {
+    filter: blur(14px);
+    transition: filter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+}
+
+[data-privacy-blur="true"] [data-privacy-sensitive="true"]:hover iframe,
+[data-privacy-blur="true"] [data-privacy-sensitive="true"]:focus-within iframe {
+    filter: blur(0);
+    user-select: auto;
+}

@@ -1,7 +1,10 @@
+"use client";
+
 import {
   ArrowRight,
   ArrowUpRight,
   Bell,
+  Check,
   CircleCheck,
   Eye,
   FileCheck2,
@@ -12,6 +15,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { api } from "@/lib/client-api";
 import { cn } from "@/lib/cn";
 import { formatDateTime, timeAgo } from "@/lib/format";
 
@@ -52,7 +58,7 @@ const kinds: Record<string, { Icon: LucideIcon; tone: Tone }> = {
 
 export function notificationHref(
   n: Pick<NotificationItem, "caseId" | "evidenceId">,
-  role: string
+  role: string,
 ): string | null {
   if (n.caseId) return role === "student" ? `/cases/${n.caseId}` : `/review/${n.caseId}`;
   return n.evidenceId ? `/vault/${n.evidenceId}` : null;
@@ -72,15 +78,28 @@ export function NotificationRow({
   compact?: boolean;
   onNavigate?: () => void;
 }) {
+  const router = useRouter();
+  const [read, setRead] = useState(Boolean(n.readAt));
   const { Icon, tone } = kinds[n.type] ?? { Icon: Bell, tone: "plain" as const };
-  const unread = !n.readAt;
+  const unread = !read;
   const href = notificationHref(n, role);
+
+  const handleClick = () => {
+    onNavigate?.();
+    if (unread) {
+      setRead(true);
+      api("/api/notifications/read", { body: { ids: [n.id] } }).catch(() => {});
+      router.refresh();
+    }
+  };
+
   const className = cn(
     "grid grid-cols-[32px_minmax(0,1fr)_8px] gap-3",
     compact ? "px-4 py-3" : "px-[var(--card-pad)] py-4",
     unread && "bg-brand-50",
-    href && "hover:bg-brand-50"
+    href && "hover:bg-brand-50",
   );
+
   const content = (
     <>
       <span aria-hidden className={cn("grid size-8 place-items-center rounded-full", tones[tone])}>
@@ -91,7 +110,7 @@ export function NotificationRow({
           className={cn(
             "block text-ink",
             compact ? "text-sm leading-5" : "leading-6",
-            unread && !compact && "font-semibold"
+            unread && !compact && "font-semibold",
           )}
         >
           {n.title}
@@ -111,7 +130,7 @@ export function NotificationRow({
 
   if (href) {
     return (
-      <Link href={href} onClick={onNavigate} className={className}>
+      <Link href={href} onClick={handleClick} className={className}>
         {content}
       </Link>
     );
@@ -120,7 +139,7 @@ export function NotificationRow({
 }
 
 /**
- * Green Card version matching Figma node 44:1820
+ * Green Card version matching Figma node 44:1820 with individual read/unread dismissal
  */
 export function NotificationCard({
   n,
@@ -129,24 +148,49 @@ export function NotificationCard({
   n: NotificationItem;
   role: string;
 }) {
+  const router = useRouter();
+  const [read, setRead] = useState(Boolean(n.readAt));
   const { Icon } = kinds[n.type] ?? { Icon: Bell };
-  const unread = !n.readAt;
+  const unread = !read;
   const href = notificationHref(n, role) ?? "/vault";
+
+  const markThisRead = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setRead(true);
+    api("/api/notifications/read", { body: { ids: [n.id] } })
+      .then(() => router.refresh())
+      .catch(() => {});
+  };
+
+  const handleActionClick = () => {
+    if (unread) {
+      setRead(true);
+      api("/api/notifications/read", { body: { ids: [n.id] } }).catch(() => {});
+      router.refresh();
+    }
+  };
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border-2 border-brand-500 bg-card p-5 shadow-xs transition-all sm:flex-row sm:items-center sm:justify-between sm:gap-4 hover:shadow-md">
-      <div className="flex items-start gap-4 sm:items-center">
+      <div className="flex items-start gap-4 sm:items-center min-w-0 flex-1">
         <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-700">
           <Icon size={22} strokeWidth={2} />
         </div>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-base font-bold text-ink">{n.title}</h3>
             {unread && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-escalated-bg px-2.5 py-0.5 text-xs font-semibold text-escalated-fg">
+              <button
+                type="button"
+                onClick={markThisRead}
+                title="Mark this notification as read"
+                className="group inline-flex items-center gap-1 rounded-full bg-escalated-bg px-2.5 py-0.5 text-xs font-semibold text-escalated-fg transition-colors hover:bg-escalated-bg/80 cursor-pointer"
+              >
                 <span className="size-1.5 rounded-full bg-escalated-solid" />
-                Unread
-              </span>
+                <span>Unread</span>
+                <Check size={12} strokeWidth={2.5} className="ml-0.5 opacity-60 group-hover:opacity-100" />
+              </button>
             )}
           </div>
           {n.body && <p className="text-sm leading-relaxed text-muted">{n.body}</p>}
@@ -159,6 +203,7 @@ export function NotificationCard({
         </span>
         <Link
           href={href}
+          onClick={handleActionClick}
           className="inline-flex items-center gap-1 text-xs font-bold text-brand-700 hover:text-brand-800 hover:underline"
         >
           <span>{n.caseId ? (role === "student" ? "View report" : "View case") : "View evidence"}</span>

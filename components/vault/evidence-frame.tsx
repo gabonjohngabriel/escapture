@@ -1,5 +1,6 @@
 "use client";
 
+import { EyeOff } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
 
 // The frame may not run scripts and this page may not look inside it, so its
@@ -32,11 +33,13 @@ export function EvidenceFrame({
   src,
   title,
   size,
+  sensitive = false,
 }: {
   src: string;
   title: string;
   /** Size of the captured area on the original page, in CSS pixels. Missing on older captures. */
   size?: { width: number; height: number; fit?: { w: number; h: number }[] };
+  sensitive?: boolean;
 }) {
   const ref = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState<number | null>(null);
@@ -75,15 +78,31 @@ export function EvidenceFrame({
   }, [size]);
 
   return (
-    <iframe
-      ref={ref}
-      sandbox=""
-      src={src}
-      title={title}
-      referrerPolicy="no-referrer"
-      // Until measured (and without JavaScript): as tall as the window allows.
-      style={{ height: height ?? `max(${MIN_HEIGHT}px, calc(100vh - ${MARGIN_AROUND}px))` }}
-      className="block w-full rounded-md border border-border bg-white"
-    />
+    <div
+      data-privacy-sensitive={sensitive ? "true" : undefined}
+      className="group/frame relative overflow-hidden rounded-md"
+    >
+      <iframe
+        ref={ref}
+        sandbox=""
+        src={src}
+        title={title}
+        referrerPolicy="no-referrer"
+        // Until measured (and without JavaScript): as tall as the window allows.
+        style={{ height: height ?? `max(${MIN_HEIGHT}px, calc(100vh - ${MARGIN_AROUND}px))` }}
+        className="block w-full rounded-md border border-border bg-white"
+      />
+      {sensitive && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-3 flex justify-center opacity-0 transition-opacity duration-200 [html[data-privacy-blur='true']_&]:opacity-100 [html[data-privacy-blur='true']_.group\/frame:hover_&]:opacity-0"
+        >
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-ink/80 px-3 py-1 text-xs font-medium text-white shadow-md backdrop-blur-xs">
+            <EyeOff size={13} aria-hidden />
+            Flagged capture blurred · Hover to reveal
+          </span>
+        </div>
+      )}
+    </div>
   );
 }

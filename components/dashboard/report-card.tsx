@@ -1,9 +1,21 @@
 "use client";
 
-import { StickyNote, Users } from "lucide-react";
+import { AlertTriangle, StickyNote, Users } from "lucide-react";
 import Link from "next/link";
+import { statusLabel, type CaseStatus } from "@/components/ui/badge";
 import { cn } from "@/lib/cn";
 import type { ReportDetailData } from "./report-details-dialog";
+
+const VALID_STATUSES: ReadonlySet<string> = new Set([
+  "draft",
+  "escalated",
+  "under_review",
+  "closed",
+]);
+
+function eyebrowLabel(status: string): string {
+  return VALID_STATUSES.has(status) ? statusLabel(status as CaseStatus) : status;
+}
 
 /**
  * Report Card component adhering strictly to the Figma 2x2 grid design.
@@ -24,19 +36,19 @@ export function ReportCard({
       ? report.assignees.map((a) => a.name).join(", ")
       : "Unassigned";
 
-  const sharingText =
-    report.flaggedWords && report.flaggedWords.length > 0
-      ? `${report.flaggedWords.length} Flagged`
-      : report.evidenceCount
-        ? `${report.evidenceCount} Flagged`
-        : "None";
+  const evidenceCount = report.evidenceCount ?? 0;
+  const evidenceText =
+    evidenceCount > 0
+      ? `${evidenceCount} ${evidenceCount === 1 ? "item" : "items"}`
+      : "None";
 
+  const flaggedCount = report.flaggedWords?.length ?? 0;
   const kindBadge = report.kindLabel ?? "Posts";
 
   return (
     <article
       className={cn(
-        "flex flex-col justify-between overflow-hidden rounded-2xl border border-brand-500/40 bg-card shadow-soft transition-all duration-150 hover:border-brand-500 hover:shadow-md",
+        "flex flex-col justify-between overflow-hidden rounded-2xl border-2 border-brand-500 bg-card shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
         className,
       )}
     >
@@ -50,7 +62,9 @@ export function ReportCard({
             <Users size={16} strokeWidth={2} className="text-white" />
           </div>
           <div className="min-w-0 flex flex-col">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-white/80">Group</span>
+            <span className="text-[11px] font-medium uppercase tracking-wider text-white/80">
+              {eyebrowLabel(report.status)}
+            </span>
             <h3 className="truncate text-base font-bold leading-tight text-white">{report.title}</h3>
           </div>
         </div>
@@ -64,14 +78,14 @@ export function ReportCard({
       {/* Metadata 3-Column Body */}
       <div className="grid grid-cols-3 gap-2 px-5 py-4 text-left">
         <div className="flex flex-col min-w-0">
-          <span className="text-xs font-bold text-brand-700">Reporter</span>
+          <span className="text-xs font-bold text-muted uppercase tracking-wider">Reporter</span>
           <span className="truncate text-sm font-medium text-ink mt-0.5" title={report.reporterName}>
             {report.reporterName}
           </span>
         </div>
 
         <div className="flex flex-col min-w-0">
-          <span className="text-xs font-bold text-brand-700">Assigned Reviewer</span>
+          <span className="text-xs font-bold text-muted uppercase tracking-wider">Assigned Reviewer</span>
           <span
             className={cn(
               "truncate text-sm font-medium mt-0.5",
@@ -83,18 +97,17 @@ export function ReportCard({
           </span>
         </div>
 
-        <div className="flex flex-col min-w-0">
-          <span className="text-xs font-bold text-brand-700">Sharing</span>
-          <span
-            className={cn(
-              "truncate text-sm font-medium mt-0.5",
-              report.flaggedWords && report.flaggedWords.length > 0
-                ? "text-brand-800 font-semibold"
-                : "text-ink",
-            )}
-          >
-            {sharingText}
+        <div className="flex flex-col min-w-0 items-start">
+          <span className="text-xs font-bold text-muted uppercase tracking-wider">Evidence</span>
+          <span className="truncate text-sm font-medium text-ink mt-0.5">
+            {evidenceText}
           </span>
+          {flaggedCount > 0 && (
+            <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-escalated-bg px-2 py-0.5 text-[11px] font-semibold text-escalated-fg">
+              <AlertTriangle size={11} strokeWidth={2.25} aria-hidden="true" />
+              <span>{flaggedCount} flagged</span>
+            </span>
+          )}
         </div>
       </div>
 

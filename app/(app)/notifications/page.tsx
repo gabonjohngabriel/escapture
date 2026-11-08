@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/search-focus";
 import { SearchEmptyState } from "@/components/ui/search-empty-state";
 import { SearchResultsSummary } from "@/components/ui/search-results-summary";
+import { groupByDay } from "@/lib/format";
 import { pageUser } from "@/server/page-auth";
 import { listNotifications } from "@/server/services/notifications";
 
@@ -69,12 +70,7 @@ export default async function NotificationsPage({
         );
     }
 
-    const now = new Date();
-    const formattedToday = `Today · ${now.toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-    })}`;
+    const groups = groupByDay(filtered);
 
     return (
         <div className="flex flex-col gap-6">
@@ -132,12 +128,6 @@ export default async function NotificationsPage({
                             clearHref="/notifications"
                         />
                     )}
-                    {/* Date Header */}
-                    <div className="pt-2">
-                        <h2 className="text-sm font-semibold text-muted">
-                            {formattedToday}
-                        </h2>
-                    </div>
 
                     {/* Notifications List */}
                     {items.length === 0 ? (
@@ -156,13 +146,24 @@ export default async function NotificationsPage({
                             tab.
                         </SearchEmptyState>
                     ) : (
-                        <div className="flex flex-col gap-3.5">
-                            {filtered.map((n) => (
-                                <NotificationCard
-                                    key={n.id}
-                                    n={n}
-                                    role={user.role}
-                                />
+                        <div className="flex flex-col gap-6 pt-2">
+                            {groups.map((group) => (
+                                <section
+                                    key={group.key}
+                                    className="flex flex-col gap-3.5">
+                                    <h2 className="text-sm font-semibold text-muted">
+                                        {group.label}
+                                    </h2>
+                                    <div className="flex flex-col gap-3.5">
+                                        {group.items.map((n) => (
+                                            <NotificationCard
+                                                key={n.id}
+                                                n={n}
+                                                role={user.role}
+                                            />
+                                        ))}
+                                    </div>
+                                </section>
                             ))}
                         </div>
                     )}

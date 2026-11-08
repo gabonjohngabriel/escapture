@@ -1,16 +1,28 @@
 "use client";
 
-import { Check, Lock, MessageCircle, MoreHorizontal, Plus, Share2, Smile, ThumbsUp, X } from "lucide-react";
+import { Check, Clock, FileCheck2, Globe, Hash, Lock, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api, errorMessage } from "@/lib/client-api";
+import { formatDateTime, kindLabel } from "@/lib/format";
 
 type EvidenceItem = {
   id: string;
   label: string;
   kind: "facebook_post" | "facebook_message";
   capturedAt: Date | string;
+  sourceUrl?: string;
+  sha256: string;
 };
+
+function safeHost(url: string | undefined): string {
+  if (!url) return "";
+  try {
+    return new URL(url).host;
+  } catch {
+    return url;
+  }
+}
 
 /**
  * Create Report Modal matching Figma node 44:1439
@@ -37,6 +49,7 @@ export function CreateReportModal({
     setError(null);
     setLoading(false);
     setShowPicker(false);
+    setSelectedIds(new Set());
   };
 
   const handleClose = () => {
@@ -51,9 +64,6 @@ export function CreateReportModal({
       .then((res) => {
         if (!active) return;
         setEvidenceList(res.items || []);
-        if (res.items && res.items.length > 0) {
-          setSelectedIds((prev) => (prev.size === 0 ? new Set([res.items[0].id]) : prev));
-        }
       })
       .catch(() => {});
     return () => {
@@ -201,71 +211,82 @@ export function CreateReportModal({
                 Captured evidence <span className="text-brand-700">*</span>
               </span>
               <span className="text-xs font-medium text-muted">
-                {selectedIds.size > 0 ? `${selectedIds.size} selected` : "1 selected"}
+                {`${selectedIds.size} selected`}
               </span>
             </div>
 
-            {/* Dark Facebook Post Style Preview Card (Figma node 44:1439) */}
-            <div className="mt-2.5 overflow-hidden rounded-[20px] bg-[#242526] p-5 text-white shadow-md font-sans">
-              {/* Post Author Row */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-full bg-[#3A3B3C] border border-white/20 overflow-hidden flex items-center justify-center text-white font-bold text-sm">
-                    {activeEvidence?.label ? activeEvidence.label.slice(0, 1).toUpperCase() : "🦅"}
-                  </div>
-                  <div>
-                    <p className="text-[14px] font-bold text-white leading-tight">
-                      {activeEvidence?.label ? (activeEvidence.label.length > 25 ? activeEvidence.label.slice(0, 25) : activeEvidence.label) : "HopefulFalcon1903"}
-                    </p>
-                    <p className="text-[12px] text-[#B0B3B8] flex items-center gap-1 mt-0.5">
-                      <span>1h</span>
-                      <span>·</span>
-                      <span>🌐</span>
-                    </p>
-                  </div>
-                </div>
-                <button type="button" aria-label="More options" className="text-[#B0B3B8] hover:text-white">
-                  <MoreHorizontal size={20} />
-                </button>
-              </div>
-
-              {/* Post Content */}
-              <div className="my-4 text-[14px] leading-relaxed text-white">
-                <p className="font-semibold mb-1">PTPA</p>
-                <p>
-                  HOY MAYA! HUWAG KANG MAGPAPAKITA SA AMIN MAMAYA KUNG HINDI SASABUNUTAN KITA!
+            {evidenceList.length === 0 ? (
+              <div className="mt-2.5 flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-subtle/40 p-6 text-center">
+                <FileCheck2 size={24} className="text-muted" aria-hidden />
+                <p className="text-sm font-semibold text-ink">
+                  Your vault has no captures yet.
+                </p>
+                <p className="text-xs text-muted max-w-xs">
+                  Use the Escapture extension to capture a post or message before attaching it to a report.
                 </p>
               </div>
-
-              {/* Reaction Buttons Row */}
-              <div className="flex items-center justify-around border-t border-b border-[#3E4042] py-2 text-[#B0B3B8] text-[13px] font-medium">
-                <button type="button" className="flex items-center gap-1.5 hover:text-white">
-                  <ThumbsUp size={16} />
-                  <span>Like</span>
-                </button>
-                <button type="button" className="flex items-center gap-1.5 hover:text-white">
-                  <MessageCircle size={16} />
-                  <span>Comment</span>
-                </button>
-                <button type="button" className="flex items-center gap-1.5 hover:text-white">
-                  <Share2 size={16} />
-                  <span>Share</span>
-                </button>
-              </div>
-
-              {/* Reply Box Mockup */}
-              <div className="mt-3 flex items-center gap-2.5">
-                <div className="size-8 rounded-full bg-[#3A3B3C] border border-white/20 flex items-center justify-center text-xs font-bold text-white shrink-0">
-                  M
-                </div>
-                <div className="flex-1 flex items-center justify-between rounded-full bg-[#3A3B3C] px-4 py-2 text-[13px] text-[#B0B3B8]">
-                  <span>Answer as Maya</span>
-                  <div className="flex items-center gap-2 text-[#B0B3B8]">
-                    <Smile size={16} />
+            ) : !activeEvidence ? (
+              <button
+                type="button"
+                onClick={() => setShowPicker((p) => !p)}
+                className="mt-2.5 flex w-full items-center justify-between rounded-2xl border-2 border-dashed border-brand-500/40 bg-brand-50/50 p-4 text-left transition-colors hover:border-brand-600 hover:bg-brand-50"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-brand-700">
+                    <Plus size={18} strokeWidth={2.5} aria-hidden />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-brand-800">No evidence selected yet</p>
+                    <p className="text-xs text-muted">Click to browse captures from your vault</p>
                   </div>
                 </div>
+                <span className="text-xs font-semibold text-brand-700 underline">
+                  {showPicker ? "Hide list" : "Browse vault"}
+                </span>
+              </button>
+            ) : (
+              <div className="mt-2.5 overflow-hidden rounded-2xl border border-brand-500/40 bg-card p-4 shadow-soft">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-brand-100 px-2.5 py-0.5 text-[11px] font-semibold text-brand-800">
+                        {kindLabel(activeEvidence.kind)}
+                      </span>
+                      {selectedEvidence.length > 1 && (
+                        <span className="inline-flex items-center rounded-full bg-subtle px-2 py-0.5 text-[11px] font-semibold text-muted">
+                          +{selectedEvidence.length - 1} more
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1.5 truncate text-sm font-bold text-ink" title={activeEvidence.label}>
+                      {activeEvidence.label}
+                    </p>
+                  </div>
+                </div>
+
+                <dl className="mt-3 grid grid-cols-1 gap-1.5 border-t border-border/60 pt-2.5 text-xs text-muted sm:grid-cols-3">
+                  <div className="flex items-center gap-1.5 truncate">
+                    <Clock size={13} className="shrink-0 text-brand-700" aria-hidden />
+                    <dd className="truncate">{formatDateTime(activeEvidence.capturedAt)}</dd>
+                  </div>
+                  {activeEvidence.sourceUrl ? (
+                    <div className="flex items-center gap-1.5 truncate">
+                      <Globe size={13} className="shrink-0 text-brand-700" aria-hidden />
+                      <dd className="truncate">{safeHost(activeEvidence.sourceUrl)}</dd>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 truncate">
+                      <FileCheck2 size={13} className="shrink-0 text-brand-700" aria-hidden />
+                      <dd className="truncate">Saved capture</dd>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1.5 truncate">
+                    <Hash size={13} className="shrink-0 text-brand-700" aria-hidden />
+                    <dd className="truncate font-mono">{activeEvidence.sha256.slice(0, 12)}…</dd>
+                  </div>
+                </dl>
               </div>
-            </div>
+            )}
 
             <p className="mt-2 text-xs text-muted">
               Choose captures from your vault. Original evidence stays unchanged.
@@ -279,7 +300,13 @@ export function CreateReportModal({
                 className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-700 hover:underline"
               >
                 <Plus size={16} strokeWidth={2.5} />
-                <span>{showPicker ? "Hide evidence list" : "+ Choose more evidence"}</span>
+                <span>
+                  {showPicker
+                    ? "Hide evidence list"
+                    : selectedIds.size === 0
+                      ? "Choose evidence"
+                      : "Choose more evidence"}
+                </span>
               </button>
 
               {showPicker && (

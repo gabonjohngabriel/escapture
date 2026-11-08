@@ -43,6 +43,11 @@ export async function flagsFor(caseIds: string[]) {
   return byCase;
 }
 
+/** Bank words as a simple list, internal to the server (no actor authorization check). */
+export async function listWordsPlain(dbx: Db | Tx = db): Promise<string[]> {
+  return bank(dbx);
+}
+
 // ---- the bank, for administrators ----
 
 export async function listWords(actor: Actor) {

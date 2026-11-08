@@ -75,7 +75,7 @@ export function StatTile({
   return (
     <div
       className={cn(
-        "flex flex-col justify-between rounded-2xl border border-border/70 bg-card p-6 shadow-soft transition-all duration-150 hover:shadow-md",
+        "flex flex-col justify-between rounded-2xl border border-brand-500/30 bg-card p-6 shadow-soft transition-all duration-150 hover:shadow-md",
         className,
       )}
     >

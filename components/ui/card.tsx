@@ -45,10 +45,10 @@ export function PageHeader({
   action?: React.ReactNode;
 }) {
   return (
-    <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
-      <div className="min-w-0">
-        <h1 className="break-words">{title}</h1>
-        {description && <p className="mt-1 max-w-prose text-muted">{description}</p>}
+    <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 pt-2">
+      <div className="min-w-0 flex flex-col gap-1">
+        <h1 className="break-words text-3xl font-bold tracking-tight text-brand-500 sm:text-4xl">{title}</h1>
+        {description && <p className="max-w-prose text-base text-muted">{description}</p>}
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </header>

@@ -46,7 +46,8 @@ export function VaultCard({
                                 ? `Shared by ${item.ownerName}`
                                 : "Captured by you"}
                         </span>
-                        <h3 className="truncate text-[16px] font-bold text-white group-hover:underline tracking-tight leading-snug">
+                        <h3
+                            className="truncate text-[16px] font-bold text-white group-hover:underline tracking-tight leading-snug">
                             {item.label || "Untitled capture"}
                         </h3>
                     </div>

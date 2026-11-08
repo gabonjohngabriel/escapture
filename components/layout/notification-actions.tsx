@@ -43,11 +43,12 @@ export function NotificationsSearchForm({
 }) {
   const { isPending, navigate } = useSearchFocus();
   const [query, setQuery] = useState(defaultQuery);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
+  const [prevDefaultQuery, setPrevDefaultQuery] = useState(defaultQuery);
+  if (defaultQuery !== prevDefaultQuery) {
+    setPrevDefaultQuery(defaultQuery);
     setQuery(defaultQuery);
-  }, [defaultQuery]);
+  }
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {

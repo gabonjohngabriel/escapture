@@ -1,5 +1,3 @@
-import { FocusLink } from "@/components/ui/search-focus";
-
 export function SearchResultsSummary({
     shown,
     total,
@@ -9,13 +7,14 @@ export function SearchResultsSummary({
     shown: number;
     total: number;
     query?: string;
-    clearHref: string;
+    clearHref?: string;
 }) {
     return (
         <p aria-live="polite" className="text-sm font-medium text-muted">
             Showing <span className="tnum font-bold text-ink">{shown}</span> of{" "}
             <span className="tnum font-bold text-ink">{total}</span>
             {query && <> for “{query}”</>}
+            {clearHref && null}
         </p>
     );
 }

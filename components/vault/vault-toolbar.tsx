@@ -28,21 +28,26 @@ export function VaultToolbar({
     const { isPending, navigate } = useSearchFocus();
     const [filterOpen, setFilterOpen] = useState(false);
     const [query, setQuery] = useState(view.q ?? "");
-    const [kind, setKind] = useState<VaultView["kind"]>(view.kind ?? "");
-    const [sort, setSort] = useState<VaultView["sort"]>(view.sort ?? "");
-    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    useEffect(() => {
+    const [prevQ, setPrevQ] = useState(view.q ?? "");
+    if ((view.q ?? "") !== prevQ) {
+        setPrevQ(view.q ?? "");
         setQuery(view.q ?? "");
-    }, [view.q]);
+    }
 
-    useEffect(() => {
+    const [kind, setKind] = useState<VaultView["kind"]>(view.kind ?? "");
+    const [prevKind, setPrevKind] = useState<VaultView["kind"]>(view.kind ?? "");
+    if ((view.kind ?? "") !== prevKind) {
+        setPrevKind(view.kind ?? "");
         setKind(view.kind ?? "");
-    }, [view.kind]);
+    }
 
-    useEffect(() => {
+    const [sort, setSort] = useState<VaultView["sort"]>(view.sort ?? "");
+    const [prevSort, setPrevSort] = useState<VaultView["sort"]>(view.sort ?? "");
+    if ((view.sort ?? "") !== prevSort) {
+        setPrevSort(view.sort ?? "");
         setSort(view.sort ?? "");
-    }, [view.sort]);
+    }
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         return () => {

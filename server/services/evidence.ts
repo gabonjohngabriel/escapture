@@ -185,6 +185,7 @@ const listColumns = {
   ownerId: evidence.ownerId,
   kind: evidence.kind,
   label: evidence.label,
+  sourceUrl: evidence.sourceUrl,
   sha256: evidence.sha256,
   capturedAt: evidence.capturedAt,
   ownerName: user.name,

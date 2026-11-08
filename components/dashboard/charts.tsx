@@ -158,7 +158,7 @@ export function ActivityLogsCard({
     <section className={cn("flex flex-col gap-3", className)}>
       <h2 className="text-2xl font-bold tracking-tight text-brand-700">Activity Logs</h2>
 
-      <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-soft flex flex-col justify-between min-h-[190px]">
+      <div className="rounded-2xl border border-brand-500/30 bg-card p-5 shadow-soft flex flex-col justify-between min-h-[190px]">
         {isUnavailable ? (
           <div className="flex flex-col py-3">
             <h3 className="text-sm font-bold text-ink">Activity unavailable</h3>
@@ -278,7 +278,7 @@ export function SummaryCard({
         )}
       </div>
 
-      <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-soft flex flex-col gap-4">
+      <div className="rounded-2xl border border-brand-500/30 bg-card p-5 shadow-soft flex flex-col gap-4">
         {isUnavailable ? (
           <div className="py-2 text-xs text-muted">Summary metrics currently unavailable.</div>
         ) : (
@@ -487,12 +487,4 @@ export function ActivityFeed({ items }: { items: Activity[] }) {
   );
 }
 
-/** How to say a case's latest event in the table's "Last update" column. */
-const LAST_UPDATE: Record<string, string> = {
-  escalated: "Escalated",
-  status_changed: "Review started",
-  closed: "Closed",
-  assigned: "Reviewer assigned",
-  unassigned: "Reviewer taken off",
-};
-export const lastUpdateText = (type: string | null | undefined) => (type ? (LAST_UPDATE[type] ?? "Updated") : "");
+export { lastUpdateText } from "@/lib/format";

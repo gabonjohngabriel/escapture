@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn";
 /**
  * A client-side search box that filters a table in the address bar without
  * triggering a full browser reload or unmounting the input.
+ * Standardized on the capsule search input aesthetic.
  */
 export function TableSearch({
   action,
@@ -24,11 +25,13 @@ export function TableSearch({
 }) {
   const { isPending, navigate } = useSearchFocus();
   const [query, setQuery] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
+  if (value !== prevValue) {
+    setPrevValue(value);
     setQuery(value);
-  }, [value]);
+  }
 
   useEffect(() => {
     return () => {
@@ -63,10 +66,10 @@ export function TableSearch({
         v ? <input key={name} type="hidden" name={name} value={v} /> : null,
       )}
       <Search
-        size={16}
-        strokeWidth={1.75}
+        size={18}
+        strokeWidth={2}
         aria-hidden
-        className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted"
+        className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-muted"
       />
       <input
         type="search"
@@ -83,13 +86,13 @@ export function TableSearch({
         aria-label={label}
         placeholder={label}
         maxLength={120}
-        className="h-10 w-full rounded-md border border-border-strong bg-card pr-8 pl-[38px] text-[15px] leading-5 text-ink placeholder:text-muted"
+        className="h-11 w-full rounded-full border border-border bg-brand-50 pr-9 pl-11 text-sm text-ink placeholder:text-muted transition-colors focus:border-brand-600 focus:bg-card focus:outline-none focus:ring-2 focus:ring-brand-600/20"
       />
       {isPending && (
         <Loader2
-          size={15}
+          size={16}
           aria-hidden
-          className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 animate-spin text-brand-600"
+          className="pointer-events-none absolute top-1/2 right-3.5 -translate-y-1/2 animate-spin text-brand-600"
         />
       )}
     </form>

@@ -9,7 +9,8 @@ import {
   td,
   th,
 } from "@/components/dashboard/data-table";
-import { FilterChip, ParamSelect } from "@/components/dashboard/filters";
+import { ActiveFilters, type ActiveFilterChip } from "@/components/dashboard/active-filters";
+import { FilterPopover, type FilterGroup } from "@/components/dashboard/filter-popover";
 import { buttonClass } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/feedback";
@@ -65,6 +66,47 @@ export default async function ArchivesPage({
   };
   const filtered = Boolean(q || mine || rev || days);
 
+  const activeChips: ActiveFilterChip[] = [];
+  if (mine) {
+    activeChips.push({ label: "Closed by me", removeHref: href({ mine: false }) });
+  }
+  if (rev) {
+    activeChips.push({ label: "Has reviewer attachments", removeHref: href({ rev: false }) });
+  }
+  if (days) {
+    activeChips.push({ label: `Last ${days} days`, removeHref: href({ days: null }) });
+  }
+
+  const filterGroups: FilterGroup[] = [
+    {
+      id: "scope",
+      label: "Reviewer Scope",
+      type: "checkbox",
+      options: [
+        {
+          label: "Closed by me",
+          href: href({ mine: !mine }),
+          active: mine,
+        },
+        {
+          label: "Has reviewer attachments",
+          href: href({ rev: !rev }),
+          active: rev,
+        },
+      ],
+    },
+    {
+      id: "period",
+      label: "Closed Period",
+      type: "segment",
+      options: [
+        { label: "Any time", href: href({ days: null }), active: !days },
+        { label: "30 days", href: href({ days: 30 }), active: days === 30 },
+        { label: "90 days", href: href({ days: 90 }), active: days === 90 },
+      ],
+    },
+  ];
+
   return (
     <>
       <PageHeader title="Case Archives" />
@@ -74,47 +116,7 @@ export default async function ArchivesPage({
           className="flex min-w-0 flex-col gap-4 [&>*]:min-w-0"
         >
           <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <FilterChip
-                label="Closed by me"
-                href={href({ mine: !mine })}
-                on={mine}
-              />
-              <FilterChip
-                label="Has reviewer attachments"
-                href={href({ rev: !rev })}
-                on={rev}
-              />
-              <ParamSelect
-                label="Closed"
-                value={days ? String(days) : "all"}
-                options={[
-                  { value: "all", label: "Any time" },
-                  { value: "30", label: "Last 30 days" },
-                  { value: "90", label: "Last 90 days" },
-                ]}
-                hrefs={{
-                  all: href({ days: null }),
-                  "30": href({ days: 30 }),
-                  "90": href({ days: 90 }),
-                }}
-              />
-              {filtered && (
-                <FocusLink
-                  href="/review/archives"
-                  className={buttonClass("ghost", "h-10 px-3 text-sm")}
-                >
-                  Clear filters
-                </FocusLink>
-              )}
-            </div>
-            <div className="flex flex-wrap items-center gap-4">
-              <p
-                aria-live="polite"
-                className="tnum text-sm leading-5 text-muted"
-              >
-                {items.length} {items.length === 1 ? "case" : "cases"}
-              </p>
+            <div className="flex flex-wrap items-center gap-3">
               <TableSearch
                 action="/review/archives"
                 label="Search cases, reporters or closing notes"
@@ -124,10 +126,22 @@ export default async function ArchivesPage({
                   rev: rev ? "1" : undefined,
                   days: days ? String(days) : undefined,
                 }}
-                className="w-full sm:w-[340px]"
+                className="w-full sm:w-[320px]"
+              />
+              <FilterPopover
+                title="Filter archives"
+                groups={filterGroups}
+                activeCount={activeChips.length}
+                clearHref="/review/archives"
               />
             </div>
           </div>
+
+          <ActiveFilters
+            countText={`${items.length} ${items.length === 1 ? "case" : "cases"}`}
+            chips={activeChips}
+            clearHref="/review/archives"
+          />
 
           <SearchFocusArea
             fallback={<TableSkeleton />}

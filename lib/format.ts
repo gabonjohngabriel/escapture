@@ -59,3 +59,76 @@ export function timeAgo(d: Date | string, now: Date = new Date()): string {
   if (days < 7) return `${days} days ago`;
   return formatDate(then);
 }
+
+export type DayBucket = "Today" | "Yesterday" | "Earlier";
+
+const longDate = new Intl.DateTimeFormat("en-US", {
+  timeZone: TZ,
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+});
+
+/**
+ * Groups items with a `createdAt` timestamp into Today, Yesterday, and Earlier
+ * based on the Manila calendar day (not a rolling 24h window).
+ * Empty buckets are omitted.
+ */
+export function groupByDay<T extends { createdAt: Date | string }>(
+  items: readonly T[],
+  now: Date = new Date(),
+): { key: DayBucket; label: string; items: T[] }[] {
+  const todayStr = dayKey(now);
+  const [y, m, d] = todayStr.split("-").map(Number);
+  const yesterdayUTC = new Date(Date.UTC(y, m - 1, d - 1, 12, 0, 0));
+  const yesterdayStr = dayKey(yesterdayUTC);
+
+  const today: T[] = [];
+  const yesterday: T[] = [];
+  const earlier: T[] = [];
+
+  for (const item of items) {
+    const k = dayKey(item.createdAt);
+    if (k === todayStr) {
+      today.push(item);
+    } else if (k === yesterdayStr) {
+      yesterday.push(item);
+    } else {
+      earlier.push(item);
+    }
+  }
+
+  const groups: { key: DayBucket; label: string; items: T[] }[] = [];
+  if (today.length > 0) {
+    groups.push({
+      key: "Today",
+      label: `Today · ${longDate.format(now)}`,
+      items: today,
+    });
+  }
+  if (yesterday.length > 0) {
+    groups.push({
+      key: "Yesterday",
+      label: `Yesterday · ${longDate.format(yesterdayUTC)}`,
+      items: yesterday,
+    });
+  }
+  if (earlier.length > 0) {
+    groups.push({
+      key: "Earlier",
+      label: "Earlier",
+      items: earlier,
+    });
+  }
+  return groups;
+}
+
+/** How to say a case's latest event in the table's "Last update" column. */
+const LAST_UPDATE: Record<string, string> = {
+  escalated: "Escalated",
+  status_changed: "Review started",
+  closed: "Closed",
+  assigned: "Reviewer assigned",
+  unassigned: "Reviewer taken off",
+};
+export const lastUpdateText = (type: string | null | undefined) => (type ? (LAST_UPDATE[type] ?? "Updated") : "");

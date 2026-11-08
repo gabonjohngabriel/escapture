@@ -59,16 +59,19 @@ export function CasesSearchForm({
 }) {
   const { isPending, navigate } = useSearchFocus();
   const [query, setQuery] = useState(defaultQuery);
-  const [sort, setSort] = useState(defaultSort);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
+  const [prevDefaultQuery, setPrevDefaultQuery] = useState(defaultQuery);
+  if (defaultQuery !== prevDefaultQuery) {
+    setPrevDefaultQuery(defaultQuery);
     setQuery(defaultQuery);
-  }, [defaultQuery]);
+  }
 
-  useEffect(() => {
+  const [sort, setSort] = useState(defaultSort);
+  const [prevDefaultSort, setPrevDefaultSort] = useState(defaultSort);
+  if (defaultSort !== prevDefaultSort) {
+    setPrevDefaultSort(defaultSort);
     setSort(defaultSort);
-  }, [defaultSort]);
+  }
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {

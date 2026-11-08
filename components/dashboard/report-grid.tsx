@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { PillTabs } from "@/components/ui/pill-tabs";
 import { CardsGridSkeleton } from "@/components/ui/search-focus";
 import { cn } from "@/lib/cn";
 import { ReportCard } from "./report-card";
@@ -63,11 +64,12 @@ export function ReportGrid({
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState(q);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
+  const [prevQ, setPrevQ] = useState(q);
+  if (q !== prevQ) {
+    setPrevQ(q);
     setSearchTerm(q);
-  }, [q]);
+  }
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {
@@ -163,64 +165,38 @@ export function ReportGrid({
 
         <div className="flex flex-wrap items-center justify-between gap-4">
           {/* Tabs: Recent Cases vs Archived Cases */}
-          <div className="inline-flex rounded-full border border-border-strong/50 bg-card p-1 shadow-xs">
-            <button
-              type="button"
-              onClick={() => handleTabChange("recent")}
-              className={cn(
-                "inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-150",
-                activeTab === "recent"
-                  ? "bg-brand-600 text-white shadow-xs"
-                  : "text-ink/80 hover:bg-brand-50 hover:text-ink",
-              )}
-            >
-              <span>Recent Cases</span>
-              <span
-                className={cn(
-                  "grid min-w-5 place-items-center rounded-full px-1.5 py-0.5 text-xs font-bold",
-                  activeTab === "recent"
-                    ? "bg-white/25 text-white"
-                    : "bg-subtle text-muted",
-                )}
-              >
-                {recentCount}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleTabChange("archived")}
-              className={cn(
-                "inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-150",
-                activeTab === "archived"
-                  ? "bg-brand-600 text-white shadow-xs"
-                  : "text-ink/80 hover:bg-brand-50 hover:text-ink",
-              )}
-            >
-              <span>Archived Cases</span>
-              <span
-                className={cn(
-                  "grid min-w-5 place-items-center rounded-full px-1.5 py-0.5 text-xs font-bold",
-                  activeTab === "archived"
-                    ? "bg-white/25 text-white"
-                    : "bg-subtle text-muted",
-                )}
-              >
-                {archivedCount}
-              </span>
-            </button>
-          </div>
+          <PillTabs
+            variant="white"
+            label="Report tabs"
+            tabs={[
+              {
+                key: "recent",
+                label: "Recent Cases",
+                count: recentCount,
+                active: activeTab === "recent",
+                onClick: () => handleTabChange("recent"),
+              },
+              {
+                key: "archived",
+                label: "Archived Cases",
+                count: archivedCount,
+                active: activeTab === "archived",
+                onClick: () => handleTabChange("archived"),
+              },
+            ]}
+          />
 
           {/* Search Bar & Filter Menu */}
           <div className="flex min-w-[280px] flex-1 items-center justify-end gap-3">
             <form
               onSubmit={handleSearchSubmit}
-              className="relative max-w-sm flex-1"
+              className="relative min-w-[240px] md:w-[320px]"
             >
               <Search
-                size={16}
+                size={18}
+                strokeWidth={2}
                 aria-hidden="true"
-                className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-muted"
+                className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-muted"
               />
               <input
                 type="search"
@@ -239,14 +215,15 @@ export function ReportGrid({
                     );
                   }, 250);
                 }}
-                placeholder="Search captures, hashes, cases..."
-                className="h-10 w-full rounded-full border border-border-strong/40 bg-card pr-8 pl-9 text-sm text-ink placeholder:text-muted/80 shadow-xs focus:border-brand-600 focus:ring-1 focus:ring-brand-600 focus:outline-none"
+                maxLength={120}
+                placeholder="Search captures, titles, or hashes..."
+                className="h-11 w-full rounded-full border border-border bg-brand-50 pr-9 pl-11 text-sm text-ink placeholder:text-muted transition-colors focus:border-brand-600 focus:bg-card focus:outline-none focus:ring-2 focus:ring-brand-600/20"
               />
               {isPending && (
                 <Loader2
-                  size={15}
+                  size={16}
                   aria-hidden="true"
-                  className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 animate-spin text-brand-600"
+                  className="pointer-events-none absolute top-1/2 right-3.5 -translate-y-1/2 animate-spin text-brand-600"
                 />
               )}
             </form>
@@ -257,21 +234,29 @@ export function ReportGrid({
                 type="button"
                 onClick={() => setFilterMenuOpen(!filterMenuOpen)}
                 className={cn(
-                  "inline-flex h-10 cursor-pointer items-center gap-2 rounded-full border px-4 text-sm font-medium shadow-xs transition-colors",
-                  activeFilterCount > 0
-                    ? "border-brand-600 bg-brand-50 text-brand-800"
-                    : "border-border-strong/40 bg-card text-ink hover:bg-brand-50/50",
+                  "flex h-11 items-center gap-2 rounded-full border border-brand-500 bg-card px-5 text-sm font-medium transition-colors hover:bg-brand-50 cursor-pointer",
+                  activeFilterCount > 0 || filterMenuOpen
+                    ? "border-brand-600 bg-brand-50 text-brand-700"
+                    : "text-brand-800",
                 )}
                 aria-expanded={filterMenuOpen}
               >
-                <SlidersHorizontal size={15} className="text-brand-700" />
+                <SlidersHorizontal size={17} strokeWidth={2} aria-hidden />
                 <span>Filter</span>
                 {activeFilterCount > 0 && (
                   <span className="grid size-5 place-items-center rounded-full bg-brand-600 text-[11px] font-bold text-white">
                     {activeFilterCount}
                   </span>
                 )}
-                <ChevronDown size={14} className="text-muted" />
+                <ChevronDown
+                  size={15}
+                  strokeWidth={2}
+                  className={cn(
+                    "text-muted transition-transform duration-200",
+                    filterMenuOpen && "rotate-180",
+                  )}
+                  aria-hidden
+                />
               </button>
 
               {filterMenuOpen && (

@@ -117,6 +117,7 @@ export async function listCaseEvidence(dbx: Db | Tx, caseId: string, side: "repo
       label: evidence.label,
       kind: evidence.kind,
       capturedAt: evidence.capturedAt,
+      sourceUrl: evidence.sourceUrl,
       sha256: evidence.sha256,
       ownerId: evidence.ownerId,
       ownerName: user.name,
