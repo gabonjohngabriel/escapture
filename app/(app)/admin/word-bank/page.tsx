@@ -1,6 +1,6 @@
 import { Tags } from "lucide-react";
 import { bodyRow, headRow, TableBox, td, th } from "@/components/dashboard/data-table";
-import { AddWordForm, RemoveWordButton } from "@/components/safetrail/word-bank";
+import { AddWordForm, RemoveWordButton } from "@/components/admin/word-bank";
 import { Card, PageHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/feedback";
 import { formatDate } from "@/lib/format";

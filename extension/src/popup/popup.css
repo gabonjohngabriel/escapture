@@ -1,46 +1,327 @@
-@font-face { font-family: "Lora"; font-weight: 600; font-display: swap; src: url("fonts/lora-latin-600-normal.woff2") format("woff2"); }
-@font-face { font-family: "Nunito"; font-weight: 400; font-display: swap; src: url("fonts/nunito-latin-400-normal.woff2") format("woff2"); }
-@font-face { font-family: "Nunito"; font-weight: 600; font-display: swap; src: url("fonts/nunito-latin-600-normal.woff2") format("woff2"); }
-@font-face { font-family: "Nunito"; font-weight: 700; font-display: swap; src: url("fonts/nunito-latin-700-normal.woff2") format("woff2"); }
+/* DM Sans — packaged font for Manifest V3 */
+@font-face {
+    font-family: "DM Sans";
+    font-weight: 400;
+    font-display: swap;
+    src: url("fonts/dm-sans-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+    font-family: "DM Sans";
+    font-weight: 500;
+    font-display: swap;
+    src: url("fonts/dm-sans-latin-500-normal.woff2") format("woff2");
+}
+@font-face {
+    font-family: "DM Sans";
+    font-weight: 600;
+    font-display: swap;
+    src: url("fonts/dm-sans-latin-600-normal.woff2") format("woff2");
+}
+@font-face {
+    font-family: "DM Sans";
+    font-weight: 700;
+    font-display: swap;
+    src: url("fonts/dm-sans-latin-700-normal.woff2") format("woff2");
+}
 
 :root {
-  --brand-100: #E6F1F6; --brand-200: #CDE2EC; --brand-700: #3A6D88; --brand-800: #2D556B;
-  --canvas: #F7FAFB; --card: #FFFFFF; --subtle: #EFF4F7; --border: #DCE6EB; --border-strong: #7690A0;
-  --ink: #1E2A32; --muted: #55646E; --disabled-bg: #E6EDF1; --disabled-fg: #7D8B94;
-  --escalated-bg: #FDF3E1; --escalated-fg: #8A5A12; --tamper-bg: #E2F3F0; --tamper-fg: #1D6359;
+    /* Exact Figma palette */
+    --brand-green: #5da36c;
+    --brand-green-hover: #508f5d;
+    --brand-green-light: #e4f1e7;
+    --brand-green-muted: #6ba293;
+    --brand-green-subtle: #f0f7f2;
+
+    /* Neutrals */
+    --canvas: #ffffff;
+    --card: #ffffff;
+    --ink: #1e2a32;
+    --muted: #55646e;
+    --border: #dce6eb;
+    --border-strong: #7690a0;
+    --disabled-bg: #e6edf1;
+    --disabled-fg: #7d8b94;
+
+    /* Semantic */
+    --escalated-bg: #fdf3e1;
+    --escalated-fg: #8a5a12;
 }
-* { box-sizing: border-box; }
-body { margin: 0; width: 360px; padding: 16px; background: var(--canvas); color: var(--ink); font: 400 15px/24px Nunito, system-ui, sans-serif; }
-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
-.brand { font: 600 20px/28px Lora, Georgia, serif; }
-main { display: flex; flex-direction: column; gap: 12px; }
-h1 { margin: 0; font: 600 20px/28px Lora, Georgia, serif; }
-h2 { margin: 4px 0 0; font: 600 14px/20px Nunito, system-ui, sans-serif; }
-.title { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.icon { width: 36px; height: 36px; padding: 0; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--card); color: var(--brand-700); font-weight: 700; } .icon:hover { background: var(--brand-100); }
-[hidden] { display: none !important; }
-.strong { font-weight: 600; font-size: 14px; line-height: 20px; }
-.checks { margin: 0; padding-left: 18px; font-size: 13px; line-height: 20px; color: var(--muted); }
-.history { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--border); border-radius: 12px; max-height: 232px; overflow-y: auto; }
-.history li { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-bottom: 1px solid var(--border); } .history li:last-child { border-bottom: 0; }
-.history a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; line-height: 20px; text-decoration: none; } .history a:hover { text-decoration: underline; }
-.row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-p { margin: 0; }
-.muted, .helper { color: var(--muted); font-size: 13px; line-height: 18px; }
-form { display: flex; flex-direction: column; gap: 12px; }
-label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; line-height: 20px; font-weight: 600; }
-input { height: 44px; border: 1px solid var(--border-strong); border-radius: 10px; padding: 0 12px; font: 400 16px/24px Nunito, system-ui, sans-serif; color: var(--ink); background: var(--card); }
-button, a.btn { height: 44px; border-radius: 10px; border: 1px solid transparent; padding: 0 20px; font: 600 15px/20px Nunito, system-ui, sans-serif; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
-button:disabled { background: var(--disabled-bg); color: var(--disabled-fg); cursor: not-allowed; }
-.primary { background: var(--brand-700); color: #fff; } .primary:hover:not(:disabled) { background: var(--brand-800); }
-.soft { background: var(--brand-100); color: var(--brand-800); } .soft:hover { background: var(--brand-200); }
-.ghost { background: transparent; color: var(--brand-700); height: 36px; padding: 0 8px; } .ghost:hover { background: var(--brand-100); }
-:focus-visible { outline: 2px solid var(--brand-700); outline-offset: 2px; }
-.note { border-radius: 10px; padding: 10px 12px; font-size: 14px; line-height: 22px; }
-.note.attention { background: var(--escalated-bg); color: var(--escalated-fg); }
-.note.info { background: var(--brand-100); color: var(--brand-800); }
-.badge { display: inline-flex; align-self: flex-start; border-radius: 999px; padding: 2px 10px; font-size: 13px; line-height: 20px; font-weight: 600; background: var(--tamper-bg); color: var(--tamper-fg); }
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-.account { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px solid var(--border); padding-top: 8px; }
-.account span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-a { color: var(--brand-700); font-weight: 600; }
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    width: 460px;
+    background: var(--canvas);
+    color: var(--ink);
+    font:
+        400 15px/24px "DM Sans",
+        system-ui,
+        sans-serif;
+    overflow: hidden;
+}
+
+/* Top Header */
+header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 76px;
+    padding: 0 24px;
+    background: var(--brand-green);
+}
+
+.logo {
+    width: 38px;
+    height: 44px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.brand {
+    font-family: "DM Sans", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 26px;
+    line-height: 32px;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+}
+
+/* ── Main body ── */
+main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px 24px 28px 24px;
+    background: var(--card);
+}
+
+[hidden] {
+    display: none !important;
+}
+
+/* ── Content row: Icon + Greeting & Heading ── */
+.content-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    min-height: 82px;
+    margin-bottom: 16px;
+}
+
+.capture-icon {
+    width: 82px;
+    height: 82px;
+    border-radius: 18px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.content-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.greeting {
+    margin: 0;
+    font-family: "DM Sans", system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 18px;
+    color: var(--brand-green);
+}
+
+h1 {
+    margin: 0;
+    font-family: "DM Sans", system-ui, sans-serif;
+    font-weight: 700;
+    color: var(--brand-green);
+    letter-spacing: -0.02em;
+}
+
+h1.heading-default {
+    font-size: 30px;
+    line-height: 32px;
+}
+
+h1.heading-unable {
+    font-size: 20px;
+    line-height: 22px;
+}
+
+/* ── Action Pill Floating Container ── */
+.action-pill {
+    background: #ffffff;
+    border-radius: 9999px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    height: 56px;
+}
+
+.btn-capture {
+    height: 46px;
+    flex: 1;
+    border-radius: 9999px;
+    border: none;
+    font-family: "DM Sans", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24px;
+    transition:
+        background 150ms ease-out,
+        color 150ms ease-out;
+}
+
+.btn-capture.active {
+    background: var(--brand-green);
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.btn-capture.active:hover {
+    background: var(--brand-green-hover);
+}
+
+.btn-capture.disabled {
+    background: var(--brand-green-light);
+    color: var(--brand-green-muted);
+    cursor: not-allowed;
+}
+
+.btn-signout {
+    height: 46px;
+    padding: 0 22px;
+    border-radius: 9999px;
+    border: none;
+    background: transparent;
+    color: var(--brand-green);
+    font-family: "DM Sans", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 150ms ease-out;
+}
+
+.btn-signout:hover {
+    background: var(--brand-green-subtle);
+}
+
+:focus-visible {
+    outline: 2px solid var(--brand-green);
+    outline-offset: 2px;
+}
+
+/* ── Notes / Alerts ── */
+.note {
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    line-height: 18px;
+    margin: 0;
+}
+
+.note.attention {
+    background: var(--escalated-bg);
+    color: var(--escalated-fg);
+}
+
+/* ── Sign-in Form ── */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-family: "DM Sans", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+input {
+    height: 44px;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    padding: 0 14px;
+    font:
+        400 15px/24px "DM Sans",
+        system-ui,
+        sans-serif;
+    color: var(--ink);
+    background: #ffffff;
+}
+
+input:focus-visible {
+    outline: 2px solid var(--brand-green);
+    outline-offset: 2px;
+}
+
+.btn-signin {
+    height: 46px;
+    border-radius: 9999px;
+    border: none;
+    background: var(--brand-green);
+    color: #ffffff;
+    font-family: "DM Sans", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 150ms ease-out;
+}
+
+.btn-signin:hover:not(:disabled) {
+    background: var(--brand-green-hover);
+}
+
+.btn-signin:disabled {
+    background: var(--disabled-bg);
+    color: var(--disabled-fg);
+    cursor: not-allowed;
+}
+
+.helper {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 14px;
+    margin-top: 12px;
+    text-align: center;
+}
+
+a {
+    color: var(--brand-green);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+p {
+    margin: 0;
+}
+
+.muted {
+    color: var(--muted);
+    font-size: 14px;
+}

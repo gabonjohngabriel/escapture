@@ -39,6 +39,7 @@ if (isLocal) {
   // Local fixture pages (pnpm fixtures:serve), for testing without real Facebook.
   manifest.host_permissions.push("http://localhost:4100/*", "http://127.0.0.1:4100/*");
   for (const entry of manifest.content_scripts) entry.matches.push("http://localhost:4100/*");
+  for (const entry of manifest.web_accessible_resources ?? []) entry.matches.push("http://localhost:4100/*", "http://127.0.0.1:4100/*");
 }
 writeFileSync(path.join(dist, "manifest.json"), JSON.stringify(manifest, null, 2));
 
@@ -47,10 +48,10 @@ for (const f of ["popup.html", "popup.css"]) cpSync(path.join(here, "src/popup",
 cpSync(path.join(here, "icons"), path.join(dist, "icons"), { recursive: true });
 cpSync(path.join(here, "src/offscreen/offscreen.html"), path.join(dist, "offscreen.html"));
 const fonts = [
-  ["lora", "lora-latin-600-normal.woff2"],
-  ["nunito", "nunito-latin-400-normal.woff2"],
-  ["nunito", "nunito-latin-600-normal.woff2"],
-  ["nunito", "nunito-latin-700-normal.woff2"],
+  ["dm-sans", "dm-sans-latin-400-normal.woff2"],
+  ["dm-sans", "dm-sans-latin-500-normal.woff2"],
+  ["dm-sans", "dm-sans-latin-600-normal.woff2"],
+  ["dm-sans", "dm-sans-latin-700-normal.woff2"],
 ];
 // Fonts are packaged: MV3 extension pages can't rely on remote font loading.
 for (const [family, file] of fonts) {
@@ -61,8 +62,8 @@ const options = {
   entryPoints: {
     background: path.join(here, "src/background/index.ts"),
     content: path.join(here, "src/content/index.ts"),
-    "page-guard": path.join(here, "src/content/page-guard.js"),
-    "guard-bridge": path.join(here, "src/content/guard-bridge.ts"),
+    "page-guard": path.join(here, "src/content/guard/page-guard.js"),
+    "guard-bridge": path.join(here, "src/content/guard/guard-bridge.ts"),
     popup: path.join(here, "src/popup/popup.ts"),
     offscreen: path.join(here, "src/offscreen/offscreen.ts"),
   },
@@ -74,6 +75,9 @@ const options = {
   define: {
     __APP_URL__: JSON.stringify(appUrl),
     __EXT_VERSION__: JSON.stringify(pkg.version),
+  },
+  loader: {
+    ".css": "text",
   },
   logLevel: "info",
 };

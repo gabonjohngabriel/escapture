@@ -108,6 +108,7 @@ export type BoardQuery = {
   days?: number;
   /** Only cases whose title or description contains a word from the word bank. */
   flagged?: boolean;
+  pageSize?: number;
 };
 
 const likeTerm = (q: string) => `%${q.replace(/[\\%_]/g, (m) => `\\${m}`)}%`;
@@ -143,6 +144,7 @@ export async function boardPage(actor: Actor, query: BoardQuery = {}) {
   const dir = sort.startsWith("-") ? desc : asc;
   const column =
     sort.endsWith("status") ? cases.status : sort.endsWith("reporter") ? sql`lower(${user.name})` : cases.escalatedAt;
+  const pageSize = query.pageSize ?? BOARD_PAGE_SIZE;
   const page = Math.max(1, query.page ?? 1);
 
   const [rows, byStatus] = await Promise.all([
@@ -152,14 +154,15 @@ export async function boardPage(actor: Actor, query: BoardQuery = {}) {
         title: cases.title,
         status: cases.status,
         escalatedAt: cases.escalatedAt,
+        description: cases.description,
         reporterName: user.name,
       })
       .from(cases)
       .innerJoin(user, eq(user.id, cases.ownerId))
       .where(where)
       .orderBy(dir(column), asc(cases.escalatedAt))
-      .limit(BOARD_PAGE_SIZE)
-      .offset((page - 1) * BOARD_PAGE_SIZE),
+      .limit(pageSize)
+      .offset((page - 1) * pageSize),
     // The tabs' counts follow the search, not the tab that is selected.
     db
       .select({ status: cases.status, n: count() })
@@ -272,7 +275,7 @@ export async function boardSummary(actor: Actor, now: Date = new Date()) {
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   // The first of this month in Manila, where the university is.
   const monthStart = new Date(`${dayKey(now).slice(0, 7)}-01T00:00:00+08:00`);
-  const [[open], [shared], [closed]] = await Promise.all([
+  const [[open], [shared], [closed], [assigned]] = await Promise.all([
     db
       .select({
         escalated: sql<number>`count(*) filter (where ${cases.status} = 'escalated')::int`,
@@ -298,6 +301,11 @@ export async function boardSummary(actor: Actor, now: Date = new Date()) {
       .select({ n: count() })
       .from(caseEvents)
       .where(and(eq(caseEvents.type, "closed"), gte(caseEvents.createdAt, monthStart))),
+    db
+      .select({ n: count() })
+      .from(caseAssignments)
+      .innerJoin(cases, eq(cases.id, caseAssignments.caseId))
+      .where(and(eq(caseAssignments.reviewerId, actor.id), inArray(cases.status, ["escalated", "under_review"]))),
   ]);
   const oldest = open?.oldestUnderReview ? new Date(open.oldestUnderReview) : null;
   return {
@@ -307,6 +315,7 @@ export async function boardSummary(actor: Actor, now: Date = new Date()) {
     oldestUnderReviewDays: oldest ? Math.floor((now.getTime() - oldest.getTime()) / (24 * 60 * 60 * 1000)) : null,
     sharedUnattached: shared?.n ?? 0,
     closedThisMonth: closed?.n ?? 0,
+    assignedToMe: assigned?.n ?? 0,
   };
 }
 

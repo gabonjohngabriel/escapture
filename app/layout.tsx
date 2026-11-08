@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Lora, Nunito } from "next/font/google";
+import "@fontsource/dm-sans/400.css";
+import "@fontsource/dm-sans/500.css";
+import "@fontsource/dm-sans/600.css";
+import "@fontsource/dm-sans/700.css";
 import { ToastProvider } from "@/components/ui/toast";
 import "./globals.css";
-
-const lora = Lora({ subsets: ["latin"], variable: "--font-lora", display: "swap" });
-const nunito = Nunito({ subsets: ["latin"], variable: "--font-nunito", display: "swap" });
 
 export const metadata: Metadata = {
   title: "Escapture",
@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${lora.variable} ${nunito.variable} antialiased`}>
-      <body>
+    <html lang="en" className="font-sans antialiased">
+      <body className="font-sans">
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>

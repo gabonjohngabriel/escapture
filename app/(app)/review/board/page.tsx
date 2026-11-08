@@ -13,7 +13,7 @@ import {
   th,
 } from "@/components/dashboard/data-table";
 import { FilterChip, ParamSelect } from "@/components/dashboard/filters";
-import { FlaggedWords } from "@/components/safetrail/flagged-words";
+import { FlaggedWords } from "@/components/review/flagged-words";
 import { StatusBadge } from "@/components/ui/badge";
 import { buttonClass } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/card";

@@ -1,12 +1,12 @@
-import { PageCrumbs } from "@/components/safetrail/app-shell";
+import { PageCrumbs } from "@/components/layout/app-shell";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CasesCard, IntegrityCard } from "@/components/safetrail/evidence-cards";
-import { EvidenceFrame } from "@/components/safetrail/evidence-frame";
-import { EvidenceTitle } from "@/components/safetrail/evidence-title";
-import { AccessList, LinkList } from "@/components/safetrail/sharing-lists";
-import { VaultRowMenu } from "@/components/safetrail/vault-row-menu";
+import { CasesCard, IntegrityCard } from "@/components/vault/evidence-cards";
+import { EvidenceFrame } from "@/components/vault/evidence-frame";
+import { EvidenceTitle } from "@/components/vault/evidence-title";
+import { AccessList, LinkList } from "@/components/cases/sharing-lists";
+import { VaultRowMenu } from "@/components/vault/vault-row-menu";
 import { Card } from "@/components/ui/card";
 import { formatDateTime, kindLabel } from "@/lib/format";
 import { isUuid, orNotFound, pageUser } from "@/server/page-auth";

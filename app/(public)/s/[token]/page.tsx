@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { RedeemForm } from "@/components/safetrail/redeem-form";
+import { RedeemForm } from "@/components/auth/redeem-form";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/feedback";
 import { pageUser } from "@/server/page-auth";

@@ -10,11 +10,15 @@ export function HowToCapture({
   variant = "soft",
   asLink = false,
   label = "How to capture",
+  className,
+  hideIcon = false,
 }: {
   variant?: ButtonVariant;
   asLink?: boolean;
   /** The button's words. The dialog is always the capture steps. */
   label?: string;
+  className?: string;
+  hideIcon?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
@@ -25,8 +29,8 @@ export function HowToCapture({
           How to capture
         </button>
       ) : (
-        <Button variant={variant} onClick={() => setOpen(true)}>
-          <CircleHelp size={18} strokeWidth={1.75} aria-hidden />
+        <Button variant={variant} className={className} onClick={() => setOpen(true)}>
+          {!hideIcon && <CircleHelp size={18} strokeWidth={1.75} aria-hidden />}
           {label}
         </Button>
       )}

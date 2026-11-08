@@ -1,4 +1,4 @@
-import type { TamperCheck, TamperReport } from "../shared/types";
+import type { TamperCheck, TamperReport } from "../../shared/types";
 
 /** The page guard's answer about the elements being captured. See page-guard.js. */
 export type GuardState = {

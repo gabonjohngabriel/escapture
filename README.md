@@ -18,7 +18,7 @@ Escapture gives each side what it needs:
 
 - **Students** capture a Facebook post or Messenger conversation with the Escapture Chrome extension. Before saving, the extension checks whether the page was edited in the browser and refuses to capture if it was. The capture is saved as a frozen, script-free copy in the student's private vault, with a SHA-256 hash and a capture time recorded by the server.
 - **The student stays in control.** Nothing reaches the school until the student escalates a case. They choose what goes in it, who helps build it, and when to send it.
-- **Reviewers** (for example, a student affairs office) get an organized case: a title, a description, and evidence they can open, each item labelled *Captured with tamper checks*, with its hash and capture time. They review the case, add the other side's evidence when it arrives, and record how the case ended.
+- **Reviewers** (for example, a student affairs office) get an organized case: a title, a description, and evidence they can open, each item labelled _Captured with tamper checks_, with its hash and capture time. They review the case, add the other side's evidence when it arrives, and record how the case ended.
 
 Escapture supports the university's own process and doesn't replace it. It doesn't decide who is right.
 
@@ -58,7 +58,7 @@ The pilot is built for Bulacan State University: students sign up with their `@m
 - Uploads are re-hashed by the server, and a mismatch is rejected.
 - Captured pages are treated as untrusted. They are served with a sandbox policy and shown only in a sandboxed frame.
 - Row-level security is on for every database table, and sign-in and the API are rate-limited.
-- Escapture describes captures as *tamper-checked*, never *tamper-proof* or *verified*.
+- Escapture describes captures as _tamper-checked_, never _tamper-proof_ or _verified_.
 
 <!-- SCREENSHOT: vault with captured items -->
 <!-- SCREENSHOT: extension popup and element picker on a Facebook post -->
@@ -112,7 +112,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
 ### 2. Start the database and the app
 
 ```bash
-pnpm db:local     # starts Postgres in Docker on port 54329
+pnpm db:local     # starts Postgres in Docker on port 5432
 pnpm db:migrate   # creates the tables
 pnpm db:seed      # adds demo accounts, evidence and cases
 pnpm dev          # http://localhost:3000
@@ -120,13 +120,13 @@ pnpm dev          # http://localhost:3000
 
 `pnpm db:seed` prints the demo accounts and their shared password:
 
-| Role | Email |
-|---|---|
-| Administrator | `admin@safetrail.test` |
-| Reviewer | `reviewer1@safetrail.test`, `reviewer2@safetrail.test` |
-| Student (reporter) | `maya.demo@ms.bulsu.edu.ph` |
-| Student (collaborator) | `jules.demo@ms.bulsu.edu.ph` |
-| Student (the other party) | `alex.demo@ms.bulsu.edu.ph` |
+| Role                      | Email                                                  |
+| ------------------------- | ------------------------------------------------------ |
+| Administrator             | `admin@safetrail.test`                                 |
+| Reviewer                  | `reviewer1@safetrail.test`, `reviewer2@safetrail.test` |
+| Student (reporter)        | `maya.demo@ms.bulsu.edu.ph`                            |
+| Student (collaborator)    | `jules.demo@ms.bulsu.edu.ph`                           |
+| Student (the other party) | `alex.demo@ms.bulsu.edu.ph`                            |
 
 Open http://localhost:3000 and sign in as any of them.
 
@@ -162,7 +162,7 @@ The extension works on `facebook.com` and `messenger.com`.
 2. Click **Escalate**, read the preview and confirm.
 3. Sign in as **reviewer1** in another browser profile. The case is on the Review Board.
 4. Open it, click **Start review**, then **Close case** and write a note.
-5. Back as Maya, the case shows *Closed* with the reviewer's note, and a notification.
+5. Back as Maya, the case shows _Closed_ with the reviewer's note, and a notification.
 
 ### Creating more accounts
 
@@ -192,12 +192,12 @@ pnpm smoke       # end-to-end walkthrough through the API; needs `pnpm dev` runn
 ```
 
 - **Unit tests** cover:
-  - who may do what, for every role and case status;
-  - the escalation preview check;
-  - hashing and link passwords;
-  - the email-domain rule and request validation;
-  - flagged-word matching;
-  - a guard that fails if any API route skips the sign-in check.
+    - who may do what, for every role and case status;
+    - the escalation preview check;
+    - hashing and link passwords;
+    - the email-domain rule and request validation;
+    - flagged-word matching;
+    - a guard that fails if any API route skips the sign-in check.
 - **The smoke test** creates fresh accounts and walks the whole product: sign-up, uploads with hash checking, sharing and links, cases and collaborators, escalation and locking, reviewer-only access, reviewer attachments staying hidden from the reporter, closing, notifications and flagged words.
 
 ## Project structure

@@ -2,8 +2,8 @@
 // class names, and only the page's stylesheet rules that apply to it are kept
 // ("tree-shaking"). Images are embedded as data URIs and everything active is
 // stripped. Nothing in the result loads from the network or runs.
-import type { Kind } from "../shared/types";
-import { isComposer } from "./checks";
+import type { Kind } from "../../shared/types";
+import { isComposer } from "../guard/checks";
 
 const REMOVE = new Set([
   "SCRIPT", "STYLE", "LINK", "META", "BASE", "IFRAME", "FRAME", "FRAMESET", "OBJECT", "EMBED",
@@ -864,7 +864,7 @@ const LINK_PANEL_CSS =
   "font:13px/18px system-ui,-apple-system,'Segoe UI',sans-serif;text-align:left}" +
   ".st-tip:target{display:block}" +
   ".st-tip b{display:block;margin:4px 0;font-weight:400;color:#1E2A32;word-break:break-all;user-select:all;-webkit-user-select:all}" +
-  ".st-tip a{float:right;margin-left:12px;color:#3A6D88;font-weight:600;text-decoration:none}";
+  ".st-tip a{float:right;margin-left:12px;color:#5DA36C;font-weight:600;text-decoration:none}";
 
 /**
  * Captured links never leave the capture. Clicking one opens a small panel at

@@ -1,16 +1,93 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Escapture</title>
-    <link rel="stylesheet" href="popup.css" />
-  </head>
-  <body>
-    <header>
-      <img src="icons/icon-128.png" width="28" height="28" alt="" />
-      <span class="brand">Escapture</span>
-    </header>
-    <main id="app" aria-live="polite"><p class="muted">Loading</p></main>
-    <script src="popup.js"></script>
-  </body>
+    <head>
+        <meta charset="utf-8" />
+        <title>Escapture</title>
+        <link rel="stylesheet" href="popup.css" />
+    </head>
+    <body>
+        <header>
+            <img
+                class="logo"
+                src="icons/logo-white.png"
+                width="38"
+                height="44"
+                alt="" />
+            <span class="brand">Escapture</span>
+        </header>
+        <main id="app" aria-live="polite">
+            <!-- View: Error Notice -->
+            <p id="view-error" class="note attention" role="alert" hidden></p>
+
+            <!-- View: Loading -->
+            <div id="view-loading">
+                <p class="muted">Loading</p>
+            </div>
+
+            <!-- View: Signed Out -->
+            <div id="view-signed-out" hidden>
+                <form id="form-signin">
+                    <label>
+                        Escapture email
+                        <input
+                            type="email"
+                            name="email"
+                            id="input-email"
+                            autocomplete="username"
+                            required
+                            placeholder="name@example.com" />
+                    </label>
+                    <label>
+                        Password
+                        <input
+                            type="password"
+                            name="password"
+                            id="input-password"
+                            autocomplete="current-password"
+                            required
+                            placeholder="Password" />
+                    </label>
+                    <button
+                        type="submit"
+                        id="btn-signin-submit"
+                        class="btn-signin">
+                        Sign in to Escapture
+                    </button>
+                </form>
+                <p class="helper">
+                    No account yet?
+                    <a id="link-signup" href="#" target="_blank" rel="noopener"
+                        >Create one</a
+                    >
+                </p>
+            </div>
+
+            <!-- View: Ready (Signed In) -->
+            <div id="view-ready" hidden>
+                <div class="content-row">
+                    <img
+                        src="icons/capture-icon.png"
+                        class="capture-icon"
+                        alt=""
+                        width="82"
+                        height="82" />
+                    <div class="content-text">
+                        <p id="user-greeting" class="greeting">Hello, User!</p>
+                        <h1 id="capture-heading" class="heading-default">
+                            Capture evidence?
+                        </h1>
+                    </div>
+                </div>
+                <div class="action-pill">
+                    <button type="button" id="btn-capture" class="btn-capture">
+                        Capture this page
+                    </button>
+                    <button type="button" id="btn-signout" class="btn-signout">
+                        Sign Out
+                    </button>
+                </div>
+            </div>
+        </main>
+        <script src="popup.js"></script>
+    </body>
 </html>

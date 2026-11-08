@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { AppShell } from "@/components/safetrail/app-shell";
+import { AppShell } from "@/components/layout/app-shell";
 import { PageSkeleton } from "@/components/ui/feedback";
 import { pageUser } from "@/server/page-auth";
 import { navCounts } from "@/server/services/nav";

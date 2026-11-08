@@ -39,5 +39,11 @@
       "js": ["guard-bridge.js"],
       "run_at": "document_start"
     }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*", "fonts/*"],
+      "matches": ["https://www.facebook.com/*", "https://web.facebook.com/*", "https://www.messenger.com/*"]
+    }
   ]
 }

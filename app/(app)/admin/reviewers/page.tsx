@@ -1,7 +1,7 @@
 import { SearchX, Users } from "lucide-react";
 import Link from "next/link";
 import { bodyRow, headRow, TableBox, TableSearch, td, th } from "@/components/dashboard/data-table";
-import { ReviewerForm, ReviewerRowActions } from "@/components/safetrail/reviewer-form";
+import { ReviewerForm, ReviewerRowActions } from "@/components/admin/reviewer-form";
 import { Badge } from "@/components/ui/badge";
 import { buttonClass } from "@/components/ui/button";
 import { Card, PageHeader } from "@/components/ui/card";

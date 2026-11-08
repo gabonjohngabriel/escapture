@@ -1,5 +1,5 @@
 import { CircleCheck, FileCheck2, Inbox, Lock, X } from "lucide-react";
-import { TamperCheck } from "@/components/safetrail/tamper-check";
+import { TamperCheck } from "@/components/vault/tamper-check";
 import { StatusBadge, type CaseStatus } from "@/components/ui/badge";
 import { MockButton, ProductFrame } from "./blocks";
 

@@ -11,7 +11,7 @@ import {
   LOCKED_NOTE,
   RenameEvidenceDialog,
 } from "./evidence-actions";
-import { EmailShareDialog, LinkShareDialog } from "./share-dialogs";
+import { EmailShareDialog, LinkShareDialog } from "@/components/cases/share-dialogs";
 
 const icon = { size: 18, strokeWidth: 1.75, "aria-hidden": true } as const;
 

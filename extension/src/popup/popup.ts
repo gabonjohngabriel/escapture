@@ -1,120 +1,162 @@
-import { captureHost, CHECKS, type AuthState, type CaptureRecord, type LastCapture, type Reply } from "../shared/types";
+import {
+    captureHost,
+    type AuthState,
+    type CaptureRecord,
+    type LastCapture,
+    type Reply,
+} from "../shared/types";
 
-const app = document.getElementById("app")!;
-const send = <T>(msg: unknown) => chrome.runtime.sendMessage(msg) as Promise<Reply<T>>;
+type Status = {
+    auth: AuthState;
+    lastCapture: LastCapture | null;
+    history: CaptureRecord[];
+};
 
-type Status = { auth: AuthState; lastCapture: LastCapture | null; history: CaptureRecord[] };
+const send = <T>(msg: unknown) =>
+    chrome.runtime.sendMessage(msg) as Promise<Reply<T>>;
 
-function h<K extends keyof HTMLElementTagNameMap>(tag: K, props: Record<string, string> = {}, ...children: (Node | string)[]) {
-  const el = document.createElement(tag);
-  for (const [k, v] of Object.entries(props)) {
-    if (k === "class") el.className = v;
-    else el.setAttribute(k, v);
-  }
-  el.append(...children);
-  return el;
+// DOM element references
+const viewError = document.getElementById("view-error") as HTMLParagraphElement;
+const viewLoading = document.getElementById("view-loading") as HTMLDivElement;
+const viewSignedOut = document.getElementById(
+    "view-signed-out",
+) as HTMLDivElement;
+const viewReady = document.getElementById("view-ready") as HTMLDivElement;
+
+const formSignin = document.getElementById("form-signin") as HTMLFormElement;
+const inputEmail = document.getElementById("input-email") as HTMLInputElement;
+const inputPassword = document.getElementById(
+    "input-password",
+) as HTMLInputElement;
+const btnSigninSubmit = document.getElementById(
+    "btn-signin-submit",
+) as HTMLButtonElement;
+const linkSignup = document.getElementById("link-signup") as HTMLAnchorElement;
+
+const userGreeting = document.getElementById(
+    "user-greeting",
+) as HTMLParagraphElement;
+const captureHeading = document.getElementById(
+    "capture-heading",
+) as HTMLHeadingElement;
+const btnCapture = document.getElementById("btn-capture") as HTMLButtonElement;
+const btnSignout = document.getElementById("btn-signout") as HTMLButtonElement;
+
+// Set signup link dynamically from build environment
+if (linkSignup) {
+    linkSignup.href = `${__APP_URL__}/sign-up`;
 }
 
-function renderSignedOut(error?: string) {
-  const email = h("input", { type: "email", name: "email", autocomplete: "username", required: "" });
-  const password = h("input", { type: "password", name: "password", autocomplete: "current-password", required: "" });
-  const submit = h("button", { type: "submit", class: "primary" }, "Sign in to Escapture");
-  const form = h("form", {}, h("label", {}, "Escapture email", email), h("label", {}, "Password", password), submit);
-  form.addEventListener("submit", async (e) => {
+function showError(message?: string) {
+    if (message) {
+        viewError.textContent = message;
+        viewError.hidden = false;
+    } else {
+        viewError.textContent = "";
+        viewError.hidden = true;
+    }
+}
+
+function showView(view: "loading" | "signed-out" | "ready") {
+    viewLoading.hidden = view !== "loading";
+    viewSignedOut.hidden = view !== "signed-out";
+    viewReady.hidden = view !== "ready";
+}
+
+function setupSignedOutView(error?: string) {
+    showView("signed-out");
+    showError(error);
+    btnSigninSubmit.disabled = false;
+    btnSigninSubmit.textContent = "Sign in to Escapture";
+}
+
+formSignin.addEventListener("submit", async (e) => {
     e.preventDefault();
-    submit.disabled = true;
-    submit.textContent = "Signing in";
-    const reply = await send<{ auth: AuthState }>({ type: "auth:signIn", email: email.value.trim(), password: password.value });
-    if (reply.ok) void render();
-    else renderSignedOut(reply.error);
-  });
-  app.replaceChildren(
-    ...(error ? [h("p", { class: "note attention", role: "alert" }, error)] : []),
-    form,
-    h("p", { class: "helper" }, "No account yet? ", h("a", { href: `${__APP_URL__}/sign-up`, target: "_blank", rel: "noopener" }, "Create one")),
-  );
-}
+    btnSigninSubmit.disabled = true;
+    btnSigninSubmit.textContent = "Signing in...";
+    showError(undefined);
 
-const when = (iso: string) =>
-  new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    const reply = await send<{ auth: AuthState }>({
+        type: "auth:signIn",
+        email: inputEmail.value.trim(),
+        password: inputPassword.value,
+    });
 
-/** What was captured from this browser, newest first. */
-function historyList(history: CaptureRecord[]): Node[] {
-  if (history.length === 0) return [];
-  return [
-    h("h2", {}, "History"),
-    h(
-      "ul",
-      { class: "history" },
-      ...history.map((c) =>
-        h(
-          "li",
-          {},
-          h("a", { href: c.url, target: "_blank", rel: "noopener", title: c.label }, c.label),
-          h("span", { class: "row" }, h("span", { class: "helper" }, when(c.at)), h("span", { class: "badge" }, "Tamper checked")),
-        ),
-      ),
-    ),
-  ];
-}
+    if (reply.ok) {
+        inputPassword.value = "";
+        void render();
+    } else {
+        setupSignedOutView(reply.error);
+    }
+});
 
-/** The question-mark button and the panel it opens: what the extension checks before it saves anything. */
-function checksHelp(): { button: HTMLButtonElement; panel: HTMLElement } {
-  const panel = h(
-    "div",
-    { class: "card", id: "checks-help", hidden: "" },
-    h("p", { class: "strong" }, "Checks run at capture"),
-    h("ul", { class: "checks" }, ...CHECKS.map((c) => h("li", {}, c))),
-  );
-  const button = h("button", { type: "button", class: "icon", "aria-label": "Checks run at capture", "aria-expanded": "false", "aria-controls": "checks-help" }, "?");
-  button.addEventListener("click", () => {
-    panel.hidden = !panel.hidden;
-    button.setAttribute("aria-expanded", String(!panel.hidden));
-  });
-  return { button, panel };
-}
-
-async function renderReady(auth: Extract<AuthState, { signedIn: true }>, status: Status, error?: string) {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  const supported = Boolean(tab?.url && captureHost(tab.url));
-  const capture = h("button", { type: "button", class: "primary" }, "Capture this page");
-  if (!supported) capture.disabled = true;
-  capture.addEventListener("click", async () => {
-    capture.disabled = true;
-    const reply = await send({ type: "capture:start" });
-    if (reply.ok) window.close();
-    else void renderReady(auth, status, reply.error);
-  });
-  const signOut = h("button", { type: "button", class: "ghost" }, "Sign out");
-  signOut.addEventListener("click", async () => {
+btnSignout.addEventListener("click", async () => {
     await send({ type: "auth:signOut" });
     void render();
-  });
-  const help = checksHelp();
+});
 
-  app.replaceChildren(
-    h("div", { class: "title" }, h("h1", {}, "Capture evidence"), help.button),
-    help.panel,
-    ...(error ? [h("p", { class: "note attention", role: "alert" }, error)] : []),
-    ...(supported
-      ? []
-      : [h("p", { class: "note info" }, "Open the Facebook post or Messenger conversation you want to keep, then open this again.")]),
-    capture,
-    ...historyList(status.history),
-    h("div", { class: "account" }, h("span", { class: "helper" }, auth.email), signOut),
-  );
+btnCapture.addEventListener("click", async () => {
+    btnCapture.disabled = true;
+    const reply = await send({ type: "capture:start" });
+    if (reply.ok) {
+        window.close();
+    } else {
+        showError(reply.error);
+        btnCapture.disabled = false;
+    }
+});
+
+async function setupReadyView(
+    auth: Extract<AuthState, { signedIn: true }>,
+    error?: string,
+) {
+    showView("ready");
+    showError(error);
+
+    const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+    });
+    const supported = Boolean(tab?.url && captureHost(tab.url));
+
+    // Greeting
+    const firstName = auth.name?.trim() ? auth.name.split(" ")[0] : "User";
+    userGreeting.textContent = `Hello, ${firstName}!`;
+
+    // Dynamic heading & capture button state based on current page
+    if (supported) {
+        captureHeading.className = "heading-default";
+        captureHeading.textContent = "Capture evidence?";
+        btnCapture.className = "btn-capture active";
+        btnCapture.disabled = false;
+    } else {
+        captureHeading.className = "heading-unable";
+        captureHeading.textContent =
+            "Open Facebook posts, stories, or conversations you want to keep, then open this again.";
+        btnCapture.className = "btn-capture disabled";
+        btnCapture.disabled = true;
+    }
 }
 
 async function render() {
-  const reply = await send<Status>({ type: "auth:status" }).catch(
-    (): Reply<Status> => ({ ok: false, error: "The extension couldn't start. Close this and open it again." }),
-  );
-  if (!reply.ok) {
-    app.replaceChildren(h("p", { class: "note attention" }, reply.error));
-    return;
-  }
-  if (!reply.auth.signedIn) renderSignedOut();
-  else await renderReady(reply.auth, reply);
+    const reply = await send<Status>({ type: "auth:status" }).catch(
+        (): Reply<Status> => ({
+            ok: false,
+            error: "The extension couldn't start. Close this and open it again.",
+        }),
+    );
+
+    if (!reply.ok) {
+        showView("loading");
+        showError(reply.error);
+        return;
+    }
+
+    if (!reply.auth.signedIn) {
+        setupSignedOutView();
+    } else {
+        await setupReadyView(reply.auth);
+    }
 }
 
 void render();

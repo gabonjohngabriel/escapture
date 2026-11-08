@@ -1,4 +1,4 @@
-import { Logo } from "@/components/safetrail/logo";
+import { Logo } from "@/components/layout/logo";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (

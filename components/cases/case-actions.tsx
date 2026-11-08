@@ -1,5 +1,6 @@
 "use client";
 
+import { CreateReportModal } from "./create-report-modal";
 import { Lock, LogOut, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -13,62 +14,24 @@ import { useToast } from "@/components/ui/toast";
 import { api, ApiError, errorMessage } from "@/lib/client-api";
 import { formatDateTime, kindLabel } from "@/lib/format";
 
-export function NewCaseButton() {
-  const router = useRouter();
+export function CreateReportButton() {
   const [open, setOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const close = () => {
-    setOpen(false);
-    setError(null);
-    setLoading(false);
-  };
-
-  async function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    setLoading(true);
-    setError(null);
-    try {
-      const c = await api<{ id: string }>("/api/cases", {
-        body: { title: form.get("title") },
-      });
-      close(); // the dialog must not stay open behind the next page
-      router.push(`/cases/${c.id}`);
-    } catch (err) {
-      setLoading(false);
-      setError(errorMessage(err));
-    }
-  }
-
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
-        <Plus size={18} strokeWidth={1.75} aria-hidden />
-        New case
-      </Button>
-      <Dialog
-        open={open}
-        onClose={close}
-        title="Start a new case"
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="inline-flex h-11 items-center gap-2 rounded-full bg-[#52946B] px-6 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#427A56] hover:shadow"
       >
-        <form onSubmit={submit} className="flex flex-col gap-4">
-          {error && <Banner tone="attention">{error}</Banner>}
-          <Input label="Title" name="title" required maxLength={160} />
-          <div className="flex justify-end gap-3">
-            <Button variant="ghost" onClick={close}>
-              Go back
-            </Button>
-            <Button type="submit" loading={loading}>
-              Create draft
-            </Button>
-          </div>
-        </form>
-      </Dialog>
+        <Plus size={18} strokeWidth={2.5} aria-hidden />
+        <span>Create Report</span>
+      </button>
+      <CreateReportModal open={open} onClose={() => setOpen(false)} />
     </>
   );
 }
+
+export const NewCaseButton = CreateReportButton;
 
 /** A confirm dialog for the actions that take a case, or a person, away. */
 function ConfirmDialog({

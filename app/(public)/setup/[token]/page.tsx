@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { SetupForm } from "@/components/safetrail/setup-form";
+import { SetupForm } from "@/components/auth/setup-form";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/feedback";
 import { setupInfo } from "@/server/services/admin";

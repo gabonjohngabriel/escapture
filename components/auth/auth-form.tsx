@@ -19,7 +19,7 @@ const never = () => () => {};
 const nothing = () => null;
 // 40px tall so the whole row is a comfortable target; the box lines up with the first line of text.
 const checkRow = "flex min-h-10 cursor-pointer items-start gap-3 py-[9px] text-[15px] leading-[22px]";
-const checkBox = "mt-px size-5 shrink-0 accent-brand-700";
+const checkBox = "mt-px size-5 shrink-0 accent-[#52946B]";
 
 function FieldError({ id, className, children }: { id?: string; className?: string; children: React.ReactNode }) {
   return (
@@ -223,7 +223,7 @@ export function AuthForm({ mode, domain }: { mode: "sign-in" | "sign-up"; domain
           </label>
         )}
       </div>
-      <Button type="submit" loading={loading} className="h-12! w-full text-base">
+      <Button type="submit" loading={loading} className="h-12! w-full rounded-full bg-[#52946B] text-white hover:bg-[#437C58] text-[16px] font-bold shadow-xs transition-colors">
         {signUp ? "Create account" : "Sign in"}
       </Button>
     </form>

@@ -1,8 +1,8 @@
 import { Inbox, Lock } from "lucide-react";
 import Link from "next/link";
 import { bodyRow, headRow, rowLink, TableBox, td, th } from "@/components/dashboard/data-table";
-import { AttachToCase } from "@/components/safetrail/attach-to-case";
-import { TamperCheck } from "@/components/safetrail/tamper-check";
+import { AttachToCase } from "@/components/vault/attach-to-case";
+import { TamperCheck } from "@/components/vault/tamper-check";
 import { buttonClass } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/card";
 import { Banner, EmptyState } from "@/components/ui/feedback";

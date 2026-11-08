@@ -1,11 +1,11 @@
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { TrailRegister } from "@/components/safetrail/illustrations/trail-register";
-import { TrailSignIn } from "@/components/safetrail/illustrations/trail-sign-in";
-import { Logo } from "@/components/safetrail/logo";
+import { TrailRegister } from "@/components/auth/illustrations/trail-register";
+import { TrailSignIn } from "@/components/auth/illustrations/trail-sign-in";
+import { Logo } from "@/components/layout/logo";
 
-const topLink = "link inline-flex min-h-10 items-center rounded-sm";
-const footLink = "inline-flex min-h-10 items-center rounded-sm hover:text-brand-800 hover:underline";
+const topLink = "inline-flex min-h-10 items-center rounded-full text-[14px] font-bold text-[#52946B] hover:text-[#356246] transition-colors";
+const footLink = "inline-flex min-h-10 items-center text-[13px] text-[#5F856E] hover:text-[#52946B] hover:underline transition-colors";
 
 /**
  * The split layout for sign in and register: a brand panel beside the form.

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { Logo } from "@/components/safetrail/logo";
+import { Logo } from "@/components/layout/logo";
 import { buttonClass } from "@/components/ui/button";
 import { allowedEmailDomain } from "@/lib/email-domain";
 import { getUser, homeFor } from "@/server/auth";

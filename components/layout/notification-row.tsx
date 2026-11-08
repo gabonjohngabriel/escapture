@@ -1,4 +1,5 @@
 import {
+  ArrowRight,
   ArrowUpRight,
   Bell,
   CircleCheck,
@@ -34,7 +35,6 @@ const tones: Record<Tone, string> = {
   plain: "bg-brand-100 text-brand-800",
 };
 
-// One place decides how each kind of notification looks, for the bell's popover and the page.
 const kinds: Record<string, { Icon: LucideIcon; tone: Tone }> = {
   case_escalated: { Icon: ArrowUpRight, tone: "attention" },
   case_closed: { Icon: CircleCheck, tone: "done" },
@@ -50,15 +50,16 @@ const kinds: Record<string, { Icon: LucideIcon; tone: Tone }> = {
   capture_saved: { Icon: FileCheck2, tone: "saved" },
 };
 
-/** Where a notification leads for this role, if anywhere. */
-export function notificationHref(n: Pick<NotificationItem, "caseId" | "evidenceId">, role: string): string | null {
+export function notificationHref(
+  n: Pick<NotificationItem, "caseId" | "evidenceId">,
+  role: string
+): string | null {
   if (n.caseId) return role === "student" ? `/cases/${n.caseId}` : `/review/${n.caseId}`;
   return n.evidenceId ? `/vault/${n.evidenceId}` : null;
 }
 
 /**
- * One notification: an icon circle, the title, when it happened and an unread
- * dot. `compact` is the popover's version; the page also shows the excerpt.
+ * Popover row version
  */
 export function NotificationRow({
   n,
@@ -78,7 +79,7 @@ export function NotificationRow({
     "grid grid-cols-[32px_minmax(0,1fr)_8px] gap-3",
     compact ? "px-4 py-3" : "px-[var(--card-pad)] py-4",
     unread && "bg-brand-50",
-    href && "hover:bg-brand-50",
+    href && "hover:bg-brand-50"
   );
   const content = (
     <>
@@ -86,7 +87,13 @@ export function NotificationRow({
         <Icon size={16} strokeWidth={1.75} />
       </span>
       <span className="min-w-0">
-        <span className={cn("block text-ink", compact ? "text-sm leading-5" : "leading-6", unread && !compact && "font-semibold")}>
+        <span
+          className={cn(
+            "block text-ink",
+            compact ? "text-sm leading-5" : "leading-6",
+            unread && !compact && "font-semibold"
+          )}
+        >
           {n.title}
         </span>
         {!compact && n.body && <span className="block text-sm leading-[22px] text-muted">{n.body}</span>}
@@ -98,20 +105,66 @@ export function NotificationRow({
           {timeAgo(n.createdAt)}
         </time>
       </span>
-      {unread ? (
-        <span className="mt-2 size-2 rounded-full bg-brand-700">
-          <span className="sr-only">Unread</span>
-        </span>
-      ) : (
-        <span />
-      )}
+      {unread && <span className="mt-2 size-2 rounded-full bg-brand-700" aria-label="Unread" />}
     </>
   );
-  return href ? (
-    <Link href={href} className={className} onClick={onNavigate}>
-      {content}
-    </Link>
-  ) : (
-    <div className={className}>{content}</div>
+
+  if (href) {
+    return (
+      <Link href={href} onClick={onNavigate} className={className}>
+        {content}
+      </Link>
+    );
+  }
+  return <div className={className}>{content}</div>;
+}
+
+/**
+ * Green Card version matching Figma node 44:1820
+ */
+export function NotificationCard({
+  n,
+  role,
+}: {
+  n: NotificationItem;
+  role: string;
+}) {
+  const { Icon } = kinds[n.type] ?? { Icon: Bell };
+  const unread = !n.readAt;
+  const href = notificationHref(n, role) ?? "/vault";
+
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl border-2 border-[#52946B] bg-card p-5 shadow-sm transition-all sm:flex-row sm:items-center sm:justify-between sm:gap-4 hover:shadow-md">
+      <div className="flex items-start gap-4 sm:items-center">
+        <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#EBF4EE] text-[#52946B]">
+          <Icon size={22} strokeWidth={2} />
+        </div>
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-base font-bold text-[#203E2C]">{n.title}</h3>
+            {unread && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#FEF3C7] px-2.5 py-0.5 text-xs font-semibold text-[#D97706]">
+                <span className="size-1.5 rounded-full bg-[#D97706]" />
+                Unread
+              </span>
+            )}
+          </div>
+          {n.body && <p className="text-sm leading-relaxed text-[#55665C]">{n.body}</p>}
+        </div>
+      </div>
+
+      <div className="flex shrink-0 items-center justify-between gap-4 border-t border-border pt-2 sm:flex-col sm:items-end sm:border-0 sm:pt-0">
+        <span className="tnum text-xs font-medium text-[#55665C]">
+          {timeAgo(n.createdAt)}
+        </span>
+        <Link
+          href={href}
+          className="inline-flex items-center gap-1 text-xs font-bold text-[#52946B] hover:underline"
+        >
+          <span>{n.caseId ? "View report" : "View shared evidence"}</span>
+          <ArrowRight size={14} strokeWidth={2.5} />
+        </Link>
+      </div>
+    </div>
   );
 }

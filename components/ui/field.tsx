@@ -5,7 +5,7 @@ import { useId, useState, type InputHTMLAttributes, type TextareaHTMLAttributes 
 import { cn } from "@/lib/cn";
 
 const control =
-  "w-full rounded-md border bg-card px-3 text-base text-ink placeholder:text-muted disabled:cursor-not-allowed disabled:bg-disabled-bg disabled:text-disabled-fg";
+  "w-full rounded-2xl border border-[#DCE5DF] bg-card px-4 text-[15px] text-ink placeholder:text-muted transition-colors focus:border-[#52946B] focus:outline-none focus:ring-2 focus:ring-[#52946B]/20 disabled:cursor-not-allowed disabled:bg-disabled-bg disabled:text-disabled-fg";
 
 type Common = { label: string; hint?: string; error?: string | null };
 
@@ -18,12 +18,12 @@ function Wrap({
   children,
 }: Common & { id: string; labelEnd?: React.ReactNode; children: React.ReactNode }) {
   const labelEl = (
-    <label htmlFor={id} className="text-sm leading-5 font-semibold text-ink">
+    <label htmlFor={id} className="text-[14px] leading-5 font-bold text-[#52946B]">
       {label}
     </label>
   );
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1.5">
       {labelEnd ? (
         <div className="flex items-baseline justify-between gap-3">
           {labelEl}
@@ -34,7 +34,7 @@ function Wrap({
       )}
       {children}
       {hint && !error && (
-        <p id={`${id}-hint`} className="text-[13px] leading-[18px] text-muted">
+        <p id={`${id}-hint`} className="text-[13px] leading-[18px] text-[#5F856E]">
           {hint}
         </p>
       )}
@@ -65,7 +65,7 @@ export function Input({
         id={id}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(id, hint, error)}
-        className={cn(control, "h-[var(--control-h)]", error ? "border-danger-fg" : "border-border-strong", className)}
+        className={cn(control, "h-12", error ? "border-danger-fg" : "border-[#DCE5DF]", className)}
         {...rest}
       />
     </Wrap>
@@ -98,8 +98,8 @@ export function PasswordInput({
           aria-describedby={describedBy(id, hint, error)}
           className={cn(
             control,
-            "h-[var(--control-h)] pr-[52px]",
-            error || invalid ? "border-danger-fg" : "border-border-strong",
+            "h-12 pr-[52px]",
+            error || invalid ? "border-danger-fg" : "border-[#DCE5DF]",
             className,
           )}
           {...rest}
@@ -109,9 +109,9 @@ export function PasswordInput({
           aria-label={shown ? "Hide password" : "Show password"}
           aria-pressed={shown}
           onClick={() => setShown((v) => !v)}
-          className="absolute top-1/2 right-1 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-muted transition-colors duration-150 ease-out hover:bg-brand-100 hover:text-brand-800"
+          className="absolute top-1/2 right-2 grid size-8 -translate-y-1/2 place-items-center rounded-lg text-muted transition-colors duration-150 ease-out hover:bg-brand-100 hover:text-[#52946B]"
         >
-          <Icon size={20} strokeWidth={1.75} aria-hidden />
+          <Icon size={18} strokeWidth={1.75} aria-hidden />
         </button>
       </div>
     </Wrap>
@@ -123,6 +123,7 @@ export function Textarea({
   hint,
   error,
   className,
+  rows = 4,
   ...rest
 }: Common & TextareaHTMLAttributes<HTMLTextAreaElement>) {
   const id = useId();
@@ -130,9 +131,10 @@ export function Textarea({
     <Wrap id={id} label={label} hint={hint} error={error}>
       <textarea
         id={id}
+        rows={rows}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(id, hint, error)}
-        className={cn(control, "min-h-32 py-2", error ? "border-danger-fg" : "border-border-strong", className)}
+        className={cn(control, "py-3", error ? "border-danger-fg" : "border-[#DCE5DF]", className)}
         {...rest}
       />
     </Wrap>
@@ -152,8 +154,9 @@ export function Select({
     <Wrap id={id} label={label} hint={hint} error={error}>
       <select
         id={id}
+        aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(id, hint, error)}
-        className={cn(control, "h-[var(--control-h)] border-border-strong", className)}
+        className={cn(control, "h-12", error ? "border-danger-fg" : "border-[#DCE5DF]", className)}
         {...rest}
       >
         {children}

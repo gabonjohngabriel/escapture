@@ -1,20 +1,114 @@
 import type { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/cn";
+
+export type StatTileVariant = "amber" | "coral" | "green" | "default";
+
+const VARIANTS: Record<
+  StatTileVariant,
+  {
+    label: string;
+    note: string;
+    value: string;
+    iconBg: string;
+    iconColor: string;
+    iconRing: string;
+  }
+> = {
+  amber: {
+    label: "text-[#B47504]",
+    note: "text-[#D97706]/85",
+    value: "text-[#B47504]",
+    iconBg: "bg-amber-50",
+    iconColor: "text-amber-500",
+    iconRing: "ring-amber-200",
+  },
+  coral: {
+    label: "text-[#D94F4F]",
+    note: "text-[#E05252]/85",
+    value: "text-[#D94F4F]",
+    iconBg: "bg-red-50",
+    iconColor: "text-red-400",
+    iconRing: "ring-red-200",
+  },
+  green: {
+    label: "text-brand-700",
+    note: "text-brand-600/85",
+    value: "text-brand-700",
+    iconBg: "bg-brand-50",
+    iconColor: "text-brand-600",
+    iconRing: "ring-brand-200",
+  },
+  default: {
+    label: "text-muted",
+    note: "text-muted",
+    value: "text-ink",
+    iconBg: "bg-subtle",
+    iconColor: "text-muted",
+    iconRing: "ring-border",
+  },
+};
 
 /**
- * One summary number for a reviewer's dashboard: a label, the count, and one
- * plain line of context. No arrows, percentages or sparklines.
+ * Metric card for the reviewer dashboard matching the Figma design:
+ * Clean card with colored icon pill, status label, secondary context note,
+ * and high-contrast large numeric metric (or dash when unavailable).
  */
-export function StatTile({ label, Icon, value, note }: { label: string; Icon: LucideIcon; value: number; note: string }) {
+export function StatTile({
+  label,
+  Icon,
+  value,
+  note,
+  variant = "default",
+  unavailable = false,
+  className,
+}: {
+  label: string;
+  Icon: LucideIcon | React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>;
+  value: number | string;
+  note: string;
+  variant?: StatTileVariant;
+  unavailable?: boolean;
+  className?: string;
+}) {
+  const v = VARIANTS[variant] ?? VARIANTS.default;
+
   return (
-    <div className="flex flex-col gap-1 rounded-xl border border-border bg-card p-[var(--card-pad)] shadow-soft">
-      <dt className="flex items-center gap-2 text-sm leading-5 font-semibold text-muted">
-        <Icon size={16} strokeWidth={1.75} aria-hidden />
-        {label}
-      </dt>
-      <dd className="flex flex-col gap-1">
-        <span className="tnum font-heading text-[32px] leading-10 font-semibold text-ink">{value}</span>
-        <span className="text-[13px] leading-[18px] text-muted">{note}</span>
-      </dd>
+    <div
+      className={cn(
+        "flex flex-col justify-between rounded-2xl border border-border/70 bg-card p-6 shadow-soft transition-all duration-150 hover:shadow-md",
+        className,
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col">
+          <dt className={cn("text-[15px] leading-snug font-semibold", unavailable ? "text-muted" : v.label)}>
+            {label}
+          </dt>
+          <dd className={cn("text-xs leading-5 font-normal mt-0.5", unavailable ? "text-muted/70" : v.note)}>
+            {unavailable ? "Unavailable" : note}
+          </dd>
+        </div>
+        <div
+          aria-hidden="true"
+          className={cn(
+            "grid size-11 shrink-0 place-items-center rounded-full ring-1 shadow-xs",
+            unavailable ? "bg-subtle text-muted ring-border" : `${v.iconBg} ${v.iconColor} ${v.iconRing}`,
+          )}
+        >
+          <Icon size={22} strokeWidth={2} />
+        </div>
+      </div>
+
+      <div className="mt-5">
+        <span
+          className={cn(
+            "tnum font-heading text-4xl leading-none font-bold tracking-tight",
+            unavailable ? "text-muted/50 font-normal" : v.value,
+          )}
+        >
+          {unavailable ? "—" : value}
+        </span>
+      </div>
     </div>
   );
 }
