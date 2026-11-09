@@ -57,6 +57,20 @@
       "when": 1794144409576,
       "tag": "0007_vengeful_black_bolt",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794212500000,
+      "tag": "0008_flagged_words_expansion",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794214005473,
+      "tag": "0009_worthless_zarda",
+      "breakpoints": true
     }
   ]
 }

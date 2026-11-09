@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  boolean,
   char,
   check,
   index,
@@ -29,6 +30,28 @@ export const caseEventType = pgEnum("case_event_type", [
   "closed",
   "assigned",
   "unassigned",
+]);
+
+export const referralAgency = pgEnum("referral_agency", [
+  "barangay",
+  "vawc",
+  "pnp_acg",
+  "nbi_cybercrime",
+]);
+
+export const referralSeverity = pgEnum("referral_severity", [
+  "routine",
+  "moderate",
+  "severe",
+  "critical",
+]);
+
+export const referralStatus = pgEnum("referral_status", [
+  "referred",
+  "accepted",
+  "investigation_active",
+  "concurred",
+  "completed",
 ]);
 
 export type TamperReport = {
@@ -270,4 +293,56 @@ export const notifications = pgTable(
     createdAt: ts("created_at").notNull().defaultNow(),
   },
   (t) => [index("notifications_user_read_idx").on(t.userId, t.readAt)],
+).enableRLS();
+
+export const caseReferrals = pgTable(
+  "case_referrals",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    caseId: uuid("case_id")
+      .notNull()
+      .references(() => cases.id, { onDelete: "cascade" }),
+    referredBy: text("referred_by")
+      .notNull()
+      .references(() => user.id),
+    targetAgency: referralAgency("target_agency").notNull(),
+    severity: referralSeverity("severity").notNull().default("routine"),
+    referralReason: text("referral_reason").notNull(),
+    status: referralStatus("status").notNull().default("referred"),
+    createdAt: ts("created_at").notNull().defaultNow(),
+    updatedAt: ts("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    index("case_referrals_case_idx").on(t.caseId),
+    index("case_referrals_agency_idx").on(t.targetAgency),
+  ],
+).enableRLS();
+
+export const caseDirectives = pgTable(
+  "case_directives",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    caseId: uuid("case_id")
+      .notNull()
+      .references(() => cases.id, { onDelete: "cascade" }),
+    referralId: uuid("referral_id")
+      .notNull()
+      .references(() => caseReferrals.id, { onDelete: "cascade" }),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => user.id),
+    authorAgency: referralAgency("author_agency").notNull(),
+    actionType: text("action_type").notNull(),
+    directives: text("directives").notNull(),
+    urgency: text("urgency").notNull().default("standard"),
+    investigationMilestone: text("investigation_milestone"),
+    universityAcknowledgment: text("university_acknowledgment").notNull().default("pending"),
+    universityRemarks: text("university_remarks"),
+    concurrence: boolean("concurrence").notNull().default(false),
+    createdAt: ts("created_at").notNull().defaultNow(),
+  },
+  (t) => [
+    index("case_directives_case_idx").on(t.caseId),
+    index("case_directives_referral_idx").on(t.referralId),
+  ],
 ).enableRLS();

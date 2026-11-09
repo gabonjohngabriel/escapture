@@ -18,7 +18,15 @@ const setupKey = (userId: string) => `reviewer-setup:${userId}`;
  * Idempotent: an existing account just gets the role applied. Used by the
  * scripts; requests go through createReviewer, which never changes a role.
  */
-export async function ensureUser(input: { email: string; name: string; password: string; role: Role }) {
+export async function ensureUser(input: {
+  email: string;
+  name: string;
+  password: string;
+  role: Role;
+  office?: string;
+  agency?: string;
+  badgeOrCredentials?: string;
+}) {
   const email = input.email.trim().toLowerCase();
   const [existing] = await db.select().from(user).where(eq(user.email, email)).limit(1);
   let id = existing?.id;
@@ -31,7 +39,15 @@ export async function ensureUser(input: { email: string; name: string; password:
     // Signing up also signs in. Nobody asked for that session, and it would show as a first sign-in.
     await db.delete(session).where(eq(session.userId, id));
   }
-  await db.update(user).set({ role: input.role }).where(eq(user.id, id));
+  await db
+    .update(user)
+    .set({
+      role: input.role,
+      ...(input.office !== undefined ? { office: input.office } : {}),
+      ...(input.agency !== undefined ? { agency: input.agency } : {}),
+      ...(input.badgeOrCredentials !== undefined ? { badgeOrCredentials: input.badgeOrCredentials } : {}),
+    })
+    .where(eq(user.id, id));
   return { id, email, name: input.name, role: input.role, created: !existing };
 }
 

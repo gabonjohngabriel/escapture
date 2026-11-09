@@ -21,6 +21,12 @@ export function containsFlaggedWords(label: string, htmlContent: string, words: 
   return findFlaggedWords(text, words).length > 0;
 }
 
+const sensitivityCache = new Map<string, boolean>();
+
+export function clearSensitivityCache(): void {
+  sensitivityCache.clear();
+}
+
 /**
  * Checks whether an evidence item contains any word-bank words in its label
  * or in its saved capture contents.
@@ -42,13 +48,21 @@ export async function isSensitive(
     return true;
   }
 
-  // 2. Check captured file HTML text content
+  // 2. Check in-memory cache before downloading from Supabase Storage
+  const cacheKey = `${ev.id}:${words.join(",")}`;
+  if (sensitivityCache.has(cacheKey)) {
+    return sensitivityCache.get(cacheKey)!;
+  }
+
+  // 3. Check captured file HTML text content
   try {
     const { getEvidenceFile } = await import("./evidence");
     const bytes = await getEvidenceFile(actor, ev.id);
     const html = new TextDecoder().decode(bytes);
     const text = stripHtml(html);
-    return findFlaggedWords(text, words).length > 0;
+    const result = findFlaggedWords(text, words).length > 0;
+    sensitivityCache.set(cacheKey, result);
+    return result;
   } catch {
     return false;
   }

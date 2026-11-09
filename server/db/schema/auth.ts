@@ -8,7 +8,12 @@ import {
     timestamp,
 } from "drizzle-orm/pg-core";
 
-export const userRole = pgEnum("user_role", ["student", "reviewer", "admin"]);
+export const userRole = pgEnum("user_role", [
+    "student",
+    "reviewer",
+    "admin",
+    "authority",
+]);
 
 export const user = pgTable("user", {
     id: text("id").primaryKey(),
@@ -17,8 +22,10 @@ export const user = pgTable("user", {
     emailVerified: boolean("email_verified").notNull().default(false),
     image: text("image"),
     role: userRole("role").notNull().default("student"),
-    // Reviewer accounts only: the office they review for, and when an administrator deactivated them.
+    // Reviewer / Authority accounts: office, agency, badge/credentials, and deactivation timestamp.
     office: text("office"),
+    agency: text("agency"),
+    badgeOrCredentials: text("badge_or_credentials"),
     deactivatedAt: timestamp("deactivated_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
         .notNull()

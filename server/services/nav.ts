@@ -1,7 +1,7 @@
 import { count, eq, inArray, or } from "drizzle-orm";
 import type { Actor } from "../auth";
 import { db } from "../db";
-import { caseCollaborators, cases } from "../db/schema";
+import { caseCollaborators, caseReferrals, cases } from "../db/schema";
 import { countEvidence } from "./evidence";
 import { boardSummary } from "./review";
 
@@ -20,6 +20,13 @@ export async function navCounts(actor: Actor): Promise<Record<string, number>> {
         .where(or(eq(cases.ownerId, actor.id), inArray(cases.id, mine))),
     ]);
     return { "/vault": evidence.mine, "/cases": caseCount?.n ?? 0 };
+  }
+  if (actor.role === "authority") {
+    const [c] = await db
+      .select({ n: count() })
+      .from(caseReferrals)
+      .where(actor.agency ? eq(caseReferrals.targetAgency, actor.agency as any) : undefined);
+    return { "/authority/cases": c?.n ?? 0 };
   }
   const s = await boardSummary(actor);
   return { "/review/board": s.escalated + s.underReview, "/review/shared": s.sharedUnattached };

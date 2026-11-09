@@ -5,7 +5,12 @@ import { allowedEmailDomain } from "@/lib/email-domain";
 import { sha256Hex } from "@/lib/hash";
 import type { Actor } from "@/server/auth";
 import { db, pg } from "@/server/db";
-import { cases, evidence } from "@/server/db/schema";
+import {
+    caseDirectives,
+    caseReferrals,
+    cases,
+    evidence,
+} from "@/server/db/schema";
 import {
     addCollaborator,
     attachEvidence,
@@ -91,6 +96,33 @@ async function main() {
             password: PASSWORD,
             role: "student",
         }),
+        vawc: await ensureUser({
+            email: "ravenbituin@guinhawa.gov.ph",
+            name: "Raven Bituin",
+            password: PASSWORD,
+            role: "authority",
+            agency: "vawc",
+            office: "Barangay Guinhawa VAWC Desk",
+            badgeOrCredentials: "VAWC-OFFICER-2026-004",
+        }),
+        pnp: await ensureUser({
+            email: "nico.agustin@acg.pnp.gov.ph",
+            name: "Nico Angelo Agustin",
+            password: PASSWORD,
+            role: "authority",
+            agency: "pnp_acg",
+            office: "PNP Anti-Cybercrime Group",
+            badgeOrCredentials: "PNP-ACG-88492",
+        }),
+        nbi: await ensureUser({
+            email: "rafael.perez@nbi.gov.ph",
+            name: "Rafael Perez",
+            password: PASSWORD,
+            role: "authority",
+            agency: "nbi_cybercrime",
+            office: "NBI Cybercrime Division Group",
+            badgeOrCredentials: "NBI-CCD-0428",
+        }),
     };
     const maya: Actor = accounts.maya;
     const jules: Actor = accounts.jules;
@@ -108,6 +140,46 @@ async function main() {
         .limit(1);
     if (existing || existingCase) {
         console.log("Demo evidence and cases already exist. Skipping them.");
+        if (existingCase) {
+            const [existingRef] = await db
+                .select({ id: caseReferrals.id })
+                .from(caseReferrals)
+                .where(eq(caseReferrals.caseId, existingCase.id))
+                .limit(1);
+            if (!existingRef) {
+                const [ref] = await db
+                    .insert(caseReferrals)
+                    .values({
+                        caseId: existingCase.id,
+                        referredBy: accounts.reviewer1.id,
+                        targetAgency: "pnp_acg",
+                        severity: "severe",
+                        referralReason:
+                            "Targeted online harassment and defamatory statements against student, continuing in off-campus chat threads. Requires cyber investigation.",
+                        status: "investigation_active",
+                    })
+                    .returning();
+
+                await db.insert(caseDirectives).values({
+                    caseId: existingCase.id,
+                    referralId: ref.id,
+                    authorId: accounts.pnp.id,
+                    authorAgency: "pnp_acg",
+                    actionType: "PNP Blotter & Digital Preservation",
+                    directives:
+                        "Incident recorded in PNP Blotter #2026-BUL-088. Evidence hash verified. Preservation notice issued under Sec. 13 of RA 10175.",
+                    urgency: "priority",
+                    investigationMilestone:
+                        "Docket #2026-BUL-088 opened. Digital preservation requested.",
+                    universityAcknowledgment: "adopted",
+                    universityRemarks:
+                        "Guidance Office in coordination with BulSU Legal acknowledging PNP docket.",
+                });
+                console.log(
+                    "Attached sample severe referral and directive to existing case.",
+                );
+            }
+        }
     } else {
         const post = await capture(
             maya,
@@ -153,6 +225,37 @@ async function main() {
         });
         await attachEvidence(maya, draft.id, [chat.id]);
         console.log("Created demo evidence, one escalated case and one draft.");
+
+        // Create sample referral to PNP ACG for the severe case
+        const [ref] = await db
+            .insert(caseReferrals)
+            .values({
+                caseId: escalated.id,
+                referredBy: accounts.reviewer1.id,
+                targetAgency: "pnp_acg",
+                severity: "severe",
+                referralReason:
+                    "Targeted online harassment and defamatory statements against student, continuing in off-campus chat threads. Requires cyber investigation.",
+                status: "investigation_active",
+            })
+            .returning();
+
+        await db.insert(caseDirectives).values({
+            caseId: escalated.id,
+            referralId: ref.id,
+            authorId: accounts.pnp.id,
+            authorAgency: "pnp_acg",
+            actionType: "PNP Blotter & Digital Preservation",
+            directives:
+                "Incident recorded in PNP Blotter #2026-BUL-088. Evidence hash verified. Preservation notice issued under Sec. 13 of RA 10175.",
+            urgency: "priority",
+            investigationMilestone:
+                "Docket #2026-BUL-088 opened. Digital preservation requested.",
+            universityAcknowledgment: "adopted",
+            universityRemarks:
+                "Guidance Office in coordination with BulSU Legal acknowledging PNP docket.",
+        });
+        console.log("Created sample severe referral and directive to PNP ACG.");
     }
 
     console.log("\nDemo accounts (password for all: " + PASSWORD + ")");

@@ -7,6 +7,8 @@ import { AssignReviewers } from "@/components/review/assign-reviewers";
 import { EvidenceRecord } from "@/components/vault/evidence-record";
 import { FlaggedWords } from "@/components/review/flagged-words";
 import { CloseCaseButton, StartReviewButton } from "@/components/review/review-actions";
+import { ReferCaseDialog } from "@/components/review/refer-dialog";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { TamperCheck } from "@/components/vault/tamper-check";
 import { Timeline } from "@/components/cases/timeline";
 import { StatusBadge } from "@/components/ui/badge";
@@ -66,8 +68,11 @@ export default async function ReviewCasePage({ params }: PageProps<"/review/[id]
           )}
         </div>
         {/* One step at a time: start the review, then the same spot offers closing it. */}
-        {c.status === "escalated" && <StartReviewButton caseId={c.id} />}
-        {c.status === "under_review" && <CloseCaseButton caseId={c.id} />}
+        <div className="flex flex-wrap items-center gap-2">
+          {!closed && <ReferCaseDialog caseId={c.id} caseTitle={c.title} />}
+          {c.status === "escalated" && <StartReviewButton caseId={c.id} />}
+          {c.status === "under_review" && <CloseCaseButton caseId={c.id} />}
+        </div>
       </header>
 
       <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
@@ -186,9 +191,9 @@ export default async function ReviewCasePage({ params }: PageProps<"/review/[id]
                 <li key={p.id} className="flex items-center gap-3">
                   <span
                     aria-hidden
-                    className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-100 text-[13px] leading-none font-bold text-brand-800"
+                    className="grid size-8 shrink-0 place-items-center rounded-full overflow-hidden shadow-xs"
                   >
-                    {initials(p.name)}
+                    <UserAvatar seed={p.id} size={32} title={p.name} className="size-full rounded-full" />
                   </span>
                   <span className="min-w-0 text-sm leading-5">
                     <span className="block font-semibold">{p.name}</span>
@@ -204,6 +209,52 @@ export default async function ReviewCasePage({ params }: PageProps<"/review/[id]
           <Card className="flex flex-col gap-3">
             <h2 className={panelTitle}>Assigned reviewers</h2>
             <AssignReviewers caseId={c.id} assignees={c.assignees} reviewers={assignable} canEdit={canAssign} />
+          </Card>
+
+          <Card className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <h2 className={panelTitle}>External Authority Oversight</h2>
+              <span className="text-xs font-semibold text-muted">
+                {c.referrals.length} {c.referrals.length === 1 ? "referral" : "referrals"}
+              </span>
+            </div>
+            {c.referrals.length === 0 ? (
+              <p className="text-[13px] text-muted">
+                Not currently referred to external law enforcement or LGU.
+              </p>
+            ) : (
+              <div className="flex flex-col gap-2.5">
+                {c.referrals.map((r) => (
+                  <div key={r.id} className="rounded-xl border border-border bg-surface p-3 text-xs space-y-1">
+                    <div className="flex items-center justify-between font-bold">
+                      <span className="text-ink uppercase">{r.targetAgency.replace("_", " ")}</span>
+                      <span className="rounded-full bg-amber-500/10 text-amber-600 px-2 py-0.5 text-[10px] uppercase font-bold">
+                        {r.severity}
+                      </span>
+                    </div>
+                    <p className="text-muted text-[11px] line-clamp-2">Reason: {r.referralReason}</p>
+                    <p className="text-[10px] font-semibold text-brand-700">Status: {r.status.replace("_", " ")}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            {c.directives.length > 0 && (
+              <div className="mt-2 pt-2 border-t border-border flex flex-col gap-2">
+                <span className="text-xs font-bold text-ink">Directives & Advisories Received:</span>
+                {c.directives.map((d) => (
+                  <div key={d.id} className="rounded-lg bg-surface/80 p-2.5 text-xs border border-border/60 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <strong className="text-ink">{d.actionType}</strong>
+                      <span className="text-[10px] uppercase text-brand-600 font-bold">{d.urgency}</span>
+                    </div>
+                    <p className="text-[11px] text-ink/80 leading-relaxed">{d.directives}</p>
+                    {d.investigationMilestone && (
+                      <p className="text-[10px] text-amber-600 font-semibold">Milestone: {d.investigationMilestone}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </Card>
 
           <Card className="flex flex-col gap-3">

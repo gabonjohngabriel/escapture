@@ -10,12 +10,14 @@ import { isAllowedSignupEmail } from "@/lib/email-gate";
 import { db, schema } from "./db";
 import { forbidden, unauthorized } from "./errors";
 
-export type Role = "student" | "reviewer" | "admin";
+export type Role = "student" | "reviewer" | "admin" | "authority";
 export type Actor = {
   id: string;
   email: string;
   name: string;
   role: Role;
+  agency?: string | null;
+  office?: string | null;
   sessionId?: string;
 };
 
@@ -51,9 +53,13 @@ export const auth = betterAuth({
       role: { type: "string", required: false, defaultValue: "student", input: false },
     },
   },
-  trustedOrigins: [appUrl, process.env.NEXT_PUBLIC_APP_URL, process.env.EXTENSION_ORIGIN].filter(
-    (o): o is string => Boolean(o),
-  ),
+  trustedOrigins: [
+    appUrl,
+    process.env.NEXT_PUBLIC_APP_URL,
+    process.env.EXTENSION_ORIGIN,
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+  ].filter((o): o is string => Boolean(o)),
   rateLimit: {
     enabled: true,
     window: 60,
@@ -108,12 +114,31 @@ export const auth = betterAuth({
 export async function getUser(): Promise<Actor | null> {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return null;
-  const u = session.user as typeof session.user & { role?: Role };
+  const u = session.user as typeof session.user & {
+    role?: Role;
+    agency?: string | null;
+    office?: string | null;
+  };
+  let agency = u.agency ?? null;
+  let office = u.office ?? null;
+  if (!agency && (u.role === "authority" || u.role === "reviewer")) {
+    const [dbUser] = await db
+      .select({ agency: schema.user.agency, office: schema.user.office })
+      .from(schema.user)
+      .where(eq(schema.user.id, u.id))
+      .limit(1);
+    if (dbUser) {
+      agency = dbUser.agency;
+      office = dbUser.office;
+    }
+  }
   return {
     id: u.id,
     email: u.email,
     name: u.name,
     role: u.role ?? "student",
+    agency,
+    office,
     sessionId: session.session.id,
   };
 }
@@ -127,4 +152,10 @@ export async function requireUser(opts?: { roles?: Role[] }): Promise<Actor> {
 }
 
 export const homeFor = (role: Role) =>
-  role === "reviewer" ? "/review" : role === "admin" ? "/admin/reviewers" : "/vault";
+  role === "reviewer"
+    ? "/review"
+    : role === "admin"
+      ? "/admin/reviewers"
+      : role === "authority"
+        ? "/authority/cases"
+        : "/vault";

@@ -21,7 +21,7 @@ const Row = ({ title, meta, children }: { title: string; meta: string; children:
  */
 export function HeroVaultWindow() {
   return (
-    <div className="w-full max-w-[480px] rounded-2xl border border-border/80 bg-[#F1F4F6] p-3.5 sm:p-4 shadow-[0_12px_36px_rgba(0,0,0,0.06)]">
+    <div className="w-full max-w-[480px] rounded-2xl border border-border bg-canvas p-3.5 sm:p-4 shadow-[0_12px_36px_rgba(0,0,0,0.06)]">
       {/* Window title bar */}
       <div className="flex items-center gap-3 pb-3 px-1">
         <div className="flex items-center gap-1.5" aria-hidden>

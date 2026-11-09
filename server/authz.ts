@@ -3,7 +3,7 @@
 // resources the user shouldn't know exist.
 import { AppError, conflict, forbidden, notFound } from "./errors";
 
-export type Role = "student" | "reviewer" | "admin";
+export type Role = "student" | "reviewer" | "admin" | "authority";
 export type CaseStatus = "draft" | "escalated" | "under_review" | "closed";
 export type Decision = "ok" | "not_found" | "forbidden" | "locked";
 
@@ -168,4 +168,72 @@ export function canAttachAsReviewer(
   if (c.status === "closed") return "locked";
   if (!e) return "not_found";
   return e.ownerId === u.id || e.sharedWithUser ? "ok" : "not_found";
+}
+
+// ---- External Oversight & Authority (Local Government / Law Enforcement) ----
+
+export type AuthorityActor = { id: string; role: Role; agency?: string | null };
+
+/** University staff can refer an escalated or under_review case to external authorities. */
+export function canReferCase(u: U, c: { status: CaseStatus }): Decision {
+  if (!isStaff(u)) return "forbidden";
+  if (c.status === "draft") return "not_found";
+  return c.status === "closed" ? "locked" : "ok";
+}
+
+/**
+ * Authority accounts oversee cases explicitly referred to their agency.
+ * University staff (admin / reviewer) can also oversee all referred cases.
+ */
+export function canOverseeCase(
+  u: AuthorityActor,
+  c: { status: CaseStatus },
+  referrals: { targetAgency: string }[],
+): Decision {
+  if (isStaff(u)) {
+    return c.status === "draft" ? "not_found" : "ok";
+  }
+  if (u.role !== "authority") return "forbidden";
+  if (c.status === "draft") return "not_found";
+  if (!u.agency) return "forbidden";
+  const hasAgencyReferral = referrals.some((r) => r.targetAgency === u.agency);
+  return hasAgencyReferral ? "ok" : "not_found";
+}
+
+/** Authorities can submit directives on cases referred to their agency while the case is open. */
+export function canSubmitDirectives(
+  u: AuthorityActor,
+  c: { status: CaseStatus },
+  referral: { targetAgency: string; status: string },
+): Decision {
+  if (u.role !== "authority") return "forbidden";
+  if (c.status === "closed") return "locked";
+  if (!u.agency || referral.targetAgency !== u.agency) return "forbidden";
+  return "ok";
+}
+
+/** Authorities can accept and log investigation progress for severe or critical cases. */
+export function canUpdateInvestigationProgress(
+  u: AuthorityActor,
+  c: { status: CaseStatus },
+  referral: { targetAgency: string; severity: string; status: string },
+): Decision {
+  if (u.role !== "authority") return "forbidden";
+  if (c.status === "closed") return "locked";
+  if (!u.agency || referral.targetAgency !== u.agency) return "forbidden";
+  if (referral.severity !== "severe" && referral.severity !== "critical") {
+    return "forbidden";
+  }
+  return "ok";
+}
+
+/** Authorities can review and concur with the final decision on cases referred to them. */
+export function canConcurResolution(
+  u: AuthorityActor,
+  c: { status: CaseStatus },
+  referral: { targetAgency: string },
+): Decision {
+  if (u.role !== "authority") return "forbidden";
+  if (!u.agency || referral.targetAgency !== u.agency) return "forbidden";
+  return "ok";
 }

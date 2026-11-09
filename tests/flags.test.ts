@@ -8,6 +8,7 @@ describe("findFlaggedWords", () => {
 
   it("never matches inside another word", () => {
     expect(findFlaggedWords("A skill share and a killjoy", ["kill"])).toEqual([]);
+    expect(findFlaggedWords("Enjoying a cocktail party", ["fuck"])).toEqual([]);
   });
 
   it("accepts common English endings on a single word", () => {
@@ -37,5 +38,46 @@ describe("findFlaggedWords", () => {
   it("normalizes words for storage", () => {
     expect(normalizeWord("  Self   Harm ")).toBe("self harm");
     expect(normalizeWord("Pinatáy")).toBe("pinatay");
+  });
+
+  describe("leetspeak and de-obfuscation", () => {
+    const bank = [
+      "fuck",
+      "shit",
+      "kill",
+      "tangina",
+      "jabol",
+      "putang ina mo",
+      "kantutin kita",
+    ];
+
+    it("detects digit substitutions (0->o, 1->i, 4->a, etc.)", () => {
+      expect(findFlaggedWords("F0ck this person", bank)).toEqual(["fuck"]);
+      expect(findFlaggedWords("that is total sh1t", bank)).toEqual(["shit"]);
+      expect(findFlaggedWords("i will k1lL you", bank)).toEqual(["kill"]);
+      expect(findFlaggedWords("siya ay nag jab0l kanina", bank)).toEqual(["jabol"]);
+      expect(findFlaggedWords("tang1na naman oh", bank)).toEqual(["tangina"]);
+    });
+
+    it("detects masked characters and symbols (f_ck, f*ck)", () => {
+      expect(findFlaggedWords("what the f_ck is this", bank)).toEqual(["fuck"]);
+      expect(findFlaggedWords("what the f*ck", bank)).toEqual(["fuck"]);
+      expect(findFlaggedWords("f.ck you", bank)).toEqual(["fuck"]);
+    });
+
+    it("detects Filipino contractions and leetspeak combined", () => {
+      expect(findFlaggedWords("k4nt0t1n kta mamaya", bank)).toEqual(["kantutin kita"]);
+      expect(findFlaggedWords("p0t4ng n4 mo gago", bank)).toEqual(["putang ina mo"]);
+    });
+
+    it("handles character elongation / runs", () => {
+      expect(findFlaggedWords("fuuuuck off", bank)).toEqual(["fuck"]);
+      expect(findFlaggedWords("shiiiiiit", bank)).toEqual(["shit"]);
+      expect(findFlaggedWords("tanginaaaaa", bank)).toEqual(["tangina"]);
+    });
+
+    it("avoids false positives with standard dates or numbers", () => {
+      expect(findFlaggedWords("Room 404 on 2026-11-09, call 0917-123-4567", bank)).toEqual([]);
+    });
   });
 });

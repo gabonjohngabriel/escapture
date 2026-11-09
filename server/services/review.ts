@@ -14,9 +14,11 @@ import { db } from "../db";
 import {
   caseAssignments,
   caseCollaborators,
+  caseDirectives,
   caseFlags,
   caseEvents,
   caseEvidence,
+  caseReferrals,
   cases,
   evidence,
   evidenceShares,
@@ -324,7 +326,7 @@ export async function getReviewCase(actor: Actor, caseId: string) {
   const { c } = await loadCase(db, caseId);
   enforce(canReviewCase(actor, c));
   const isClosed = c.status === "closed";
-  const [[owner], collaborators, reporterEvidence, reviewerEvidence, reporterRecord, reviewerRecord, assignees, events] = await Promise.all([
+  const [[owner], collaborators, reporterEvidence, reviewerEvidence, reporterRecord, reviewerRecord, assignees, events, referrals, directives] = await Promise.all([
     db.select({ id: user.id, name: user.name, email: user.email }).from(user).where(eq(user.id, c.ownerId)),
     listCollaborators(db, caseId),
     isClosed ? [] : listCaseEvidence(db, caseId, "reporter"),
@@ -352,6 +354,38 @@ export async function getReviewCase(actor: Actor, caseId: string) {
       .innerJoin(user, eq(user.id, caseEvents.actorId))
       .where(eq(caseEvents.caseId, caseId))
       .orderBy(asc(caseEvents.createdAt)),
+    db
+      .select({
+        id: caseReferrals.id,
+        targetAgency: caseReferrals.targetAgency,
+        severity: caseReferrals.severity,
+        referralReason: caseReferrals.referralReason,
+        status: caseReferrals.status,
+        createdAt: caseReferrals.createdAt,
+        referredByName: user.name,
+      })
+      .from(caseReferrals)
+      .innerJoin(user, eq(user.id, caseReferrals.referredBy))
+      .where(eq(caseReferrals.caseId, caseId)),
+    db
+      .select({
+        id: caseDirectives.id,
+        referralId: caseDirectives.referralId,
+        authorAgency: caseDirectives.authorAgency,
+        actionType: caseDirectives.actionType,
+        directives: caseDirectives.directives,
+        urgency: caseDirectives.urgency,
+        investigationMilestone: caseDirectives.investigationMilestone,
+        universityAcknowledgment: caseDirectives.universityAcknowledgment,
+        universityRemarks: caseDirectives.universityRemarks,
+        concurrence: caseDirectives.concurrence,
+        createdAt: caseDirectives.createdAt,
+        authorName: user.name,
+      })
+      .from(caseDirectives)
+      .innerJoin(user, eq(user.id, caseDirectives.authorId))
+      .where(eq(caseDirectives.caseId, caseId))
+      .orderBy(desc(caseDirectives.createdAt)),
   ]);
   return {
     id: c.id,
@@ -371,6 +405,8 @@ export async function getReviewCase(actor: Actor, caseId: string) {
     assignees,
     flaggedWords: (await flagsFor([caseId])).get(caseId) ?? [],
     events,
+    referrals,
+    directives,
   };
 }
 
@@ -498,6 +534,31 @@ export async function closeCase(actor: Actor, caseId: string, note: string) {
         caseId,
       })),
     );
+    // Notify external authorities who had referrals on this case
+    const caseRefRows = await tx
+      .select({ targetAgency: caseReferrals.targetAgency })
+      .from(caseReferrals)
+      .where(eq(caseReferrals.caseId, caseId));
+    if (caseRefRows.length > 0) {
+      const agencies = [...new Set(caseRefRows.map((r) => r.targetAgency))];
+      const authorityUsers = await tx
+        .select({ id: user.id })
+        .from(user)
+        .where(and(eq(user.role, "authority"), inArray(user.agency, agencies)));
+      if (authorityUsers.length > 0) {
+        await notify(
+          tx,
+          authorityUsers.map((u) => ({
+            userId: u.id,
+            type: "case_closed",
+            title: `Case Concluded by University: ${c.title}`,
+            body: `Disposition: ${excerpt(note)}`,
+            caseId,
+          })),
+        );
+      }
+    }
+
     return { id: updated.id, status: updated.status, closedAt: updated.closedAt };
   });
 }

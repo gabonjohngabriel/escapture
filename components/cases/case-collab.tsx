@@ -15,6 +15,7 @@ import {
 import { api, ApiError } from "@/lib/client-api";
 import { initials } from "@/lib/format";
 import { mapIndex, mergeText } from "@/lib/merge";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 type Field = "title" | "description";
 type Texts = Record<Field, string>;
@@ -368,10 +369,10 @@ export function PresenceAvatars() {
             <span
               tabIndex={0}
               aria-label={`${o.name}, ${o.email}, has this case open`}
-              className="grid size-9 place-items-center rounded-full border-2 bg-brand-100 text-[13px] leading-none font-bold text-brand-800"
+              className="relative flex size-9 shrink-0 items-center justify-center rounded-full border-2 overflow-hidden shadow-xs"
               style={{ borderColor: colorFor(o.id) }}
             >
-              {initials(o.name)}
+              <UserAvatar seed={o.id} size={36} title={o.name} className="size-full rounded-none" />
             </span>
             <span
               role="tooltip"

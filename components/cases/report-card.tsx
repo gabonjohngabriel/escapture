@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { StatusBadge } from "@/components/ui/badge";
 import { formatDateTime } from "@/lib/format";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 export type ReportItem = {
     id: string;
@@ -32,8 +33,6 @@ export function ReportCard({
         item.evidenceCount === 1 ? "capture" : "captures"
     }`;
 
-    const initial = (item.title || "R").slice(0, 1).toUpperCase();
-
     return (
         <Link
             href={`/cases/${item.id}`}
@@ -41,9 +40,12 @@ export function ReportCard({
             {/* Top Banner */}
             <div className="flex items-center justify-between bg-brand-500 px-6 py-4 text-white">
                 <div className="flex min-w-0 items-center gap-3.5">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-white/60 bg-white/10 font-bold text-white text-sm">
-                        {initial}
-                    </div>
+                    <UserAvatar
+                        seed={item.ownerName || item.id}
+                        size={40}
+                        title={item.ownerName || "Reporter"}
+                        className="border-2 border-white/60 shadow-xs shrink-0"
+                    />
                     <div className="min-w-0">
                         <span className="block text-xs font-semibold text-white/80 leading-tight">
                             {item.role === "owner"

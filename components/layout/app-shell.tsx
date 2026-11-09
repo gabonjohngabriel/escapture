@@ -32,6 +32,7 @@ import { Menu } from "@/components/ui/menu";
 import { api } from "@/lib/client-api";
 import { cn } from "@/lib/cn";
 import { initials } from "@/lib/format";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { Logo } from "./logo";
 import { NotificationPopover } from "./notification-popover";
 import {
@@ -39,7 +40,7 @@ import {
     PrivacyBlurToggle,
 } from "@/components/layout/privacy-blur";
 
-type Role = "student" | "reviewer" | "admin";
+type Role = "student" | "reviewer" | "admin" | "authority";
 type NavItem = {
     href: string;
     label: string;
@@ -78,6 +79,15 @@ const REVIEW_NAV: NavItem[] = [
     },
 ];
 
+const AUTHORITY_NAV: NavItem[] = [
+    {
+        href: "/authority/cases",
+        label: "Referred Cases",
+        Icon: Columns3,
+        match: (p) => p.startsWith("/authority"),
+    },
+];
+
 const NAV: Record<Role, NavItem[]> = {
     student: [
         {
@@ -109,6 +119,7 @@ const NAV: Record<Role, NavItem[]> = {
             match: (p) => p.startsWith("/admin/word-bank"),
         },
     ],
+    authority: AUTHORITY_NAV,
 };
 
 const ROLE: Record<Role, { label: string; group: string }> = {
@@ -123,6 +134,10 @@ const ROLE: Record<Role, { label: string; group: string }> = {
     admin: {
         label: "Administrator",
         group: "Manage Your Platform",
+    },
+    authority: {
+        label: "Law Enforcement / LGU",
+        group: "External Oversight",
     },
 };
 
@@ -551,11 +566,12 @@ export function AppShell({
                                 triggerClassName="flex h-11 items-center gap-3 rounded-full py-0 pr-3 pl-1.5 text-left text-ink transition-colors duration-150 hover:bg-brand-50"
                                 trigger={
                                     <>
-                                        <span
-                                            aria-hidden
-                                            className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-100 text-[13px] leading-none font-bold text-brand-900">
-                                            {initials(user.name)}
-                                        </span>
+                                        <UserAvatar
+                                            seed={user.name || user.email}
+                                            size={32}
+                                            title={user.name}
+                                            className="size-8 shrink-0"
+                                        />
                                         <span className="hidden max-w-[160px] lg:block">
                                             <span className="block truncate text-sm leading-[18px] font-semibold">
                                                 {user.name}
