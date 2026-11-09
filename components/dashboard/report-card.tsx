@@ -136,14 +136,14 @@ export function ReportCard({
       {/* Metadata 3-Column Body */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-2 px-5 py-4 text-left border-t border-border/40 bg-card">
         <div className="flex flex-col min-w-0">
-          <span className="text-xs font-bold text-muted uppercase tracking-wider">Reporter</span>
+          <span className="text-xs font-bold text-muted">Reporter</span>
           <span className="truncate text-sm font-medium text-ink mt-0.5" title={report.reporterName}>
             {report.reporterName}
           </span>
         </div>
 
         <div className="flex flex-col min-w-0">
-          <span className="text-xs font-bold text-muted uppercase tracking-wider">Assigned Reviewer</span>
+          <span className="text-xs font-bold text-muted">Assigned reviewer</span>
           <span
             className={cn(
               "truncate text-sm font-medium mt-0.5",
@@ -156,7 +156,7 @@ export function ReportCard({
         </div>
 
         <div className="flex flex-col min-w-0 items-start">
-          <span className="text-xs font-bold text-muted uppercase tracking-wider">Evidence</span>
+          <span className="text-xs font-bold text-muted">Evidence</span>
           <span className="truncate text-sm font-medium text-ink mt-0.5">
             {evidenceText}
           </span>

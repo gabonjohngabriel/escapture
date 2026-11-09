@@ -134,7 +134,7 @@ export function FilterPopover({
           <div className="flex flex-col gap-4 py-3">
             {groups.map((group) => (
               <div key={group.id} className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-muted uppercase tracking-wider">
+                <span className="text-xs font-bold text-muted">
                   {group.label}
                 </span>
 

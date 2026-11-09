@@ -149,7 +149,7 @@ export function IntegrityCard({
         </summary>
         <div className="mt-3 flex flex-col gap-3">
           <div className="rounded-xl border border-border/80 bg-subtle/60 p-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-brand-800 mb-2">
+            <h4 className="text-xs font-bold text-brand-800 mb-2">
               Security guarantees at capture
             </h4>
             <ul className="flex flex-col gap-2.5">

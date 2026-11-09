@@ -46,6 +46,28 @@
     --danger-fg: #9a3b3b;
     --danger-solid: #a83f3f;
 
+    /* authority navy & semantic tiers */
+    --authority-bg: #eef2f6;
+    --authority-fg: #1e3a5f;
+    --authority-border: #c5d3e2;
+    --authority-solid: #243b53;
+
+    --routine-bg: #eef4f8;
+    --routine-fg: #244b6b;
+    --routine-border: #c5d9e8;
+
+    --moderate-bg: #fdf3e1;
+    --moderate-fg: #8a5a12;
+    --moderate-border: #f0d096;
+
+    --severe-bg: #fdece7;
+    --severe-fg: #9e3f22;
+    --severe-border: #f5bfb0;
+
+    --critical-bg: #fceded;
+    --critical-fg: #9a3b3b;
+    --critical-border: #f2b8b8;
+
     /* text and focus on dark bands (brand-900) */
     --on-dark: #ffffff;
     --on-dark-muted: #c7e0ce;
@@ -148,6 +170,22 @@
     --color-danger-bg: var(--danger-bg);
     --color-danger-fg: var(--danger-fg);
     --color-danger-solid: var(--danger-solid);
+    --color-authority-bg: var(--authority-bg);
+    --color-authority-fg: var(--authority-fg);
+    --color-authority-border: var(--authority-border);
+    --color-authority-solid: var(--authority-solid);
+    --color-routine-bg: var(--routine-bg);
+    --color-routine-fg: var(--routine-fg);
+    --color-routine-border: var(--routine-border);
+    --color-moderate-bg: var(--moderate-bg);
+    --color-moderate-fg: var(--moderate-fg);
+    --color-moderate-border: var(--moderate-border);
+    --color-severe-bg: var(--severe-bg);
+    --color-severe-fg: var(--severe-fg);
+    --color-severe-border: var(--severe-border);
+    --color-critical-bg: var(--critical-bg);
+    --color-critical-fg: var(--critical-fg);
+    --color-critical-border: var(--critical-border);
     --radius-md: var(--radius);
     --radius-xl: var(--radius-card);
     --radius-2xl: var(--radius-modal);

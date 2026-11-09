@@ -9,7 +9,6 @@ import {
     History,
     MessageSquare,
     Send,
-    ShieldAlert,
     ShieldCheck,
     ThumbsUp,
     XCircle,
@@ -18,7 +17,8 @@ import { useState } from "react";
 import { api } from "@/lib/client-api";
 import { formatDateTime } from "@/lib/format";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/ui/badge";
+import { Badge, ReferralStatusBadge, SeverityBadge, StatusBadge, UrgencyBadge } from "@/components/ui/badge";
+import { Input, Select, Textarea } from "@/components/ui/field";
 
 export type OversightData = {
     case: {
@@ -183,28 +183,21 @@ export function CaseOversightView({
         }
     };
 
-    const severityBadge = (severity: string) => {
-        const colors = {
-            critical: "bg-red-500/10 text-red-600 border-red-500/30",
-            severe: "bg-amber-500/10 text-amber-600 border-amber-500/30",
-            moderate: "bg-yellow-500/10 text-yellow-600 border-yellow-500/30",
-            routine: "bg-blue-500/10 text-blue-600 border-blue-500/30",
-        };
-        return (
-            <span
-                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider ${
-                    colors[severity as keyof typeof colors] ?? colors.routine
-                }`}>
-                <ShieldAlert size={12} aria-hidden />
-                {severity}
-            </span>
-        );
+    const acknowledgmentLabel = (ack: string) => {
+        switch (ack) {
+            case "adopted":
+                return { label: "Adopted", tone: "review" as const };
+            case "acknowledged":
+                return { label: "Acknowledged", tone: "authority" as const };
+            default:
+                return { label: ack || "Pending", tone: "neutral" as const };
+        }
     };
 
     return (
         <div className="space-y-6">
             {/* Header / Case Banner */}
-            <div className="rounded-2xl border border-brand-500/20 bg-card p-6 shadow-xs">
+            <div className="rounded-2xl border border-(--brand-500) bg-card p-6 shadow-xs">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <div className="flex items-center gap-2 text-xs font-semibold text-muted">
@@ -220,42 +213,44 @@ export function CaseOversightView({
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                         <StatusBadge status={data.case.status} />
-                        {activeReferral && severityBadge(activeReferral.severity)}
+                        {activeReferral && <SeverityBadge severity={activeReferral.severity} />}
                     </div>
                 </div>
 
-                {/* Referral Dispatch Card */}
+                {/* Referral Dispatch Card (Authority Navy) */}
                 {activeReferral && (
-                    <div className="mt-6 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm">
-                        <div className="flex items-start justify-between gap-4">
+                    <div className="mt-6 rounded-xl border border-[#C5D3E2] bg-[#EEF2F6] p-4 text-sm text-[#1E3A5F]">
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                             <div className="space-y-1">
-                                <p className="font-bold text-amber-900 dark:text-amber-300 flex items-center gap-2">
-                                    <ShieldCheck size={18} className="text-amber-600" aria-hidden />
+                                <p className="font-bold text-[#1E3A5F] flex items-center gap-2 text-[14px]">
+                                    <ShieldCheck size={18} className="text-[#243B53]" aria-hidden />
                                     Referred to {agencyLabel(activeReferral.targetAgency)} by {activeReferral.referredByName} ({activeReferral.referredByOffice || "BulSU Reviewer"})
                                 </p>
-                                <p className="text-amber-800/90 dark:text-amber-200/90 text-xs sm:text-sm">
-                                    <strong>Referral Rationale:</strong> {activeReferral.referralReason}
+                                <p className="text-[#244B6B] text-xs sm:text-[13px] leading-relaxed">
+                                    <strong className="font-semibold text-[#1E3A5F]">Referral rationale:</strong> {activeReferral.referralReason}
                                 </p>
                             </div>
-                            <span className="shrink-0 rounded-md bg-amber-500/20 px-2 py-1 text-xs font-semibold text-amber-900 dark:text-amber-300 uppercase">
-                                Status: {activeReferral.status.replace("_", " ")}
-                            </span>
+                            <div className="shrink-0 flex items-center gap-2">
+                                <span className="text-xs text-[#244B6B] font-medium">Status:</span>
+                                <ReferralStatusBadge status={activeReferral.status} />
+                            </div>
                         </div>
 
                         {activeReferral.status === "referred" &&
                             (activeReferral.severity === "severe" || activeReferral.severity === "critical") && (
-                                <div className="mt-3 pt-3 border-t border-amber-500/20 flex items-center justify-between">
-                                    <p className="text-xs text-amber-800 dark:text-amber-300">
-                                        This severe incident requires external agency intake and docket assignment.
+                                <div className="mt-3 pt-3 border-t border-[#C5D3E2]/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <p className="text-xs text-[#244B6B]">
+                                        This severe incident requires external agency intake and formal docket assignment.
                                     </p>
                                     <Button
+                                        variant="authority"
                                         onClick={handleAcceptHandling}
                                         disabled={submitting}
-                                        className="h-9 px-3.5 text-xs bg-amber-600 hover:bg-amber-700 text-white font-semibold">
+                                        className="h-9 px-4 text-xs font-semibold">
                                         <Gavel size={14} className="mr-1.5" aria-hidden />
-                                        Accept Formal External Handling
+                                        Accept formal external handling
                                     </Button>
                                 </div>
                             )}
@@ -274,7 +269,7 @@ export function CaseOversightView({
                             : "border-transparent text-muted hover:text-ink"
                     }`}>
                     <Gavel size={16} aria-hidden />
-                    <span>Action Directives & Advisories ({data.directives.length})</span>
+                    <span>Action directives & advisories ({data.directives.length})</span>
                 </button>
                 <button
                     type="button"
@@ -285,7 +280,7 @@ export function CaseOversightView({
                             : "border-transparent text-muted hover:text-ink"
                     }`}>
                     <FileCheck2 size={16} aria-hidden />
-                    <span>Sealed Evidence Records ({data.evidence.length})</span>
+                    <span>Sealed evidence records ({data.evidence.length})</span>
                 </button>
                 <button
                     type="button"
@@ -296,7 +291,7 @@ export function CaseOversightView({
                             : "border-transparent text-muted hover:text-ink"
                     }`}>
                     <ShieldCheck size={16} aria-hidden />
-                    <span>Final Decision Review & Concurrence</span>
+                    <span>Final decision review & concurrence</span>
                 </button>
             </div>
 
@@ -304,76 +299,54 @@ export function CaseOversightView({
             {activeTab === "directives" && (
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                     {/* Submit Directive Form */}
-                    <div className="lg:col-span-1 rounded-2xl border border-border bg-card p-5 shadow-xs h-fit space-y-4">
+                    <div className="lg:col-span-1 rounded-2xl border border-(--brand-500) bg-card p-5 shadow-xs h-fit space-y-4">
                         <div>
-                            <h2 className="text-base font-bold text-ink">Submit Action Directive</h2>
+                            <h2 className="text-base font-bold text-ink">Submit action directive</h2>
                             <p className="text-xs text-muted">
                                 Provide official legal or procedural recommendations based on the evidence.
                             </p>
                         </div>
 
                         <form onSubmit={handleSubmitDirectives} className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-muted">
-                                    Action / Order Type
-                                </label>
-                                <input
-                                    type="text"
-                                    value={actionType}
-                                    onChange={(e) => setActionType(e.target.value)}
-                                    className="mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand-500"
-                                    placeholder="e.g. Barangay Protection Order (BPO), PNP Subpoena"
-                                    required
-                                />
-                            </div>
+                            <Input
+                                label="Action or order type"
+                                value={actionType}
+                                onChange={(e) => setActionType(e.target.value)}
+                                placeholder="e.g. Barangay Protection Order (BPO), PNP Subpoena"
+                                required
+                            />
 
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-muted">
-                                    Urgency
-                                </label>
-                                <select
-                                    value={urgency}
-                                    onChange={(e) =>
-                                        setUrgency(
-                                            e.target.value as "standard" | "priority" | "immediate",
-                                        )
-                                    }
-                                    className="mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand-500">
-                                    <option value="standard">Standard Review</option>
-                                    <option value="priority">Priority Intervention</option>
-                                    <option value="immediate">Immediate Legal Summons / Safety Plan</option>
-                                </select>
-                            </div>
+                            <Select
+                                label="Urgency level"
+                                value={urgency}
+                                onChange={(e) =>
+                                    setUrgency(
+                                        e.target.value as "standard" | "priority" | "immediate",
+                                    )
+                                }>
+                                <option value="standard">Standard review</option>
+                                <option value="priority">Priority intervention</option>
+                                <option value="immediate">Immediate legal summons / safety plan</option>
+                            </Select>
 
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-muted">
-                                    Directives & Procedural Guidance
-                                </label>
-                                <textarea
-                                    value={directivesText}
-                                    onChange={(e) => setDirectivesText(e.target.value)}
-                                    rows={4}
-                                    className="mt-1 w-full rounded-xl border border-border bg-surface p-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand-500"
-                                    placeholder="Detail what specific steps must be executed by the student, university, or local jurisdiction..."
-                                    required
-                                />
-                            </div>
+                            <Textarea
+                                label="Directives and procedural guidance"
+                                value={directivesText}
+                                onChange={(e) => setDirectivesText(e.target.value)}
+                                rows={4}
+                                placeholder="Detail what specific steps must be executed by the student, university, or local jurisdiction..."
+                                required
+                            />
 
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-muted">
-                                    External Milestone (Optional)
-                                </label>
-                                <input
-                                    type="text"
-                                    value={milestone}
-                                    onChange={(e) => setMilestone(e.target.value)}
-                                    className="mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand-500"
-                                    placeholder="e.g. Summons served for Nov 14 hearing"
-                                />
-                            </div>
+                            <Input
+                                label="External milestone (optional)"
+                                value={milestone}
+                                onChange={(e) => setMilestone(e.target.value)}
+                                placeholder="e.g. Summons served for Nov 14 hearing"
+                            />
 
                             {error && (
-                                <p className="text-xs font-medium text-red-600 dark:text-red-400">
+                                <p className="text-xs font-medium text-red-600">
                                     {error}
                                 </p>
                             )}
@@ -383,16 +356,16 @@ export function CaseOversightView({
                                 disabled={submitting}
                                 className="w-full gap-2 bg-brand-600 hover:bg-brand-700 text-white">
                                 <Send size={15} aria-hidden />
-                                <span>{submitting ? "Submitting..." : "Issue Advisory Directive"}</span>
+                                <span>{submitting ? "Submitting..." : "Issue advisory directive"}</span>
                             </Button>
                         </form>
                     </div>
 
                     {/* Timeline of Directives */}
                     <div className="lg:col-span-2 space-y-4">
-                        <h2 className="text-base font-bold text-ink">Recorded Directives & Updates</h2>
+                        <h2 className="text-base font-bold text-ink">Recorded directives & updates</h2>
                         {data.directives.length === 0 ? (
-                            <div className="rounded-2xl border-2 border-brand-500/30 bg-card p-10 text-center shadow-xs">
+                            <div className="rounded-2xl border-2 border-brand-500 bg-card p-10 text-center shadow-xs">
                                 <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-brand-50 text-brand-700">
                                     <History size={28} strokeWidth={2} aria-hidden />
                                 </div>
@@ -406,18 +379,16 @@ export function CaseOversightView({
                                 {data.directives.map((d) => (
                                     <div
                                         key={d.id}
-                                        className="rounded-2xl border border-border bg-card p-5 shadow-xs space-y-3">
+                                        className="rounded-2xl border border-(--brand-500) bg-card p-5 shadow-xs space-y-3">
                                         <div className="flex items-center justify-between gap-3">
                                             <div className="flex items-center gap-2">
-                                                <div className="rounded-lg bg-brand-500/10 p-1.5 text-brand-600">
+                                                <div className="rounded-lg bg-brand-50 p-1.5 text-brand-600">
                                                     <Gavel size={16} aria-hidden />
                                                 </div>
                                                 <span className="font-bold text-sm text-ink">{d.actionType}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <span className="rounded-full bg-surface border border-border px-2 py-0.5 text-[11px] font-semibold text-muted uppercase">
-                                                    {d.urgency}
-                                                </span>
+                                                <UrgencyBadge urgency={d.urgency} />
                                                 <span className="text-xs text-muted">
                                                     {formatDateTime(d.createdAt)}
                                                 </span>
@@ -429,8 +400,8 @@ export function CaseOversightView({
                                         </p>
 
                                         {d.investigationMilestone && (
-                                            <div className="flex items-center gap-2 rounded-lg bg-surface px-3 py-1.5 text-xs font-semibold text-brand-700 dark:text-brand-300">
-                                                <Clock size={13} aria-hidden />
+                                            <div className="flex items-center gap-2 rounded-lg bg-subtle px-3 py-1.5 text-xs font-semibold text-[#8A5A12]">
+                                                <Clock size={13} className="shrink-0 text-[#E9B350]" aria-hidden />
                                                 <span>Milestone: {d.investigationMilestone}</span>
                                             </div>
                                         )}
@@ -439,19 +410,12 @@ export function CaseOversightView({
                                             <span className="text-muted">
                                                 By: <strong>{d.authorName}</strong> ({agencyLabel(d.authorAgency)})
                                             </span>
-                                            <span className="font-semibold text-muted">
-                                                University Status:{" "}
-                                                <span
-                                                    className={
-                                                        d.universityAcknowledgment === "adopted"
-                                                            ? "text-green-600 font-bold uppercase"
-                                                            : d.universityAcknowledgment === "acknowledged"
-                                                            ? "text-blue-600 font-bold uppercase"
-                                                            : "text-muted uppercase"
-                                                    }>
-                                                    {d.universityAcknowledgment}
-                                                </span>
-                                            </span>
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-muted">University status:</span>
+                                                <Badge tone={acknowledgmentLabel(d.universityAcknowledgment).tone}>
+                                                    {acknowledgmentLabel(d.universityAcknowledgment).label}
+                                                </Badge>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -466,19 +430,18 @@ export function CaseOversightView({
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h2 className="text-base font-bold text-ink">Cryptographically Sealed Evidence</h2>
+                            <h2 className="text-base font-bold text-ink">Cryptographically sealed evidence</h2>
                             <p className="text-xs text-muted">
                                 Captured in accordance with RA 10175 chain-of-custody rules. SHA-256 hashes verified.
                             </p>
                         </div>
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-xs font-bold text-green-700 dark:text-green-400">
-                            <ShieldCheck size={14} aria-hidden />
-                            Chain of Custody Intact
-                        </span>
+                        <Badge tone="tamper" icon={<ShieldCheck size={14} aria-hidden />}>
+                            Chain of custody intact
+                        </Badge>
                     </div>
 
                     {data.evidence.length === 0 ? (
-                        <div className="rounded-2xl border-2 border-brand-500/30 bg-card p-10 text-center shadow-xs">
+                        <div className="rounded-2xl border-2 border-brand-500 bg-card p-10 text-center shadow-xs">
                             <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-brand-50 text-brand-700">
                                 <FileCheck2 size={28} strokeWidth={2} aria-hidden />
                             </div>
@@ -492,7 +455,7 @@ export function CaseOversightView({
                             {data.evidence.map((e) => (
                                 <div
                                     key={e.id}
-                                    className="rounded-2xl border border-border bg-card p-5 shadow-xs space-y-3">
+                                    className="rounded-2xl border border-(--brand-500) bg-card p-5 shadow-xs space-y-3">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             {e.kind === "facebook_post" ? (
@@ -504,28 +467,28 @@ export function CaseOversightView({
                                                 {e.label}
                                             </h3>
                                         </div>
-                                        <span className="rounded-full bg-surface border border-border px-2 py-0.5 text-xs font-medium text-muted">
-                                            {e.kind === "facebook_post" ? "Facebook Post" : "Messenger Chat"}
+                                        <span className="rounded-full bg-subtle border border-border px-2.5 py-0.5 text-xs font-medium text-muted">
+                                            {e.kind === "facebook_post" ? "Facebook post" : "Messenger chat"}
                                         </span>
                                     </div>
 
                                     <div className="space-y-1 text-xs text-muted">
                                         <p>
-                                            <strong>Captured At:</strong> {formatDateTime(e.capturedAt)}
+                                            <strong className="text-ink">Captured at:</strong> {formatDateTime(e.capturedAt)}
                                         </p>
                                         <p className="truncate">
-                                            <strong>Source URL:</strong> {e.sourceUrl}
+                                            <strong className="text-ink">Source URL:</strong> {e.sourceUrl}
                                         </p>
                                         <p>
-                                            <strong>Owner:</strong> {e.ownerName}
+                                            <strong className="text-ink">Owner:</strong> {e.ownerName}
                                         </p>
                                     </div>
 
-                                    <div className="rounded-lg bg-surface p-2.5 font-mono text-[11px] text-muted space-y-1">
-                                        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-ink/70">
+                                    <div className="rounded-lg bg-subtle p-2.5 font-mono text-[11px] text-muted space-y-1">
+                                        <div className="flex items-center justify-between text-[11px] font-bold text-ink/80">
                                             <span>SHA-256 Digest</span>
-                                            <span className="text-green-600 flex items-center gap-1">
-                                                <CheckCircle2 size={11} /> Verified
+                                            <span className="text-brand-700 flex items-center gap-1">
+                                                <CheckCircle2 size={12} /> Verified
                                             </span>
                                         </div>
                                         <p className="break-all font-mono">{e.sha256}</p>
@@ -539,54 +502,49 @@ export function CaseOversightView({
 
             {/* Tab: Final Decision Concurrence */}
             {activeTab === "concurrence" && (
-                <div className="rounded-2xl border border-border bg-card p-6 shadow-xs max-w-2xl mx-auto space-y-5">
+                <div className="rounded-2xl border border-(--brand-500) bg-card p-6 shadow-xs max-w-2xl mx-auto space-y-5">
                     <div className="text-center space-y-2">
-                        <div className="mx-auto size-12 rounded-full bg-brand-500/10 flex items-center justify-center text-brand-600">
+                        <div className="mx-auto size-12 rounded-full bg-brand-50 flex items-center justify-center text-brand-700">
                             <ShieldCheck size={28} aria-hidden />
                         </div>
-                        <h2 className="text-xl font-bold text-ink">Final Decision Review & Concurrence</h2>
+                        <h2 className="text-xl font-bold text-ink">Final decision review & concurrence</h2>
                         <p className="text-xs text-muted max-w-md mx-auto">
                             As the designated local authority / law enforcement desk, review the final university case disposition and provide your official sign-off or remarks.
                         </p>
                     </div>
 
-                    <div className="rounded-xl border border-border bg-surface p-4 text-xs space-y-2">
-                        <p className="font-semibold text-ink">Authority Sign-off Protocol:</p>
+                    <div className="rounded-xl border border-border bg-subtle p-4 text-xs space-y-2">
+                        <p className="font-semibold text-ink">Authority sign-off protocol:</p>
                         <p className="text-muted leading-relaxed">
                             Under the dual-track oversight model, the university remains the administrative steward of the case. Concurring validates that external law enforcement/LGU requirements (e.g. Barangay Protection Orders, Cybercrime blotters, safety planning) have been satisfied or properly coordinated.
                         </p>
                     </div>
 
-                    <div className="space-y-3">
-                        <label className="block text-xs font-bold uppercase tracking-wider text-muted">
-                            Official Concurrence Remarks / Endorsement
-                        </label>
-                        <textarea
-                            value={concurrenceRemarks}
-                            onChange={(e) => setConcurrenceRemarks(e.target.value)}
-                            rows={3}
-                            placeholder="State any conditions, closing remarks, or confirmations for the case record..."
-                            className="w-full rounded-xl border border-border bg-surface p-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand-500"
-                        />
-                    </div>
+                    <Textarea
+                        label="Official concurrence remarks or endorsement"
+                        value={concurrenceRemarks}
+                        onChange={(e) => setConcurrenceRemarks(e.target.value)}
+                        rows={3}
+                        placeholder="State any conditions, closing remarks, or confirmations for the case record..."
+                    />
 
                     <div className="flex flex-col sm:flex-row gap-3 pt-2">
                         <Button
                             type="button"
                             onClick={() => handleConcur(true)}
                             disabled={concurring}
-                            className="flex-1 gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold">
+                            className="flex-1 gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold">
                             <ThumbsUp size={16} aria-hidden />
-                            <span>{concurring ? "Recording..." : "Concur with Resolution"}</span>
+                            <span>{concurring ? "Recording..." : "Concur with resolution"}</span>
                         </Button>
                         <Button
                             type="button"
                             variant="secondary"
                             onClick={() => handleConcur(false)}
                             disabled={concurring}
-                            className="border-red-500/30 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">
+                            className="border-red-300 text-red-700 hover:bg-red-50">
                             <XCircle size={16} aria-hidden />
-                            <span>Record Non-Concurrence / Pending Remarks</span>
+                            <span>Record non-concurrence or pending remarks</span>
                         </Button>
                     </div>
                 </div>

@@ -68,7 +68,7 @@ export function ReportCard({
             {/* Bottom Information */}
             <div className="grid grid-cols-1 gap-4 px-6 py-4 sm:grid-cols-3 sm:gap-6 bg-card border-t border-border/40">
                 <div>
-                    <p className="text-xs font-bold text-muted uppercase tracking-wider">
+                    <p className="text-xs font-bold text-muted">
                         Updated
                     </p>
                     <p className="tnum mt-0.5 text-sm font-semibold text-ink leading-tight">
@@ -77,7 +77,7 @@ export function ReportCard({
                 </div>
 
                 <div>
-                    <p className="text-xs font-bold text-muted uppercase tracking-wider">
+                    <p className="text-xs font-bold text-muted">
                         Evidence
                     </p>
                     <p className="mt-0.5 truncate text-sm font-semibold text-ink leading-tight">
@@ -86,7 +86,7 @@ export function ReportCard({
                 </div>
 
                 <div>
-                    <p className="text-xs font-bold text-muted uppercase tracking-wider">
+                    <p className="text-xs font-bold text-muted">
                         Sharing
                     </p>
                     <p className="mt-0.5 truncate text-sm font-semibold text-ink leading-tight">

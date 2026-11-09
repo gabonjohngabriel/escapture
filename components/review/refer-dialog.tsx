@@ -1,9 +1,11 @@
 "use client";
 
-import { AlertTriangle, Send, ShieldAlert, X } from "lucide-react";
+import { AlertCircle, Gavel, Send, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 import { api } from "@/lib/client-api";
 import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
+import { Select, Textarea } from "@/components/ui/field";
 
 export function ReferCaseDialog({
     caseId,
@@ -41,8 +43,9 @@ export function ReferCaseDialog({
             setOpen(false);
             setReason("");
             onReferred?.();
-        } catch (err: any) {
-            setError(err.message || "Failed to refer case to external authority.");
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Failed to refer case to external authority.";
+            setError(message);
         } finally {
             setLoading(false);
         }
@@ -51,118 +54,90 @@ export function ReferCaseDialog({
     return (
         <>
             <Button
-                variant="secondary"
+                variant="authority"
                 onClick={() => setOpen(true)}
-                className="h-9 px-3.5 text-xs gap-2 border-amber-600/30 text-amber-900 hover:bg-amber-50 dark:text-amber-300 dark:hover:bg-amber-950/30">
-                <ShieldAlert size={16} aria-hidden />
-                <span>Refer to External Authority</span>
+                className="h-9 px-4 text-xs font-semibold gap-2 shadow-xs">
+                <Gavel size={15} aria-hidden />
+                <span>Refer to external authority</span>
             </Button>
 
-            {open && (
-                <div
-                    role="dialog"
-                    aria-modal="true"
-                    aria-labelledby="refer-dialog-title"
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-                    <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-modal animate-in fade-in zoom-in-95 duration-150">
-                        <div className="flex items-center justify-between border-b border-border pb-4">
-                            <div className="flex items-center gap-2.5">
-                                <div className="rounded-xl bg-amber-500/10 p-2 text-amber-600 dark:text-amber-400">
-                                    <ShieldAlert size={22} aria-hidden />
-                                </div>
-                                <div>
-                                    <h2 id="refer-dialog-title" className="text-lg font-bold text-ink">
-                                        Refer Case to External Authority
-                                    </h2>
-                                    <p className="text-xs text-muted">
-                                        Grant oversight access to law enforcement or LGU desks
-                                    </p>
-                                </div>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => setOpen(false)}
-                                className="rounded-full p-1.5 text-muted hover:bg-surface hover:text-ink">
-                                <X size={18} aria-hidden />
-                            </button>
-                        </div>
+            <Dialog
+                open={open}
+                onClose={() => setOpen(false)}
+                title="Refer case to external authority"
+                description={`Grant oversight access to law enforcement or LGU desks for: ${caseTitle}`}
+                footer={
+                    <>
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={() => setOpen(false)}
+                            disabled={loading}>
+                            Cancel
+                        </Button>
+                        <Button
+                            type="button"
+                            disabled={loading}
+                            onClick={handleSubmit}
+                            className="gap-2 bg-brand-600 hover:bg-brand-700 text-white">
+                            <Send size={15} aria-hidden />
+                            <span>{loading ? "Dispatching..." : "Dispatch referral"}</span>
+                        </Button>
+                    </>
+                }>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <Select
+                        label="Target agency or external body"
+                        value={agency}
+                        onChange={(e) =>
+                            setAgency(
+                                e.target.value as "vawc" | "pnp_acg" | "nbi_cybercrime" | "barangay",
+                            )
+                        }>
+                        <option value="pnp_acg">PNP Anti-Cybercrime Group (Bulacan PFU)</option>
+                        <option value="nbi_cybercrime">NBI Cybercrime Division Group</option>
+                        <option value="vawc">Barangay VAWC Desk (Violence Against Women & Children)</option>
+                        <option value="barangay">Barangay Officials / Local Lupon</option>
+                    </Select>
 
-                        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-muted">
-                                    Target Agency / External Body
-                                </label>
-                                <select
-                                    value={agency}
-                                    onChange={(e) => setAgency(e.target.value as any)}
-                                    className="mt-1.5 w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand-500">
-                                    <option value="pnp_acg">PNP Anti-Cybercrime Group (Bulacan PFU)</option>
-                                    <option value="nbi_cybercrime">NBI Cybercrime Division Group</option>
-                                    <option value="vawc">Barangay VAWC Desk (Violence Against Women & Children)</option>
-                                    <option value="barangay">Barangay Officials / Local Lupon</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-muted">
-                                    Severity Level
-                                </label>
-                                <select
-                                    value={severity}
-                                    onChange={(e) => setSeverity(e.target.value as any)}
-                                    className="mt-1.5 w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand-500">
-                                    <option value="routine">Routine — Information & Guidance</option>
-                                    <option value="moderate">Moderate — Advisory Intervention Required</option>
-                                    <option value="severe">Severe — External Investigation & Legal Handling</option>
-                                    <option value="critical">Critical — Immediate Threat / Physical Harm Risk</option>
-                                </select>
-                                {severity === "severe" || severity === "critical" ? (
-                                    <p className="mt-1 flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400">
-                                        <AlertTriangle size={14} aria-hidden />
-                                        Severe cases allow the authority to accept formal handling and track external progress.
-                                    </p>
-                                ) : null}
-                            </div>
-
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-muted">
-                                    Referral Reason & Evidence Summary
-                                </label>
-                                <textarea
-                                    value={reason}
-                                    onChange={(e) => setReason(e.target.value)}
-                                    rows={4}
-                                    placeholder="Explain why this case is being referred to this agency and what external assistance is requested..."
-                                    className="mt-1.5 w-full rounded-xl border border-border bg-surface p-3 text-sm text-ink placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-brand-500"
-                                />
-                            </div>
-
-                            {error && (
-                                <p className="rounded-lg bg-red-500/10 p-2.5 text-xs font-medium text-red-600 dark:text-red-400">
-                                    {error}
-                                </p>
-                            )}
-
-                            <div className="flex justify-end gap-3 pt-3 border-t border-border">
-                                <Button
-                                    type="button"
-                                    variant="secondary"
-                                    onClick={() => setOpen(false)}
-                                    disabled={loading}>
-                                    Cancel
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="gap-2 bg-brand-600 hover:bg-brand-700 text-white">
-                                    <Send size={16} aria-hidden />
-                                    <span>{loading ? "Dispatching..." : "Dispatch Referral"}</span>
-                                </Button>
-                            </div>
-                        </form>
+                    <div>
+                        <Select
+                            label="Severity level"
+                            value={severity}
+                            onChange={(e) =>
+                                setSeverity(
+                                    e.target.value as "routine" | "moderate" | "severe" | "critical",
+                                )
+                            }>
+                            <option value="routine">Routine — Information & guidance</option>
+                            <option value="moderate">Moderate — Advisory intervention required</option>
+                            <option value="severe">Severe — External investigation & legal handling</option>
+                            <option value="critical">Critical — Immediate threat / safety escalation</option>
+                        </Select>
+                        {(severity === "severe" || severity === "critical") && (
+                            <p className="mt-1.5 flex items-center gap-1.5 text-xs text-[#9E3F22]">
+                                <ShieldAlert size={14} className="shrink-0" aria-hidden />
+                                Severe incidents allow the external agency to accept formal handling and docket the case.
+                            </p>
+                        )}
                     </div>
-                </div>
-            )}
+
+                    <Textarea
+                        label="Referral reason and evidence summary"
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                        rows={4}
+                        placeholder="Explain why this case is being referred to this agency and what external assistance is requested..."
+                    />
+
+                    {error && (
+                        <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+                            <AlertCircle size={15} className="shrink-0" />
+                            <span>{error}</span>
+                        </div>
+                    )}
+                </form>
+            </Dialog>
         </>
     );
 }

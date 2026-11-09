@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
 export function AuthorityEmptyState({
-  title = "No Cases Currently Referred",
+  title = "No cases currently referred",
   description = "When the university escalates a severe incident or requests external legal intervention, cases will appear here.",
   actionLabel = "Check for new referrals",
 }: {

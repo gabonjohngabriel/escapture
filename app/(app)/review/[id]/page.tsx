@@ -1,4 +1,4 @@
-import { ArrowLeft, EyeOff, Lock } from "lucide-react";
+import { ArrowLeft, Clock, EyeOff, Lock } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { bodyRow, headRow, rowLink, TableBox, td, th } from "@/components/dashboard/data-table";
@@ -11,10 +11,10 @@ import { ReferCaseDialog } from "@/components/review/refer-dialog";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { TamperCheck } from "@/components/vault/tamper-check";
 import { Timeline } from "@/components/cases/timeline";
-import { StatusBadge } from "@/components/ui/badge";
+import { ReferralStatusBadge, SeverityBadge, StatusBadge, UrgencyBadge } from "@/components/ui/badge";
 import { buttonClass } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { formatDateTime, initials, kindLabel } from "@/lib/format";
+import { formatDateTime, kindLabel } from "@/lib/format";
 import { isUuid, orNotFound, pageUser } from "@/server/page-auth";
 import { getReviewCase, listAssignableReviewers } from "@/server/services/review";
 
@@ -22,6 +22,19 @@ import { getReviewCase, listAssignableReviewers } from "@/server/services/review
 export const instant = false;
 
 const panelTitle = "text-[17px] leading-6";
+
+function agencyDisplayName(agency: string) {
+  switch (agency) {
+    case "pnp_acg":
+      return "PNP Anti-Cybercrime Group";
+    case "nbi_cybercrime":
+      return "NBI Cybercrime Division";
+    case "vawc":
+      return "Barangay VAWC Desk";
+    default:
+      return agency.replace(/_/g, " ").replace(/\b\w/g, (ch) => ch.toUpperCase());
+  }
+}
 
 export default async function ReviewCasePage({ params }: PageProps<"/review/[id]">) {
   const { id } = await params;
@@ -213,43 +226,49 @@ export default async function ReviewCasePage({ params }: PageProps<"/review/[id]
 
           <Card className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <h2 className={panelTitle}>External Authority Oversight</h2>
-              <span className="text-xs font-semibold text-muted">
+              <h2 className={panelTitle}>External authority oversight</h2>
+              <span className="text-[13px] font-semibold text-muted">
                 {c.referrals.length} {c.referrals.length === 1 ? "referral" : "referrals"}
               </span>
             </div>
             {c.referrals.length === 0 ? (
-              <p className="text-[13px] text-muted">
+              <p className="text-[13px] leading-[20px] text-muted">
                 Not currently referred to external law enforcement or LGU.
               </p>
             ) : (
               <div className="flex flex-col gap-2.5">
                 {c.referrals.map((r) => (
-                  <div key={r.id} className="rounded-xl border border-border bg-surface p-3 text-xs space-y-1">
-                    <div className="flex items-center justify-between font-bold">
-                      <span className="text-ink uppercase">{r.targetAgency.replace("_", " ")}</span>
-                      <span className="rounded-full bg-amber-500/10 text-amber-600 px-2 py-0.5 text-[10px] uppercase font-bold">
-                        {r.severity}
-                      </span>
+                  <div key={r.id} className="rounded-xl border border-border bg-subtle p-3.5 text-xs space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-ink text-[13px]">{agencyDisplayName(r.targetAgency)}</span>
+                      <SeverityBadge severity={r.severity} />
                     </div>
-                    <p className="text-muted text-[11px] line-clamp-2">Reason: {r.referralReason}</p>
-                    <p className="text-[10px] font-semibold text-brand-700">Status: {r.status.replace("_", " ")}</p>
+                    <p className="text-muted text-[13px] leading-relaxed line-clamp-3">
+                      <strong className="text-ink font-semibold">Reason:</strong> {r.referralReason}
+                    </p>
+                    <div className="pt-1 flex items-center justify-between text-[12px]">
+                      <span className="text-muted">Referral status:</span>
+                      <ReferralStatusBadge status={r.status} />
+                    </div>
                   </div>
                 ))}
               </div>
             )}
             {c.directives.length > 0 && (
-              <div className="mt-2 pt-2 border-t border-border flex flex-col gap-2">
-                <span className="text-xs font-bold text-ink">Directives & Advisories Received:</span>
+              <div className="mt-2 pt-3 border-t border-border flex flex-col gap-2.5">
+                <span className="text-[13px] font-bold text-ink">Directives & advisories received:</span>
                 {c.directives.map((d) => (
-                  <div key={d.id} className="rounded-lg bg-surface/80 p-2.5 text-xs border border-border/60 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <strong className="text-ink">{d.actionType}</strong>
-                      <span className="text-[10px] uppercase text-brand-600 font-bold">{d.urgency}</span>
+                  <div key={d.id} className="rounded-xl bg-subtle p-3 text-xs border border-border space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <strong className="text-ink text-[13px]">{d.actionType}</strong>
+                      <UrgencyBadge urgency={d.urgency} />
                     </div>
-                    <p className="text-[11px] text-ink/80 leading-relaxed">{d.directives}</p>
+                    <p className="text-[13px] text-ink/90 leading-relaxed">{d.directives}</p>
                     {d.investigationMilestone && (
-                      <p className="text-[10px] text-amber-600 font-semibold">Milestone: {d.investigationMilestone}</p>
+                      <p className="text-[12px] text-[#8A5A12] font-semibold flex items-center gap-1.5 pt-1">
+                        <Clock size={13} className="shrink-0 text-[#E9B350]" aria-hidden />
+                        <span>Milestone: {d.investigationMilestone}</span>
+                      </p>
                     )}
                   </div>
                 ))}

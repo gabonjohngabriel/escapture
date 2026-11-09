@@ -328,7 +328,7 @@ export function EscalateButton({ caseId, hasEvidence }: { caseId: string; hasEvi
               </Banner>
             )}
             <div className="rounded-2xl bg-subtle p-4">
-              <p className="text-xs font-bold text-muted uppercase tracking-wider">Report</p>
+              <p className="text-xs font-bold text-muted">Report</p>
               <h4 className="mt-1">{preview.title}</h4>
               <p className="mt-1 max-w-prose text-sm leading-[22px] whitespace-pre-wrap wrap-anywhere">
                 {preview.description || "No description was added."}

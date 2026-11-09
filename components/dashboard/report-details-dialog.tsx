@@ -72,7 +72,7 @@ export function ReportDetailsDialog({
       <div className="flex flex-col gap-5 py-2">
         {report.description && (
           <div className="rounded-xl border border-border/80 bg-subtle/50 p-4">
-            <h4 className="text-xs font-semibold text-brand-700 uppercase tracking-wider mb-1">Incident Summary</h4>
+            <h4 className="text-xs font-semibold text-brand-700 mb-1">Incident summary</h4>
             <p className="text-sm leading-relaxed text-ink/90 whitespace-pre-wrap">{report.description}</p>
           </div>
         )}

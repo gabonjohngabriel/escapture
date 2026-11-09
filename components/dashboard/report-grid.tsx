@@ -262,8 +262,8 @@ export function ReportGrid({
               {filterMenuOpen && (
                 <div className="animate-in fade-in zoom-in-95 absolute top-full right-0 z-30 mt-2 w-72 rounded-2xl border border-border bg-card p-4 shadow-raised">
                   <div className="flex items-center justify-between border-b border-border pb-2.5">
-                    <span className="text-xs font-bold tracking-wider text-brand-700 uppercase">
-                      Filter Reports
+                    <span className="text-xs font-bold text-brand-700">
+                      Filter reports
                     </span>
                     {activeFilterCount > 0 && (
                       <button

@@ -86,7 +86,7 @@ export function VaultCard({
             {/* Bottom Information */}
             <div className="grid grid-cols-2 gap-4 px-6 py-4 sm:grid-cols-4 sm:gap-4 bg-card border-t border-border/40">
                 <div>
-                    <p className="text-xs font-bold text-muted uppercase tracking-wider">
+                    <p className="text-xs font-bold text-muted">
                         Captured
                     </p>
                     <p className="tnum mt-0.5 text-sm font-semibold text-ink leading-tight">
@@ -95,7 +95,7 @@ export function VaultCard({
                 </div>
 
                 <div>
-                    <p className="text-xs font-bold text-muted uppercase tracking-wider">
+                    <p className="text-xs font-bold text-muted">
                         In reports
                     </p>
                     <p className="mt-0.5 truncate text-sm font-semibold text-ink leading-tight">
@@ -104,7 +104,7 @@ export function VaultCard({
                 </div>
 
                 <div>
-                    <p className="text-xs font-bold text-muted uppercase tracking-wider">
+                    <p className="text-xs font-bold text-muted">
                         Sharing
                     </p>
                     <p className="mt-0.5 truncate text-sm font-semibold text-ink leading-tight">
@@ -113,7 +113,7 @@ export function VaultCard({
                 </div>
 
                 <div>
-                    <p className="text-xs font-bold text-muted uppercase tracking-wider">
+                    <p className="text-xs font-bold text-muted">
                         Integrity
                     </p>
                     <span className="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold text-tamper-fg">

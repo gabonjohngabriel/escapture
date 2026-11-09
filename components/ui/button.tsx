@@ -8,6 +8,7 @@ export type ButtonVariant =
     | "soft"
     | "ghost"
     | "weighty"
+    | "authority"
     | "danger"
     | "danger-solid"
     | "on-dark"
@@ -23,6 +24,7 @@ const variants: Record<ButtonVariant, string> = {
     soft: "bg-brand-50 text-brand-800 hover:bg-brand-100 active:bg-brand-200",
     ghost: "text-brand-700 hover:bg-brand-50 hover:text-brand-800",
     weighty: "bg-brand-900 text-white hover:bg-brand-950",
+    authority: "bg-[#243B53] text-white hover:bg-[#182A3C] active:bg-[#101E2B]",
     danger: "border border-danger-solid bg-card text-danger-solid hover:bg-danger-bg",
     "danger-solid": "bg-danger-solid text-white hover:bg-danger-fg",
     // For brand-900 bands only.
