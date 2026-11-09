@@ -1,10 +1,11 @@
 "use client";
 
-import { Eye, FileText, ShieldAlert, User, Users } from "lucide-react";
+import { Eye, FileText, ShieldAlert, Users } from "lucide-react";
 import Link from "next/link";
 import { StatusBadge, type CaseStatus } from "@/components/ui/badge";
 import { buttonClass } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { formatDate } from "@/lib/format";
 
 export type ReportDetailData = {
@@ -78,7 +79,10 @@ export function ReportDetailsDialog({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
           <div className="flex items-center gap-2.5 rounded-lg border border-border/70 p-3 bg-card">
-            <User size={18} className="text-brand-600 shrink-0" />
+            <UserAvatar
+              seed={report.reporterName || report.id}
+              className="size-8 shrink-0 rounded-full border border-brand-500/40"
+            />
             <div className="min-w-0">
               <p className="text-xs text-muted font-medium">Reporter</p>
               <p className="font-semibold text-ink truncate">{report.reporterName}</p>
@@ -119,8 +123,8 @@ export function ReportDetailsDialog({
         </div>
 
         {report.flaggedWords && report.flaggedWords.length > 0 && (
-          <div className="flex flex-col gap-1.5 rounded-xl border border-amber-200/80 bg-amber-50/50 p-3">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-800">
+          <div className="flex flex-col gap-1.5 rounded-xl border border-escalated-solid/40 bg-escalated-bg/70 p-3">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-escalated-fg">
               <ShieldAlert size={14} />
               <span>Flagged Keywords Detected ({report.flaggedWords.length})</span>
             </div>
@@ -128,7 +132,7 @@ export function ReportDetailsDialog({
               {report.flaggedWords.map((word) => (
                 <span
                   key={word}
-                  className="inline-flex items-center rounded-md bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900 border border-amber-200"
+                  className="inline-flex items-center rounded-md bg-card/90 px-2 py-0.5 text-xs font-semibold text-escalated-fg border border-escalated-solid/50 shadow-2xs"
                 >
                   {word}
                 </span>
