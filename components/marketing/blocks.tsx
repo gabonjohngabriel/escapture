@@ -121,15 +121,45 @@ export function MockButton({
   return <span className={buttonClass(variant, cn("cursor-default", className))}>{children}</span>;
 }
 
-export function PilotStrip({ items }: { items: string[] }) {
+export function PilotStrip({
+  items,
+  label = "PILOT & COMPLIANCE",
+}: {
+  items: string[];
+  label?: string;
+}) {
   return (
-    <div className="mk-pilot">
-      <div className="mk-wrap">
-        <ul>
-          {items.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
+    <div className="border-y border-border/70 bg-card/60 backdrop-blur-xs py-4 sm:py-5">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-3 sm:gap-4 text-center lg:text-left">
+          {label && (
+            <span className="text-[11px] font-bold tracking-wider text-brand-700/90 uppercase shrink-0">
+              {label}
+            </span>
+          )}
+          <div className="flex flex-wrap items-center justify-center lg:justify-end gap-2 sm:gap-3">
+            {items.map((item, index) => (
+              <span
+                key={item}
+                className={cn(
+                  "inline-flex items-center gap-2 text-xs sm:text-[13px] font-medium px-3.5 py-1.5 rounded-full border transition-colors shadow-2xs",
+                  index === 0
+                    ? "bg-brand-50 text-brand-900 border-brand-200 font-semibold"
+                    : "bg-canvas text-muted border-border/80"
+                )}
+              >
+                <span
+                  className={cn(
+                    "size-1.5 rounded-full shrink-0",
+                    index === 0 ? "bg-brand-600 animate-pulse" : "bg-brand-400"
+                  )}
+                  aria-hidden
+                />
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -221,29 +251,75 @@ export function TrustPanel({
 
 export function Faq({ items }: { items: { q: string; a: string }[] }) {
   return (
-    <div className="mk-faq">
+    <div className="max-w-3xl mx-auto divide-y divide-border/80 border-y border-border/80">
       {items.map((item, i) => (
-        <details key={item.q} open={i === 0}>
-          <summary>
-            {item.q}
-            <ChevronDown size={20} strokeWidth={1.75} aria-hidden />
+        <details key={item.q} open={i === 0} className="group py-5 sm:py-6 transition-colors">
+          <summary className="flex items-center justify-between gap-4 cursor-pointer list-none text-left select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg">
+            <span className="font-heading text-base sm:text-lg font-semibold text-brand-950 group-hover:text-brand-700 transition-colors">
+              {item.q}
+            </span>
+            <div className="size-8 rounded-full bg-brand-50/80 border border-brand-200/60 flex items-center justify-center shrink-0 text-brand-700 group-hover:bg-brand-100 transition-colors">
+              <ChevronDown
+                size={18}
+                strokeWidth={2}
+                aria-hidden
+                className="transition-transform duration-200 group-open:rotate-180"
+              />
+            </div>
           </summary>
-          <p>{item.a}</p>
+          <p className="mt-3.5 sm:mt-4 text-sm sm:text-base text-muted leading-relaxed max-w-2xl">
+            {item.a}
+          </p>
         </details>
       ))}
     </div>
   );
 }
 
-export function CtaBand({ title, lead, children }: { title: string; lead: string; children: React.ReactNode }) {
+export function CtaBand({
+  title,
+  lead,
+  trustBadges = [
+    "SHA-256 tamper checks",
+    "Private until escalated",
+    "Student-controlled timeline",
+  ],
+  children,
+}: {
+  title: string;
+  lead: string;
+  trustBadges?: string[];
+  children: React.ReactNode;
+}) {
   return (
-    <section className="mk-cta-section mk-tone-canvas">
-      <div className="mk-wrap">
-        <div className="mk-cta mk-dark" style={{ borderRadius: "var(--radius-section)" }}>
+    <section className="py-12 sm:py-16 lg:py-20 bg-canvas">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative overflow-hidden rounded-[28px] sm:rounded-[32px] bg-brand-900 text-on-dark p-8 sm:p-12 lg:p-16 text-center shadow-raised border border-brand-800">
           <TrailPattern dark />
-          <h2 className="mk-display-lg">{title}</h2>
-          <p className="mk-lead">{lead}</p>
-          <div className="mk-actions">{children}</div>
+          <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-4 leading-tight">
+              {title}
+            </h2>
+            <p className="text-base sm:text-lg text-brand-100/90 leading-relaxed max-w-2xl mb-8">
+              {lead}
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto mb-8">
+              {children}
+            </div>
+            {trustBadges && trustBadges.length > 0 && (
+              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2.5 pt-6 border-t border-brand-800/80 w-full">
+                {trustBadges.map((badge) => (
+                  <span
+                    key={badge}
+                    className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-brand-200"
+                  >
+                    <Check size={16} className="text-brand-300" strokeWidth={2.5} aria-hidden />
+                    {badge}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>

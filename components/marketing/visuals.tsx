@@ -21,41 +21,59 @@ const Row = ({ title, meta, children }: { title: string; meta: string; children:
  */
 export function HeroVaultWindow() {
   return (
-    <div className="w-full max-w-[480px] rounded-2xl border border-border bg-canvas p-3 sm:p-4 shadow-[0_12px_36px_rgba(0,0,0,0.06)]">
+    <div className="w-full max-w-[490px] rounded-2xl border border-border/80 bg-card/90 backdrop-blur-sm p-3 sm:p-4 shadow-[0_20px_50px_rgba(30,42,35,0.08)] ring-1 ring-border/50 transition-all hover:shadow-[0_24px_60px_rgba(30,42,35,0.12)]">
       {/* Window title bar */}
-      <div className="flex items-center gap-3 pb-2.5 sm:pb-3 px-1">
+      <div className="flex items-center justify-between pb-3 px-1 border-b border-border/60 mb-3.5">
         <div className="flex items-center gap-1.5" aria-hidden>
-          <div className="size-2.5 rounded-full bg-white border border-border" />
-          <div className="size-2.5 rounded-full bg-white border border-border" />
-          <div className="size-2.5 rounded-full bg-white border border-border" />
+          <div className="size-2.5 rounded-full bg-rose-400/70 border border-rose-500/20" />
+          <div className="size-2.5 rounded-full bg-amber-400/70 border border-amber-500/20" />
+          <div className="size-2.5 rounded-full bg-emerald-400/70 border border-emerald-500/20" />
         </div>
-        <div className="flex-1 max-w-[240px] rounded-md bg-white px-3 py-1 text-xs text-brand-800/60 shadow-xs border border-border/50 font-mono tracking-tight">
-          escapture.app/vault
+        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-canvas border border-border/70 text-[11px] font-mono text-brand-800/80 shadow-2xs">
+          <Lock className="size-3 text-brand-600" />
+          <span>escapture.app/vault</span>
         </div>
+        <div className="w-10" />
       </div>
 
-      {/* Inner App Window White Sheet */}
-      <div className="rounded-xl bg-white p-3.5 sm:p-5 shadow-xs border border-border/60 flex flex-col gap-3.5 sm:gap-4">
+      {/* Inner App Window Sheet */}
+      <div className="rounded-xl bg-canvas/80 p-3.5 sm:p-4 shadow-2xs border border-border/60 flex flex-col gap-3">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2">
-            <Lock className="size-4.5 sm:size-5 text-brand-700" />
-            <h3 className="font-bold text-brand-900 text-base sm:text-lg">Your Vault</h3>
+            <div className="size-8 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center border border-brand-200/60 shadow-2xs">
+              <Lock className="size-4" />
+            </div>
+            <div>
+              <h3 className="font-bold text-brand-900 text-sm sm:text-base leading-tight">Your Vault</h3>
+              <p className="text-[11px] text-muted">2 verified captures</p>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 bg-brand-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-xs">
+          <div className="flex items-center gap-1.5 bg-brand-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-2xs">
             <FileCheck2 className="size-3.5" />
             <span>Capture evidence</span>
           </div>
         </div>
 
-        {/* Vault Item */}
-        <div className="rounded-xl border border-border/70 p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 bg-card hover:bg-canvas/50 transition">
+        {/* Vault Item 1 */}
+        <div className="rounded-xl border border-border/80 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-card shadow-2xs hover:border-brand-300 transition-colors">
           <div className="flex flex-col">
-            <span className="text-sm font-semibold text-brand-900">Group chat, Nov 6</span>
-            <span className="text-xs text-muted">Messenger · 12 messages</span>
+            <span className="text-xs sm:text-sm font-semibold text-brand-950">Group chat, Nov 6</span>
+            <span className="text-[11px] text-muted">Messenger · 12 messages</span>
           </div>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 border border-brand-200/80 px-2.5 py-1 text-[11px] font-semibold text-brand-800 shrink-0 self-start sm:self-auto">
             <CircleCheck className="size-3.5 text-brand-600" />
-            Captured with tamper checks
+            Tamper checks passed
+          </span>
+        </div>
+
+        {/* Vault Item 2 */}
+        <div className="rounded-xl border border-border/70 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-card/60 shadow-2xs">
+          <div className="flex flex-col">
+            <span className="text-xs sm:text-sm font-semibold text-brand-950">Post comments, Nov 5</span>
+            <span className="text-[11px] text-muted">Facebook post · 8 comments</span>
+          </div>
+          <span className="inline-flex items-center gap-1 rounded-full bg-canvas border border-border/70 px-2 py-0.5 text-[10px] font-medium text-muted shrink-0 self-start sm:self-auto">
+            SHA-256 verified
           </span>
         </div>
       </div>
