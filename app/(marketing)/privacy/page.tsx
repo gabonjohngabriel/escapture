@@ -46,8 +46,8 @@ const WHO: [string, string, string][] = [
 
 export default function PrivacyPage() {
   return (
-    <article className="mk-wrap flex flex-col gap-4 py-16 [&>*]:max-w-[72ch]">
-      <h1>Escapture Privacy Policy</h1>
+    <article className="mk-wrap flex flex-col gap-4 py-8 sm:py-16 [&>*]:max-w-[72ch]">
+      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-800">Escapture Privacy Policy</h1>
       <p className="text-muted">
         Last updated: <time dateTime="2026-10-14">14 October 2026</time>
       </p>

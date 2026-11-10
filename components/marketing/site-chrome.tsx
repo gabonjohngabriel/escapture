@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Logo } from "@/components/layout/logo";
 import { allowedEmailDomain } from "@/lib/email-domain";
 import { getUser, homeFor } from "@/server/auth";
+import { MobileNavMenu } from "./mobile-nav";
 
 /** The address new accounts must use; the same setting the sign-up gate reads. */
 export const emailDomain = allowedEmailDomain;
@@ -36,10 +37,10 @@ const links = [
 export function SiteNav() {
   return (
     <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b border-border/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-6">
-        <div className="flex items-center gap-8 lg:gap-12">
-          <Link href="/" className="flex items-center gap-2 group transition" aria-label="Escapture home">
-            <Logo size={42} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3 sm:gap-6">
+        <div className="flex items-center gap-6 lg:gap-12 min-w-0">
+          <Link href="/" className="flex items-center gap-2 group transition shrink-0" aria-label="Escapture home">
+            <Logo size={38} nameClassName="hidden sm:inline text-[22px] sm:text-[24px]" />
           </Link>
 
           <nav aria-label="Main Navigation" className="hidden md:flex items-center gap-6 lg:gap-8">
@@ -47,7 +48,7 @@ export function SiteNav() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-[16px] font-medium text-brand-700 hover:text-brand-900 transition-colors"
+                className="text-[16px] font-medium text-brand-700 hover:text-brand-900 transition-colors whitespace-nowrap"
               >
                 {link.label}
               </Link>
@@ -55,7 +56,8 @@ export function SiteNav() {
           </nav>
         </div>
 
-        <div className="flex items-center">
+        {/* Desktop actions */}
+        <div className="hidden md:flex items-center">
           <div className="bg-card border border-brand-200/60 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)] rounded-full p-1.5 flex items-center gap-2">
             <Suspense fallback={<SignIn />}>
               <Account />
@@ -67,6 +69,24 @@ export function SiteNav() {
               Start Your Vault
             </Link>
           </div>
+        </div>
+
+        {/* Mobile actions: compact CTA pill + hamburger toggle */}
+        <div className="flex md:hidden items-center gap-2 shrink-0">
+          <Link
+            href="/sign-up"
+            className="bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-xs sm:text-sm px-3.5 sm:px-4 py-2 rounded-full shadow-xs transition whitespace-nowrap"
+          >
+            Start Your Vault
+          </Link>
+          <MobileNavMenu
+            links={links}
+            accountSlot={
+              <Suspense fallback={<SignIn />}>
+                <Account />
+              </Suspense>
+            }
+          />
         </div>
       </div>
     </header>
@@ -102,7 +122,7 @@ const columns = [
 export function SiteFooter() {
   return (
     <footer className="mk-footer border-t border-border mt-auto bg-card">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
         <div className="mk-footer-grid">
           <div className="flex flex-col items-start gap-3">
             <Logo size={28} />
@@ -116,7 +136,9 @@ export function SiteFooter() {
               <ul>
                 {column.links.map((link) => (
                   <li key={link.label}>
-                    <Link href={link.href}>{link.label}</Link>
+                    <Link href={link.href} className="inline-block py-1 sm:py-0.5">
+                      {link.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -130,3 +152,4 @@ export function SiteFooter() {
     </footer>
   );
 }
+

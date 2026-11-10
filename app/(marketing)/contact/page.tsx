@@ -12,8 +12,8 @@ const label = "text-[13px] leading-[18px] font-semibold text-muted";
 
 export default function ContactPage() {
   return (
-    <article className="mk-wrap flex flex-col gap-4 py-16 [&>*]:max-w-[72ch]">
-      <h1>Contact the team</h1>
+    <article className="mk-wrap flex flex-col gap-4 py-8 sm:py-16 [&>*]:max-w-[72ch]">
+      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-800">Contact the team</h1>
 
       <h2 className={h2}>Team Echelon</h2>
       <p>

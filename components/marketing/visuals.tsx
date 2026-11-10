@@ -21,9 +21,9 @@ const Row = ({ title, meta, children }: { title: string; meta: string; children:
  */
 export function HeroVaultWindow() {
   return (
-    <div className="w-full max-w-[480px] rounded-2xl border border-border bg-canvas p-3.5 sm:p-4 shadow-[0_12px_36px_rgba(0,0,0,0.06)]">
+    <div className="w-full max-w-[480px] rounded-2xl border border-border bg-canvas p-3 sm:p-4 shadow-[0_12px_36px_rgba(0,0,0,0.06)]">
       {/* Window title bar */}
-      <div className="flex items-center gap-3 pb-3 px-1">
+      <div className="flex items-center gap-3 pb-2.5 sm:pb-3 px-1">
         <div className="flex items-center gap-1.5" aria-hidden>
           <div className="size-2.5 rounded-full bg-white border border-border" />
           <div className="size-2.5 rounded-full bg-white border border-border" />
@@ -35,11 +35,11 @@ export function HeroVaultWindow() {
       </div>
 
       {/* Inner App Window White Sheet */}
-      <div className="rounded-xl bg-white p-4 sm:p-5 shadow-xs border border-border/60 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
+      <div className="rounded-xl bg-white p-3.5 sm:p-5 shadow-xs border border-border/60 flex flex-col gap-3.5 sm:gap-4">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2">
-            <Lock className="size-5 text-brand-700" />
-            <h3 className="font-bold text-brand-900 text-lg">Your Vault</h3>
+            <Lock className="size-4.5 sm:size-5 text-brand-700" />
+            <h3 className="font-bold text-brand-900 text-base sm:text-lg">Your Vault</h3>
           </div>
           <div className="flex items-center gap-1.5 bg-brand-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-xs">
             <FileCheck2 className="size-3.5" />
@@ -48,12 +48,12 @@ export function HeroVaultWindow() {
         </div>
 
         {/* Vault Item */}
-        <div className="rounded-xl border border-border/70 p-3.5 flex items-center justify-between gap-3 bg-card hover:bg-canvas/50 transition">
+        <div className="rounded-xl border border-border/70 p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 bg-card hover:bg-canvas/50 transition">
           <div className="flex flex-col">
             <span className="text-sm font-semibold text-brand-900">Group chat, Nov 6</span>
             <span className="text-xs text-muted">Messenger · 12 messages</span>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 border border-brand-200/80 px-2.5 py-1 text-[11px] font-semibold text-brand-800 shrink-0">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 border border-brand-200/80 px-2.5 py-1 text-[11px] font-semibold text-brand-800 shrink-0 self-start sm:self-auto">
             <CircleCheck className="size-3.5 text-brand-600" />
             Captured with tamper checks
           </span>

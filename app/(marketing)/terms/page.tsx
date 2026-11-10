@@ -14,8 +14,8 @@ const list = "flex list-disc flex-col gap-2 pl-6";
 
 export default function TermsPage() {
   return (
-    <article className="mk-wrap flex flex-col gap-4 py-16 [&>*]:max-w-[72ch]">
-      <h1>Escapture Terms of Service</h1>
+    <article className="mk-wrap flex flex-col gap-4 py-8 sm:py-16 [&>*]:max-w-[72ch]">
+      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-800">Escapture Terms of Service</h1>
       <p className="text-muted">
         Last updated: <time dateTime="2026-10-14">14 October 2026</time>
       </p>

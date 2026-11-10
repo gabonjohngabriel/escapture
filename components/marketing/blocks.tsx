@@ -237,7 +237,7 @@ export function Faq({ items }: { items: { q: string; a: string }[] }) {
 
 export function CtaBand({ title, lead, children }: { title: string; lead: string; children: React.ReactNode }) {
   return (
-    <section className="mk-tone-canvas" style={{ padding: "32px 0 96px" }}>
+    <section className="mk-cta-section mk-tone-canvas">
       <div className="mk-wrap">
         <div className="mk-cta mk-dark" style={{ borderRadius: "var(--radius-section)" }}>
           <TrailPattern dark />

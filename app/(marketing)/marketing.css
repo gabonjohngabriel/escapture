@@ -5,7 +5,10 @@
 */
 
 .mk-root { background: var(--canvas); color: var(--ink); }
-.mk-root [id] { scroll-margin-top: 88px; } /* the sticky nav is 72px */
+.mk-root [id] { scroll-margin-top: 76px; } /* sticky nav is 64px on mobile, 80px on desktop */
+@media (min-width: 640px) {
+  .mk-root [id] { scroll-margin-top: 88px; }
+}
 
 .mk-wrap { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
 
@@ -117,6 +120,7 @@
 .mk-faq p { max-width: 64ch; margin-bottom: 24px; color: var(--muted); }
 
 /* ---- call to action ---- */
+.mk-cta-section { padding: 32px 0 96px; }
 .mk-cta { position: relative; overflow: hidden; padding: 96px 32px; text-align: center; }
 .mk-cta > *:not(.mk-trail) { position: relative; }
 .mk-cta .mk-lead { margin-left: auto; margin-right: auto; }
@@ -141,7 +145,8 @@
   .mk-feature-rev .mk-feature-text { order: 0; } /* text first when stacked */
   .mk-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
   .mk-split { grid-template-columns: 1fr; gap: 40px; }
-  .mk-footer-grid { grid-template-columns: 1fr 1fr; }
+  .mk-footer-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+  .mk-footer-grid > :first-child { grid-column: 1 / -1; }
   .mk-display-xl { font-size: 36px; line-height: 44px; }
   .mk-display-lg { font-size: 32px; line-height: 40px; }
   .mk-section { padding: 64px 0; }
@@ -155,6 +160,17 @@
   .mk-dialog-actions { flex-wrap: wrap; }
   .mk-display-md { font-size: 28px; line-height: 36px; }
   .mk-start-panel { padding: 24px 16px; }
+  .mk-pilot { padding: 18px 0; }
+  .mk-pilot ul { flex-direction: column; gap: 8px; text-align: center; font-size: 14px; }
+  .mk-faq summary { padding: 18px 0; font-size: 16px; line-height: 22px; }
+  .mk-cta-section { padding: 16px 0 56px; }
+  .mk-cta { padding: 48px 20px; }
+  .mk-cta .mk-actions { flex-direction: column; align-items: stretch; }
+  .mk-cta .mk-actions > * { width: 100%; text-align: center; justify-content: center; }
+  .mk-footer { padding: 48px 0 24px; }
+  .mk-footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+  .mk-footer li a { padding: 6px 0; }
+  .mk-footer-note { margin-top: 36px; padding-top: 20px; }
 }
 
 /* Motion: a short entrance for the hero, and blocks that fade and rise 12px as they scroll into
