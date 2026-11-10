@@ -5,11 +5,10 @@ import {
   startRegistration,
   type PublicKeyCredentialCreationOptionsJSON,
 } from "@simplewebauthn/browser";
-import { AlertTriangle, CheckCircle2, KeyRound, Plus, ShieldCheck, Trash2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, KeyRound, Plus, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog } from "@/components/ui/dialog";
 import { Banner } from "@/components/ui/feedback";
 import { Input } from "@/components/ui/field";
 import { api, errorMessage } from "@/lib/client-api";
@@ -20,18 +19,20 @@ export function PasskeyManager({
   initialItems,
   rpId,
   hasMismatchedPasskeys,
+  hasDeviceBinding = false,
 }: {
   initialItems: PasskeyItem[];
   rpId: string;
   hasMismatchedPasskeys: boolean;
+  hasDeviceBinding?: boolean;
 }) {
   const router = useRouter();
   const [label, setLabel] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<PasskeyItem | null>(null);
-  const [deleting, setDeleting] = useState(false);
+
+  const hasLinkedPasskey = initialItems.some((item) => item.rpIdMatches) || hasDeviceBinding;
 
   async function handleAddPasskey(e: React.FormEvent) {
     e.preventDefault();
@@ -56,16 +57,16 @@ export function PasskeyManager({
         body: {
           challengeId,
           response: attResp,
-          label: label.trim() || "Windows Hello / Passkey",
+          label: label.trim() || "This Device (Platform Passkey)",
         },
       });
 
       setLabel("");
-      setSuccess("Passkey registered! You can now use it to unlock evidence capturing in the extension.");
+      setSuccess("Passkey registered and this browser is now linked 1-to-1 to your account.");
       router.refresh();
     } catch (err) {
       if (err instanceof Error && err.name === "InvalidStateError") {
-        setError("A passkey for this authenticator is already registered on your account.");
+        setError("A passkey for this device is already registered on your account.");
       } else if (err instanceof Error && err.name === "NotAllowedError") {
         setError("Passkey setup was cancelled or timed out. Try again when ready.");
       } else {
@@ -76,31 +77,12 @@ export function PasskeyManager({
     }
   }
 
-  async function handleConfirmDelete() {
-    if (!deleteTarget) return;
-    setDeleting(true);
-    setError(null);
-    setSuccess(null);
-    try {
-      await api(`/api/passkeys?id=${encodeURIComponent(deleteTarget.id)}`, {
-        method: "DELETE",
-      });
-      setDeleteTarget(null);
-      setSuccess(`Removed "${deleteTarget.label}".`);
-      router.refresh();
-    } catch (err) {
-      setError(errorMessage(err));
-    } finally {
-      setDeleting(false);
-    }
-  }
-
   return (
     <div className="flex flex-col gap-6">
       {hasMismatchedPasskeys && (
         <Banner tone="attention">
-          One or more of your earlier passkeys were created under a different domain than{" "}
-          <span className="font-mono font-semibold">{rpId}</span>. Please add a new passkey for this domain to continue capturing.
+          Your earlier passkey was created under a different domain than{" "}
+          <span className="font-mono font-semibold">{rpId}</span>. Ask an administrator to reset your passkey and device link before re-enrolling.
         </Banner>
       )}
 
@@ -108,51 +90,57 @@ export function PasskeyManager({
       {success && <Banner tone="success">{success}</Banner>}
 
       {/* Add Passkey Card */}
-      <section className="overflow-hidden rounded-2xl border-2 border-brand-500 bg-card shadow-xs">
-        <div className="flex items-center justify-between bg-brand-500 px-6 py-4 text-white">
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-white/60 bg-white/10">
-              <KeyRound size={20} strokeWidth={2} aria-hidden />
+      {!hasLinkedPasskey ? (
+        <section className="overflow-hidden rounded-2xl border-2 border-brand-500 bg-card shadow-xs">
+          <div className="flex items-center justify-between bg-brand-500 px-6 py-4 text-white">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-white/60 bg-white/10">
+                <KeyRound size={20} strokeWidth={2} aria-hidden />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-white leading-snug">
+                  Link this device with a passkey
+                </h2>
+                <p className="text-xs text-white/85">
+                  Use Windows Hello PIN, Touch ID, or Chrome Passkey on this laptop
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-base font-bold text-white leading-snug">
-                Register a passkey
-              </h2>
-              <p className="text-xs text-white/85">
-                Use Windows Hello PIN, biometrics, Google Password Manager, or a phone passkey
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <form onSubmit={handleAddPasskey} className="flex flex-col gap-4 p-6">
-          <div className="max-w-md">
-            <Input
-              id="passkey-label"
-              label="Passkey nickname (optional)"
-              hint="You can register multiple passkeys across your devices so you have a backup."
-              type="text"
-              maxLength={60}
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              placeholder="e.g. My Laptop (Windows Hello) or Google Password Manager"
-            />
           </div>
 
-          <div className="flex items-center gap-3">
-            <Button type="submit" loading={busy} className="rounded-full px-5">
-              <Plus size={16} strokeWidth={2.25} aria-hidden />
-              <span>{busy ? "Waiting for device prompt…" : "Add passkey"}</span>
-            </Button>
-          </div>
-        </form>
-      </section>
+          <form onSubmit={handleAddPasskey} className="flex flex-col gap-4 p-6">
+            <div className="max-w-md">
+              <Input
+                id="passkey-label"
+                label="Device nickname (optional)"
+                hint="Each student account links 1-to-1 with a single browser and built-in device passkey. Changing devices requires an administrator reset."
+                type="text"
+                maxLength={60}
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                placeholder="e.g. My Laptop (Windows Hello)"
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button type="submit" loading={busy} className="rounded-full px-5">
+                <Plus size={16} strokeWidth={2.25} aria-hidden />
+                <span>{busy ? "Waiting for device prompt…" : "Link device passkey"}</span>
+              </Button>
+            </div>
+          </form>
+        </section>
+      ) : (
+        <Banner tone="info">
+          Your account is linked 1-to-1 to your registered browser and device passkey. To switch to a new laptop, ask an administrator to reset your passkey and device link.
+        </Banner>
+      )}
 
       {/* Registered Passkeys List */}
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-brand-800">
-            Your registered passkeys ({initialItems.length})
+            Linked device passkey ({initialItems.length})
           </h2>
           <span className="text-xs text-muted">
             Domain: <span className="font-mono font-medium text-ink">{rpId}</span>
@@ -165,10 +153,10 @@ export function PasskeyManager({
               <ShieldCheck size={24} strokeWidth={2} aria-hidden />
             </div>
             <h3 className="mt-3 text-base font-bold text-ink">
-              No passkeys registered yet
+              No device passkey linked yet
             </h3>
             <p className="mt-1 max-w-md text-sm text-muted">
-              Add at least one passkey above. The Escapture Chrome extension requires a passkey check before you can capture evidence.
+              Link your device passkey above. The Escapture Chrome extension requires this browser and your device passkey before capturing evidence.
             </p>
           </div>
         ) : (
@@ -191,7 +179,7 @@ export function PasskeyManager({
                         {item.rpIdMatches ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-brand-100 px-2.5 py-0.5 text-[11px] font-semibold text-brand-800">
                             <CheckCircle2 size={12} aria-hidden />
-                            Active
+                            Linked
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900">
@@ -211,42 +199,12 @@ export function PasskeyManager({
                       </p>
                     </div>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setDeleteTarget(item)}
-                    className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border px-3 text-xs font-semibold text-muted transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-700 cursor-pointer"
-                  >
-                    <Trash2 size={13} aria-hidden />
-                    <span>Remove</span>
-                  </button>
                 </div>
               </div>
             ))}
           </div>
         )}
       </section>
-
-      <Dialog
-        open={Boolean(deleteTarget)}
-        onClose={() => setDeleteTarget(null)}
-        title="Remove passkey?"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setDeleteTarget(null)} disabled={deleting}>
-              Cancel
-            </Button>
-            <Button variant="danger-solid" onClick={handleConfirmDelete} loading={deleting}>
-              Remove passkey
-            </Button>
-          </>
-        }
-      >
-        <p className="text-sm leading-relaxed text-ink">
-          Are you sure you want to remove{" "}
-          <span className="font-semibold text-ink">{deleteTarget?.label}</span>? If you remove all of your passkeys, you will need to register a new one before capturing evidence in the extension.
-        </p>
-      </Dialog>
     </div>
   );
 }

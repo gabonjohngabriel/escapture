@@ -21,6 +21,8 @@ type VerifyState =
     | "ready"
     | "not_found"
     | "account_mismatch"
+    | "device_mismatch"
+    | "sign_in_required"
     | "already_verified"
     | "expired"
     | "needs_enrollment";
@@ -195,6 +197,44 @@ export function VerifyCaptureClient({
                                 className="mt-5 h-10 rounded-full border border-brand-500 bg-brand-50 px-5 text-sm font-semibold text-brand-800 hover:bg-brand-100 cursor-pointer">
                                 Close this window
                             </button>
+                        </div>
+                    ) : state === "sign_in_required" ? (
+                        <div className="flex flex-col gap-4">
+                            <Banner tone="attention">
+                                Sign in to your Escapture student account in this browser window before verifying your capture.
+                            </Banner>
+                            <div>
+                                <Link
+                                    href="/sign-in"
+                                    className={buttonClass("primary")}>
+                                    Sign in to Escapture
+                                </Link>
+                            </div>
+                        </div>
+                    ) : state === "device_mismatch" ? (
+                        <div className="flex flex-col gap-4">
+                            <div className="flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950">
+                                <ShieldAlert
+                                    size={20}
+                                    className="mt-0.5 shrink-0 text-amber-700"
+                                    aria-hidden
+                                />
+                                <div className="text-sm leading-relaxed">
+                                    <p className="font-bold">
+                                        Unlinked browser or device
+                                    </p>
+                                    <p className="mt-1">
+                                        This browser is not the linked laptop for{" "}
+                                        <span className="font-semibold">
+                                            {userEmail}
+                                        </span>
+                                        . Capturing evidence is only allowed from your linked browser.
+                                    </p>
+                                </div>
+                            </div>
+                            <p className="text-xs text-muted">
+                                If you changed laptops or cleared your browser, ask an administrator to reset your passkey and device link.
+                            </p>
                         </div>
                     ) : state === "account_mismatch" ? (
                         <div className="flex flex-col gap-4">

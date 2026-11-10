@@ -10,6 +10,7 @@ type Status = {
     auth: AuthState;
     lastCapture: LastCapture | null;
     history: CaptureRecord[];
+    boundEmail?: string | null;
     tabUnlockedUntil?: number | null;
 };
 
@@ -22,6 +23,9 @@ const viewLoading = document.getElementById("view-loading") as HTMLDivElement;
 const viewSignedOut = document.getElementById(
     "view-signed-out",
 ) as HTMLDivElement;
+const boundNotice = document.getElementById(
+    "bound-notice",
+) as HTMLParagraphElement;
 const viewReady = document.getElementById("view-ready") as HTMLDivElement;
 
 const formSignin = document.getElementById("form-signin") as HTMLFormElement;
@@ -64,9 +68,19 @@ function showView(view: "loading" | "signed-out" | "ready") {
     viewReady.hidden = view !== "ready";
 }
 
-function setupSignedOutView(error?: string) {
+function setupSignedOutView(error?: string, boundEmail?: string | null) {
     showView("signed-out");
     showError(error);
+    if (boundEmail !== undefined) {
+        if (boundEmail) {
+            boundNotice.textContent = `This extension is linked to ${boundEmail}.`;
+            boundNotice.hidden = false;
+            if (!inputEmail.value) inputEmail.value = boundEmail;
+        } else {
+            boundNotice.textContent = "";
+            boundNotice.hidden = true;
+        }
+    }
     btnSigninSubmit.disabled = false;
     btnSigninSubmit.textContent = "Sign in to Escapture";
 }
@@ -169,7 +183,7 @@ async function render() {
     }
 
     if (!reply.auth.signedIn) {
-        setupSignedOutView();
+        setupSignedOutView(undefined, reply.boundEmail);
     } else {
         await setupReadyView(reply.auth, reply.tabUnlockedUntil);
     }

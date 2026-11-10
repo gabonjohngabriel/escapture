@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import { allowedEmailDomain } from "@/lib/email-domain";
 import { isAllowedSignupEmail } from "@/lib/email-gate";
 import { db, schema } from "./db";
+import { readDeviceTokenHash } from "./device-binding";
 import { forbidden, unauthorized } from "./errors";
 
 export type Role = "student" | "reviewer" | "admin" | "authority";
@@ -76,7 +77,7 @@ export const auth = betterAuth({
         // An administrator can deactivate a reviewer: no new sessions for that account.
         before: async (newSession) => {
           const [owner] = await db
-            .select({ deactivatedAt: schema.user.deactivatedAt })
+            .select({ deactivatedAt: schema.user.deactivatedAt, role: schema.user.role })
             .from(schema.user)
             .where(eq(schema.user.id, newSession.userId))
             .limit(1);
@@ -85,6 +86,23 @@ export const auth = betterAuth({
               code: "ACCOUNT_DEACTIVATED",
               message: "This account has been deactivated. Ask your administrator if you think this is a mistake.",
             });
+          }
+          if (owner?.role === "student") {
+            const deviceTokenHash = await readDeviceTokenHash();
+            if (deviceTokenHash) {
+              const [binding] = await db
+                .select({ userId: schema.deviceBinding.userId })
+                .from(schema.deviceBinding)
+                .where(eq(schema.deviceBinding.tokenHash, deviceTokenHash))
+                .limit(1);
+              if (binding && binding.userId !== newSession.userId) {
+                throw new APIError("FORBIDDEN", {
+                  code: "DEVICE_BOUND_TO_OTHER",
+                  message:
+                    "This browser is linked to another Escapture student account. Ask an administrator to reset the device binding.",
+                });
+              }
+            }
           }
           return { data: newSession };
         },

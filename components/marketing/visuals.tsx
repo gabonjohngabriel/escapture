@@ -6,222 +6,299 @@ import { MockButton, ProductFrame } from "./blocks";
 // Pictures of the product for the landing page. Everything here is sample
 // content inside a ProductFrame or an image role: nothing is interactive.
 
-const Row = ({ title, meta, children }: { title: string; meta: string; children: React.ReactNode }) => (
-  <div className="mk-mock-row">
-    <div>
-      <b>{title}</b>
-      <span className="mk-m tnum">{meta}</span>
+const Row = ({
+    title,
+    meta,
+    children,
+}: {
+    title: string;
+    meta: string;
+    children: React.ReactNode;
+}) => (
+    <div className="mk-mock-row">
+        <div>
+            <b>{title}</b>
+            <span className="mk-m tnum">{meta}</span>
+        </div>
+        {children}
     </div>
-    {children}
-  </div>
 );
 
 /**
  * High-fidelity vault mock matching Figma Home Page node 4:1817.
  */
 export function HeroVaultWindow() {
-  return (
-    <div className="w-full max-w-[480px] rounded-2xl border border-border bg-canvas p-3 sm:p-4 shadow-[0_12px_36px_rgba(0,0,0,0.06)]">
-      {/* Window title bar */}
-      <div className="flex items-center gap-3 pb-2.5 sm:pb-3 px-1">
-        <div className="flex items-center gap-1.5" aria-hidden>
-          <div className="size-2.5 rounded-full bg-white border border-border" />
-          <div className="size-2.5 rounded-full bg-white border border-border" />
-          <div className="size-2.5 rounded-full bg-white border border-border" />
-        </div>
-        <div className="flex-1 max-w-[240px] rounded-md bg-white px-3 py-1 text-xs text-brand-800/60 shadow-xs border border-border/50 font-mono tracking-tight">
-          escapture.app/vault
-        </div>
-      </div>
+    return (
+        <div className="w-full max-w-[480px] rounded-2xl border border-border bg-canvas p-3 sm:p-4 shadow-[0_12px_36px_rgba(0,0,0,0.06)]">
+            {/* Window title bar */}
+            <div className="flex items-center gap-3 pb-2.5 sm:pb-3 px-1">
+                <div className="flex items-center gap-1.5" aria-hidden>
+                    <div className="size-2.5 rounded-full bg-white border border-border" />
+                    <div className="size-2.5 rounded-full bg-white border border-border" />
+                    <div className="size-2.5 rounded-full bg-white border border-border" />
+                </div>
+                <div className="flex-1 max-w-[240px] rounded-md bg-white px-3 py-1 text-xs text-brand-800/60 shadow-xs border border-border/50 font-mono tracking-tight">
+                    escapture.app/vault
+                </div>
+            </div>
 
-      {/* Inner App Window White Sheet */}
-      <div className="rounded-xl bg-white p-3.5 sm:p-5 shadow-xs border border-border/60 flex flex-col gap-3.5 sm:gap-4">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="flex items-center gap-2">
-            <Lock className="size-4.5 sm:size-5 text-brand-700" />
-            <h3 className="font-bold text-brand-900 text-base sm:text-lg">Your Vault</h3>
-          </div>
-          <div className="flex items-center gap-1.5 bg-brand-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-xs">
-            <FileCheck2 className="size-3.5" />
-            <span>Capture evidence</span>
-          </div>
-        </div>
+            {/* Inner App Window White Sheet */}
+            <div className="rounded-xl bg-white p-3.5 sm:p-5 shadow-xs border border-border/60 flex flex-col gap-3.5 sm:gap-4">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-2">
+                        <Lock className="size-4.5 sm:size-5 text-brand-700" />
+                        <h3 className="font-bold text-brand-900 text-base sm:text-lg">
+                            Your Vault
+                        </h3>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-brand-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-xs">
+                        <FileCheck2 className="size-3.5" />
+                        <span>Capture evidence</span>
+                    </div>
+                </div>
 
-        {/* Vault Item */}
-        <div className="rounded-xl border border-border/70 p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 bg-card hover:bg-canvas/50 transition">
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold text-brand-900">Group chat, Nov 6</span>
-            <span className="text-xs text-muted">Messenger · 12 messages</span>
-          </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 border border-brand-200/80 px-2.5 py-1 text-[11px] font-semibold text-brand-800 shrink-0 self-start sm:self-auto">
-            <CircleCheck className="size-3.5 text-brand-600" />
-            Captured with tamper checks
-          </span>
+                {/* Vault Item */}
+                <div className="rounded-xl border border-border/70 p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 bg-card hover:bg-canvas/50 transition">
+                    <div className="flex flex-col">
+                        <span className="text-sm font-semibold text-brand-900">
+                            Posts, Nov 6
+                        </span>
+                        <span className="text-xs text-muted">
+                            Facebook · 12 messages
+                        </span>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 border border-brand-200/80 px-2.5 py-1 text-[11px] font-semibold text-brand-800 shrink-0 self-start sm:self-auto">
+                        <CircleCheck className="size-3.5 text-brand-600" />
+                        Captured with tamper checks
+                    </span>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }
 
 export function VaultVisual() {
-  return (
-    <ProductFrame url="escapture.app/vault" label="The Escapture vault, showing three saved captures">
-      <div className="mk-mock">
-        <div className="mk-mock-head">
-          <p className="mk-h3">Your vault</p>
-          <MockButton>
-            <FileCheck2 size={18} strokeWidth={1.75} />
-            Capture evidence
-          </MockButton>
-        </div>
-        <Row title="Group chat, 3 Oct" meta="Messenger · 42 messages">
-          <TamperCheck />
-        </Row>
-        <Row title="Comments on my post" meta="Facebook post · 18 comments">
-          <TamperCheck />
-        </Row>
-        <Row title="Shared photo thread" meta="Facebook post · 6 comments">
-          <TamperCheck />
-        </Row>
-      </div>
-    </ProductFrame>
-  );
+    return (
+        <ProductFrame
+            url="escapture.app/vault"
+            label="The Escapture vault, showing three saved captures">
+            <div className="mk-mock">
+                <div className="mk-mock-head">
+                    <p className="mk-h3">Your vault</p>
+                    <MockButton>
+                        <FileCheck2 size={18} strokeWidth={1.75} />
+                        Capture evidence
+                    </MockButton>
+                </div>
+                <Row title="Group chat, 3 Oct" meta="Messenger · 42 messages">
+                    <TamperCheck />
+                </Row>
+                <Row
+                    title="Comments on my post"
+                    meta="Facebook post · 18 comments">
+                    <TamperCheck />
+                </Row>
+                <Row
+                    title="Shared photo thread"
+                    meta="Facebook post · 6 comments">
+                    <TamperCheck />
+                </Row>
+            </div>
+        </ProductFrame>
+    );
 }
 
 export function ExtensionVisual() {
-  return (
-    <ProductFrame url="Escapture extension" label="The Escapture extension after saving a capture">
-      <div className="mk-popup-wrap">
-        <div className="mk-popup">
-          <div className="flex items-center justify-between">
-            <span className="font-heading text-[18px] leading-6 font-semibold">Escapture</span>
-            <span className="text-[13px] leading-[18px] text-muted">Signed in as you</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-[15px] leading-[22px] font-semibold">Comments on my post</span>
-            <span className="text-[13px] leading-[18px] text-muted">Facebook post · 18 comments loaded</span>
-          </div>
-          <TamperCheck time="13 Oct 2026, 7:42 PM" />
-          <div className="flex items-start gap-3 rounded-xl bg-tamper-bg p-4 text-[15px] leading-6 text-tamper-fg">
-            <CircleCheck size={20} strokeWidth={1.75} className="mt-0.5 shrink-0" />
-            <p>
-              Saved to your vault. <span className="font-semibold underline">Open in vault</span>
-            </p>
-          </div>
-          <MockButton variant="secondary" className="w-full">
-            Capture another page
-          </MockButton>
-        </div>
-        <span className="mk-toast">Saved to your vault</span>
-      </div>
-    </ProductFrame>
-  );
+    return (
+        <ProductFrame
+            url="Escapture extension"
+            label="The Escapture extension after saving a capture">
+            <div className="mk-popup-wrap">
+                <div className="mk-popup">
+                    <div className="flex items-center justify-between">
+                        <span className="font-heading text-[18px] leading-6 font-semibold">
+                            Escapture
+                        </span>
+                        <span className="text-[13px] leading-[18px] text-muted">
+                            Signed in as you
+                        </span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <span className="text-[15px] leading-[22px] font-semibold">
+                            Comments on my post
+                        </span>
+                        <span className="text-[13px] leading-[18px] text-muted">
+                            Facebook post · 18 comments loaded
+                        </span>
+                    </div>
+                    <TamperCheck time="13 Oct 2026, 7:42 PM" />
+                    <div className="flex items-start gap-3 rounded-xl bg-tamper-bg p-4 text-[15px] leading-6 text-tamper-fg">
+                        <CircleCheck
+                            size={20}
+                            strokeWidth={1.75}
+                            className="mt-0.5 shrink-0"
+                        />
+                        <p>
+                            Saved to your vault.{" "}
+                            <span className="font-semibold underline">
+                                Open in vault
+                            </span>
+                        </p>
+                    </div>
+                    <MockButton variant="secondary" className="w-full">
+                        Capture another page
+                    </MockButton>
+                </div>
+                <span className="mk-toast">Saved to your vault</span>
+            </div>
+        </ProductFrame>
+    );
 }
 
 export function SharingVisual() {
-  return (
-    <ProductFrame url="escapture.app/cases/comments-on-my-post" label="A case shared with one person through a password-protected link">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-start gap-3 rounded-xl bg-brand-100 p-4 text-[15px] leading-6 text-brand-800">
-          <Lock size={20} strokeWidth={1.75} className="mt-0.5 shrink-0" />
-          <p>Only you can see your vault. Nothing reaches reviewers until you escalate.</p>
-        </div>
-        <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-6 shadow-soft">
-          <p className="mk-h3">Comments on my post</p>
-          <p className="text-sm leading-[22px] text-muted">3 captures · Shared with 1 person</p>
-          <div className="mt-2 flex flex-col gap-3">
-            <TamperCheck time="3 Oct 2026, 8:12 PM" />
-            <div className="mk-hash">
-              <code>sha256 9f2c4e81a07bd3c5e6f1029a8c4d7be3015f6a92c8e4d1b07a3f5c9e2d6b8a41</code>
-              <MockButton variant="ghost" className="h-8 px-2.5 text-[13px]">
-                Copy
-              </MockButton>
+    return (
+        <ProductFrame
+            url="escapture.app/cases/comments-on-my-post"
+            label="A case shared with one person through a password-protected link">
+            <div className="flex flex-col gap-4">
+                <div className="flex items-start gap-3 rounded-xl bg-brand-100 p-4 text-[15px] leading-6 text-brand-800">
+                    <Lock
+                        size={20}
+                        strokeWidth={1.75}
+                        className="mt-0.5 shrink-0"
+                    />
+                    <p>
+                        Only you can see your vault. Nothing reaches reviewers
+                        until you escalate.
+                    </p>
+                </div>
+                <div className="  flex flex-col gap-2 rounded-xl border border-border bg-card p-6 shadow-soft">
+                    <p className="mk-h3">Comments on my post</p>
+                    <p className="text-sm leading-[22px] text-muted">
+                        3 captures · Shared with 1 person
+                    </p>
+                    <div className="mt-2 flex flex-col gap-3">
+                        <TamperCheck time="3 Oct 2026, 8:12 PM" />
+                        <div className="mk-hash">
+                            <code>
+                                sha256
+                                9f2c4e81a07bd3c5e6f1029a8c4d7be3015f6a92c8e4d1b07a3f5c9e2d6b8a41
+                            </code>
+                            <MockButton
+                                variant="ghost"
+                                className="h-8 px-2.5 text-[13px]">
+                                Copy
+                            </MockButton>
+                        </div>
+                        <div className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-subtle py-2 pr-2 pl-3">
+                            <span className="flex items-center gap-2 text-sm leading-5 font-semibold">
+                                <Lock size={16} strokeWidth={1.75} />
+                                Ana R. · password-protected link
+                            </span>
+                            <MockButton variant="ghost">
+                                <X size={18} strokeWidth={1.75} />
+                                Remove access
+                            </MockButton>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-subtle py-2 pr-2 pl-3">
-              <span className="flex items-center gap-2 text-sm leading-5 font-semibold">
-                <Lock size={16} strokeWidth={1.75} />
-                Ana R. · password-protected link
-              </span>
-              <MockButton variant="ghost">
-                <X size={18} strokeWidth={1.75} />
-                Remove access
-              </MockButton>
-            </div>
-          </div>
-        </div>
-      </div>
-    </ProductFrame>
-  );
+        </ProductFrame>
+    );
 }
 
 /** The escalation dialog, drawn open and inline with no overlay. */
 export function EscalateVisual() {
-  return (
-    <div className="mk-dialog" role="img" aria-label="The escalation preview: review what reviewers will see before you send it">
-      <div aria-hidden className="contents">
-        <p className="mk-h3">Review what reviewers will see</p>
-        <p className="text-muted">This is everything reviewers will receive when you escalate.</p>
-        <div className="flex flex-col gap-2">
-          <Row title="Comments on my post" meta="Facebook post · 18 comments">
-            <FileCheck2 size={20} strokeWidth={1.75} className="text-tamper-fg" />
-          </Row>
-          <Row title="Group chat, 3 Oct" meta="Messenger · 42 messages">
-            <FileCheck2 size={20} strokeWidth={1.75} className="text-tamper-fg" />
-          </Row>
+    return (
+        <div
+            className="mk-dialog"
+            role="img"
+            aria-label="The escalation preview: review what reviewers will see before you send it">
+            <div aria-hidden className="contents">
+                <p className="mk-h3">Review what reviewers will see</p>
+                <p className="text-muted">
+                    This is everything reviewers will receive when you escalate.
+                </p>
+                <div className="flex flex-col gap-2">
+                    <Row
+                        title="Comments on my post"
+                        meta="Facebook post · 18 comments">
+                        <FileCheck2
+                            size={20}
+                            strokeWidth={1.75}
+                            className="text-tamper-fg"
+                        />
+                    </Row>
+                    <Row
+                        title="Group chat, 3 Oct"
+                        meta="Messenger · 42 messages">
+                        <FileCheck2
+                            size={20}
+                            strokeWidth={1.75}
+                            className="text-tamper-fg"
+                        />
+                    </Row>
+                </div>
+                <div className="mk-note-panel">
+                    Once you escalate, this case is locked. You can&apos;t edit
+                    or withdraw it, and attached evidence can&apos;t be deleted.
+                </div>
+                <div className="mk-dialog-actions">
+                    <MockButton variant="ghost">Go back</MockButton>
+                    <MockButton variant="weighty">
+                        Escalate to reviewers
+                    </MockButton>
+                </div>
+            </div>
         </div>
-        <div className="mk-note-panel">
-          Once you escalate, this case is locked. You can&apos;t edit or withdraw it, and attached evidence can&apos;t be
-          deleted.
-        </div>
-        <div className="mk-dialog-actions">
-          <MockButton variant="ghost">Go back</MockButton>
-          <MockButton variant="weighty">Escalate to reviewers</MockButton>
-        </div>
-      </div>
-    </div>
-  );
+    );
 }
 
 const board: [string, string, CaseStatus][] = [
-  ["Comments on my post", "Escalated 8 Oct 2026", "escalated"],
-  ["Group chat, 3 Oct", "Escalated 5 Oct 2026", "under_review"],
-  ["Edited photo caption", "Escalated 22 Sep 2026", "closed"],
+    ["Comments on my post", "Escalated 8 Oct 2026", "escalated"],
+    ["Group chat, 3 Oct", "Escalated 5 Oct 2026", "under_review"],
+    ["Edited photo caption", "Escalated 22 Sep 2026", "closed"],
 ];
 
 export function ReviewBoardVisual() {
-  return (
-    <ProductFrame url="escapture.app/review" label="The Review Board, listing three cases with their statuses">
-      <div className="mk-mock">
-        <div className="mk-mock-head">
-          <p className="mk-h3">Review Board</p>
-          <span className="text-[13px] leading-[18px] text-muted">3 cases</span>
-        </div>
-        {board.map(([title, meta, status]) => (
-          <Row key={title} title={title} meta={meta}>
-            <StatusBadge status={status} />
-          </Row>
-        ))}
-        <TamperCheck reviewer time="3 Oct 2026, 8:12 PM" />
-      </div>
-    </ProductFrame>
-  );
+    return (
+        <ProductFrame
+            url="escapture.app/review"
+            label="The Review Board, listing three cases with their statuses">
+            <div className="mk-mock">
+                <div className="mk-mock-head">
+                    <p className="mk-h3">Review Board</p>
+                    <span className="text-[13px] leading-[18px] text-muted">
+                        3 cases
+                    </span>
+                </div>
+                {board.map(([title, meta, status]) => (
+                    <Row key={title} title={title} meta={meta}>
+                        <StatusBadge status={status} />
+                    </Row>
+                ))}
+                <TamperCheck reviewer time="3 Oct 2026, 8:12 PM" />
+            </div>
+        </ProductFrame>
+    );
 }
 
 export function EmptyVaultVisual() {
-  return (
-    <ProductFrame url="escapture.app/vault" label="A new, empty vault">
-      <div className="mx-auto flex max-w-[480px] flex-col items-center gap-3 px-6 py-12 text-center">
-        <div className="mk-icon-circle">
-          <Inbox size={28} strokeWidth={1.75} />
-        </div>
-        <p className="mk-h3">Your vault is ready</p>
-        <p className="text-muted">
-          When you capture a post or conversation, it appears here with its tamper checks and capture time.
-        </p>
-        <MockButton variant="soft" className="mt-2">
-          Install the Escapture extension
-        </MockButton>
-      </div>
-    </ProductFrame>
-  );
+    return (
+        <ProductFrame url="escapture.app/vault" label="A new, empty vault">
+            <div className="mx-auto flex max-w-[480px] flex-col items-center gap-3 px-6 py-12 text-center">
+                <div className="mk-icon-circle">
+                    <Inbox size={28} strokeWidth={1.75} />
+                </div>
+                <p className="mk-h3">Your vault is ready</p>
+                <p className="text-muted">
+                    When you capture a post or conversation, it appears here
+                    with its tamper checks and capture time.
+                </p>
+                <MockButton variant="soft" className="mt-2">
+                    Install the Escapture extension
+                </MockButton>
+            </div>
+        </ProductFrame>
+    );
 }

@@ -1,6 +1,7 @@
 // Better Auth tables. Column names follow Better Auth's Drizzle adapter.
 import {
     boolean,
+    char,
     integer,
     pgEnum,
     pgTable,
@@ -129,6 +130,18 @@ export const captureGrant = pgTable("capture_grant", {
         .references(() => user.id, { onDelete: "cascade" }),
     sessionId: text("session_id").notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+        .notNull()
+        .defaultNow(),
+}).enableRLS();
+
+export const deviceBinding = pgTable("device_binding", {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+        .notNull()
+        .unique()
+        .references(() => user.id, { onDelete: "cascade" }),
+    tokenHash: char("token_hash", { length: 64 }).notNull().unique(),
     createdAt: timestamp("created_at", { withTimezone: true })
         .notNull()
         .defaultNow(),

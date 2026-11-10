@@ -30,7 +30,7 @@ describe("route guards (security checklist)", () => {
     },
   );
 
-  it("only auth, link metadata, reviewer setup, and passkey auth are public", () => {
+  it("only auth, link metadata, and reviewer setup are public", () => {
     const publicRoutes = files
       .filter((f) => readFileSync(f, "utf8").includes("// public-route"))
       .map((f) => path.relative(api, f).replace(/\\/g, "/"))
@@ -38,9 +38,6 @@ describe("route guards (security checklist)", () => {
     expect(publicRoutes).toEqual([
       "auth/[...all]/route.ts",
       "links/[token]/route.ts",
-      "passkeys/auth/info/route.ts",
-      "passkeys/auth/options/route.ts",
-      "passkeys/auth/verify/route.ts",
       "setup/[token]/route.ts",
     ]);
   });
@@ -72,13 +69,18 @@ describe("route guards (security checklist)", () => {
         !f.includes(`${path.sep}auth${path.sep}`) &&
         (f.includes(`${path.sep}passkeys${path.sep}`) || f.includes(`${path.sep}capture-grant${path.sep}`)),
     );
-    expect(studentAuthRoutes.length).toBe(5);
+    expect(studentAuthRoutes.length).toBe(8);
     for (const f of studentAuthRoutes) {
       const src = readFileSync(f, "utf8");
       const handlers = src.match(/export const (GET|POST|PATCH|PUT|DELETE) = handle/g) ?? [];
       const studentGuards = src.match(/requireUser\(\{ roles: \["student"\] \}\)/g) ?? [];
       expect(studentGuards.length).toBe(handlers.length);
     }
+  });
+
+  it("students cannot self-delete passkeys via /api/passkeys", () => {
+    const src = readFileSync(path.join(api, "passkeys/route.ts"), "utf8");
+    expect(src).not.toMatch(/export const DELETE/);
   });
 
   it("POST /api/evidence enforces requireCaptureGrant before parsing form data", () => {

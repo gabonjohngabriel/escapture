@@ -71,6 +71,13 @@
       "when": 1794214005473,
       "tag": "0009_worthless_zarda",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794293416394,
+      "tag": "0010_handy_stingray",
+      "breakpoints": true
     }
   ]
 }

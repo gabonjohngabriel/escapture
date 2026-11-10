@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { VerifyCaptureClient } from "@/components/account/verify-capture-client";
+import { getUser } from "@/server/auth";
+import { readDeviceTokenHash } from "@/server/device-binding";
 import { getVerifyRequestInfo } from "@/server/services/capture-grant";
 
 export const metadata: Metadata = {
@@ -50,16 +52,38 @@ async function VerifyCaptureContent({
     const reqParam = Array.isArray(params.req) ? params.req[0] : params.req;
     const requestId = (reqParam ?? "").trim();
 
-    const info = await getVerifyRequestInfo(requestId);
+    const actor = await getUser();
+    if (!actor) {
+        return (
+            <VerifyCaptureClient
+                initialState="sign_in_required"
+                requestId={requestId}
+                userEmail=""
+            />
+        );
+    }
+    if (actor.role !== "student") {
+        return (
+            <VerifyCaptureClient
+                initialState="account_mismatch"
+                requestId={requestId}
+                userEmail={actor.email}
+                userName={actor.name}
+            />
+        );
+    }
+
+    const deviceTokenHash = await readDeviceTokenHash();
+    const info = await getVerifyRequestInfo(requestId, actor, deviceTokenHash);
 
     const userEmail =
         "userEmail" in info && typeof info.userEmail === "string"
             ? info.userEmail
-            : "";
+            : actor.email;
     const userName =
         "userName" in info && typeof info.userName === "string"
             ? info.userName
-            : undefined;
+            : actor.name;
 
     return (
         <VerifyCaptureClient

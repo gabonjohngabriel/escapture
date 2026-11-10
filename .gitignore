@@ -49,3 +49,5 @@ next-env.d.ts
 
 # real page samples for tuning capture (contain personal data, never commit)
 /fixtures/real/
+.agents
+.claude

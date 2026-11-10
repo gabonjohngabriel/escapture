@@ -6,9 +6,10 @@ import {
   type AuthenticatorTransport,
 } from "@simplewebauthn/server";
 import { and, desc, eq, gt } from "drizzle-orm";
+import { safeEqual } from "@/lib/hash";
 import type { Actor } from "../auth";
 import { assertRole } from "../authz";
-import { AppError, badRequest, notFound } from "../errors";
+import { AppError, badRequest, forbidden, notFound } from "../errors";
 
 export const GRANT_TTL_MS = 15 * 60 * 1000; // 15 minutes
 export const REQUEST_TTL_MS = 5 * 60 * 1000; // 5 minutes to complete the prompt
@@ -59,6 +60,21 @@ export function evaluateAuthChallenge(params: {
   return "ok";
 }
 
+/**
+ * Pure check for whether the browser's device token hash matches the student's
+ * 1-to-1 bound device record.
+ */
+export function evaluateDeviceBinding(params: {
+  binding: { userId: string; tokenHash: string } | null;
+  actorId: string;
+  deviceTokenHash: string | null | undefined;
+}): "ok" | "device_mismatch" {
+  if (!params.binding || !params.deviceTokenHash) return "device_mismatch";
+  if (params.binding.userId !== params.actorId) return "device_mismatch";
+  if (!safeEqual(params.binding.tokenHash, params.deviceTokenHash)) return "device_mismatch";
+  return "ok";
+}
+
 export async function requestGrant(
   actor: Actor,
   opts?: { forceVerify?: boolean },
@@ -92,6 +108,20 @@ export async function requestGrant(
     return {
       status: "needs_enrollment" as const,
       reason: credentials.length > 0 ? ("domain_changed" as const) : ("no_passkey" as const),
+      enrollUrl: `${appUrl}/account/security`,
+    };
+  }
+
+  const [binding] = await db
+    .select({ id: schema.deviceBinding.id })
+    .from(schema.deviceBinding)
+    .where(eq(schema.deviceBinding.userId, actor.id))
+    .limit(1);
+
+  if (!binding) {
+    return {
+      status: "needs_enrollment" as const,
+      reason: "device_unbound" as const,
       enrollUrl: `${appUrl}/account/security`,
     };
   }
@@ -140,7 +170,12 @@ export async function requestGrant(
   };
 }
 
-export async function getVerifyRequestInfo(requestId: string) {
+export async function getVerifyRequestInfo(
+  requestId: string,
+  actor: Actor,
+  deviceTokenHash?: string | null,
+) {
+  assertRole(actor, "student");
   if (!requestId) return { state: "not_found" as const };
   const [{ webauthnConfig }, { db, schema }] = await Promise.all([
     import("../auth"),
@@ -160,16 +195,15 @@ export async function getVerifyRequestInfo(requestId: string) {
     .limit(1);
 
   if (!row) return { state: "not_found" as const };
+  if (row.userId !== actor.id) {
+    return {
+      state: "account_mismatch" as const,
+      userEmail: actor.email,
+      userName: actor.name,
+    };
+  }
   if (row.usedAt) return { state: "already_verified" as const };
   if (row.expiresAt.getTime() <= Date.now()) return { state: "expired" as const };
-
-  const [targetUser] = await db
-    .select({ name: schema.user.name, email: schema.user.email })
-    .from(schema.user)
-    .where(eq(schema.user.id, row.userId))
-    .limit(1);
-
-  if (!targetUser) return { state: "not_found" as const };
 
   const creds = await db
     .select({ id: schema.passkeyCredential.id })
@@ -185,20 +219,45 @@ export async function getVerifyRequestInfo(requestId: string) {
   if (creds.length === 0) {
     return {
       state: "needs_enrollment" as const,
-      userEmail: targetUser.email,
-      userName: targetUser.name,
+      userEmail: actor.email,
+      userName: actor.name,
+    };
+  }
+
+  const [binding] = await db
+    .select({ userId: schema.deviceBinding.userId, tokenHash: schema.deviceBinding.tokenHash })
+    .from(schema.deviceBinding)
+    .where(eq(schema.deviceBinding.userId, actor.id))
+    .limit(1);
+
+  if (
+    evaluateDeviceBinding({
+      binding: binding ?? null,
+      actorId: actor.id,
+      deviceTokenHash,
+    }) !== "ok"
+  ) {
+    return {
+      state: "device_mismatch" as const,
+      userEmail: actor.email,
+      userName: actor.name,
     };
   }
 
   return {
     state: "ready" as const,
     requestId: row.id,
-    userEmail: targetUser.email,
-    userName: targetUser.name,
+    userEmail: actor.email,
+    userName: actor.name,
   };
 }
 
-export async function authOptions(requestId: string) {
+export async function authOptions(
+  requestId: string,
+  actor: Actor,
+  deviceTokenHash?: string | null,
+) {
+  assertRole(actor, "student");
   const [{ webauthnConfig }, { db, schema }] = await Promise.all([
     import("../auth"),
     import("../db"),
@@ -216,11 +275,34 @@ export async function authOptions(requestId: string) {
     )
     .limit(1);
 
-  if (!row) throw notFound("Verification request not found.");
-  if (row.usedAt || row.expiresAt.getTime() <= Date.now()) {
+  const check = evaluateAuthChallenge({
+    challengeRow: row ?? null,
+    actorId: actor.id,
+  });
+  if (check === "not_found") throw notFound("Verification request not found.");
+  if (check === "account_mismatch") {
+    throw forbidden("This verification request belongs to a different Escapture account.");
+  }
+  if (check === "expired_or_used" || !row) {
     throw badRequest(
       "This verification request has expired. Start capture again from the extension.",
     );
+  }
+
+  const [binding] = await db
+    .select({ userId: schema.deviceBinding.userId, tokenHash: schema.deviceBinding.tokenHash })
+    .from(schema.deviceBinding)
+    .where(eq(schema.deviceBinding.userId, actor.id))
+    .limit(1);
+
+  if (
+    evaluateDeviceBinding({
+      binding: binding ?? null,
+      actorId: actor.id,
+      deviceTokenHash,
+    }) !== "ok"
+  ) {
+    throw forbidden("This browser is not linked to your Escapture account.");
   }
 
   const credentials = await db
@@ -242,7 +324,7 @@ export async function authOptions(requestId: string) {
     userVerification: "required",
     allowCredentials: credentials.map((c) => ({
       id: c.id,
-      transports: (c.transports ?? undefined) as AuthenticatorTransport[] | undefined,
+      transports: ["internal"] as AuthenticatorTransport[],
     })),
   });
 
@@ -257,12 +339,22 @@ export async function authOptions(requestId: string) {
 export async function verifyAuth(input: {
   requestId: string;
   response: AuthenticationResponseJSON;
+  actor: Actor;
+  deviceTokenHash?: string | null;
 }) {
+  assertRole(input.actor, "student");
   const [{ webauthnConfig }, { db, schema }] = await Promise.all([
     import("../auth"),
     import("../db"),
   ]);
   const { rpID, origin } = webauthnConfig();
+
+  if (
+    input.response.authenticatorAttachment &&
+    input.response.authenticatorAttachment !== "platform"
+  ) {
+    throw badRequest("Only built-in device passkeys are allowed.");
+  }
 
   const [row] = await db
     .select()
@@ -275,12 +367,34 @@ export async function verifyAuth(input: {
     )
     .limit(1);
 
-  const check = evaluateAuthChallenge({ challengeRow: row ?? null });
+  const check = evaluateAuthChallenge({
+    challengeRow: row ?? null,
+    actorId: input.actor.id,
+  });
   if (check === "not_found") throw notFound("Verification request not found.");
+  if (check === "account_mismatch") {
+    throw forbidden("This verification request belongs to a different Escapture account.");
+  }
   if (check === "expired_or_used" || !row || !row.challenge) {
     throw badRequest(
       "This verification request has expired or was already used. Start capture again from the extension.",
     );
+  }
+
+  const [binding] = await db
+    .select({ userId: schema.deviceBinding.userId, tokenHash: schema.deviceBinding.tokenHash })
+    .from(schema.deviceBinding)
+    .where(eq(schema.deviceBinding.userId, input.actor.id))
+    .limit(1);
+
+  if (
+    evaluateDeviceBinding({
+      binding: binding ?? null,
+      actorId: input.actor.id,
+      deviceTokenHash: input.deviceTokenHash,
+    }) !== "ok"
+  ) {
+    throw forbidden("This browser is not linked to your Escapture account.");
   }
 
   const [cred] = await db

@@ -37,7 +37,7 @@ export function StudentPasskeyReset({
       await api(`/api/admin/students/${encodeURIComponent(target.id)}/passkeys`, {
         method: "DELETE",
       });
-      setSuccess(`Reset passkeys for ${target.name} (${target.email}). They can now enroll a new passkey.`);
+      setSuccess(`Reset passkey and device link for ${target.name} (${target.email}). They can now link a new device.`);
       setTarget(null);
       router.refresh();
     } catch (err) {
@@ -55,10 +55,10 @@ export function StudentPasskeyReset({
         </div>
         <div>
           <h2 className="text-lg font-bold text-brand-800">
-            Student passkey recovery
+            Student passkey &amp; device recovery
           </h2>
           <p className="text-sm text-muted">
-            If a student loses every device with a registered passkey, reset their passkeys here so they can register a new one on their Security page.
+            If a student switches laptops or loses their linked browser, reset their passkey and device binding here so they can link a new device on their Security page.
           </p>
         </div>
       </div>
@@ -99,7 +99,7 @@ export function StudentPasskeyReset({
                   className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border px-3 text-xs font-semibold text-ink transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
                 >
                   <RotateCcw size={13} aria-hidden />
-                  <span>Reset passkeys</span>
+                  <span>Reset passkey &amp; device</span>
                 </button>
               </div>
             </div>
@@ -110,21 +110,21 @@ export function StudentPasskeyReset({
       <Dialog
         open={Boolean(target)}
         onClose={() => setTarget(null)}
-        title="Reset student passkeys?"
+        title="Reset passkey and linked device?"
         footer={
           <>
             <Button variant="secondary" onClick={() => setTarget(null)} disabled={busy}>
               Cancel
             </Button>
             <Button variant="danger-solid" onClick={handleReset} loading={busy}>
-              Reset all passkeys
+              Reset passkey &amp; device
             </Button>
           </>
         }
       >
         <p className="text-sm leading-relaxed text-ink">
-          This will remove all {target?.passkeyCount} registered passkey(s) and revoke any active capture grants for{" "}
-          <span className="font-semibold text-ink">{target?.name}</span> ({target?.email}). They will need to register a new passkey before capturing evidence.
+          This will remove all {target?.passkeyCount} registered passkey(s), unlink the bound browser/device, and revoke any active capture grants for{" "}
+          <span className="font-semibold text-ink">{target?.name}</span> ({target?.email}). They will need to link a new device passkey before capturing evidence.
         </p>
       </Dialog>
     </section>

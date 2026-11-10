@@ -6,12 +6,50 @@ import {
   type RegistrationResponseJSON,
 } from "@simplewebauthn/server";
 import { and, desc, eq, sql } from "drizzle-orm";
+import { randomToken } from "@/lib/hash";
 import { webauthnConfig, type Actor } from "../auth";
 import { assertRole } from "../authz";
 import { db, schema } from "../db";
-import { badRequest, conflict, notFound } from "../errors";
+import { hashDeviceToken } from "../device-binding";
+import { badRequest, conflict, forbidden, notFound } from "../errors";
 
 const CHALLENGE_TTL_MS = 5 * 60 * 1000;
+const FORBIDDEN_TRANSPORTS = new Set(["hybrid", "usb", "ble", "nfc"]);
+
+/**
+ * Pure check for whether a newly registered WebAuthn credential satisfies
+ * our local platform authenticator policy (blocks phone QR / cross-platform,
+ * while allowing synced platform passkeys for hackathon portability).
+ */
+export function evaluateRegistrationPolicy(params: {
+  authenticatorAttachment?: string | null;
+  transports?: string[] | null;
+}): { ok: true } | { ok: false; reason: string } {
+  if (params.authenticatorAttachment !== "platform") {
+    return {
+      ok: false,
+      reason:
+        "Only built-in device passkeys (Windows Hello, Touch ID, or Chrome Passkey) are allowed.",
+    };
+  }
+  const transports = params.transports ?? [];
+  if (transports.length > 0) {
+    if (transports.some((t) => FORBIDDEN_TRANSPORTS.has(t))) {
+      return {
+        ok: false,
+        reason:
+          "Phone QR and external security keys are not allowed. Register a passkey on this device.",
+      };
+    }
+    if (!transports.includes("internal")) {
+      return {
+        ok: false,
+        reason: "Only built-in device passkeys are allowed.",
+      };
+    }
+  }
+  return { ok: true };
+}
 
 export type PasskeyItem = {
   id: string;
@@ -45,17 +83,40 @@ export async function listPasskeys(actor: Actor) {
   const hasValidPasskey = items.some((i) => i.rpIdMatches);
   const hasMismatchedPasskeys = items.some((i) => !i.rpIdMatches);
 
+  const [binding] = await db
+    .select({ id: schema.deviceBinding.id })
+    .from(schema.deviceBinding)
+    .where(eq(schema.deviceBinding.userId, actor.id))
+    .limit(1);
+
   return {
     rpId: rpID,
     items,
     hasValidPasskey,
     hasMismatchedPasskeys,
+    hasDeviceBinding: Boolean(binding),
   };
 }
 
-export async function registrationOptions(actor: Actor) {
+export async function registrationOptions(
+  actor: Actor,
+  currentDeviceTokenHash?: string | null,
+) {
   assertRole(actor, "student");
   const { rpName, rpID } = webauthnConfig();
+
+  if (currentDeviceTokenHash) {
+    const [existingBrowserBinding] = await db
+      .select({ userId: schema.deviceBinding.userId })
+      .from(schema.deviceBinding)
+      .where(eq(schema.deviceBinding.tokenHash, currentDeviceTokenHash))
+      .limit(1);
+    if (existingBrowserBinding && existingBrowserBinding.userId !== actor.id) {
+      throw forbidden(
+        "This browser is already linked to another student account. Ask an administrator to reset the device binding.",
+      );
+    }
+  }
 
   const existing = await db
     .select({
@@ -70,6 +131,19 @@ export async function registrationOptions(actor: Actor) {
       ),
     );
 
+  const [existingUserBinding] = await db
+    .select({ id: schema.deviceBinding.id })
+    .from(schema.deviceBinding)
+    .where(eq(schema.deviceBinding.userId, actor.id))
+    .limit(1);
+
+  if (existing.length > 0 || existingUserBinding) {
+    throw conflict(
+      "You already have a registered passkey and linked device. Ask an administrator to reset your binding before registering again.",
+      "passkey_exists",
+    );
+  }
+
   const options = await generateRegistrationOptions({
     rpName,
     rpID,
@@ -82,6 +156,7 @@ export async function registrationOptions(actor: Actor) {
       transports: (c.transports ?? undefined) as AuthenticatorTransport[] | undefined,
     })),
     authenticatorSelection: {
+      authenticatorAttachment: "platform",
       residentKey: "preferred",
       userVerification: "required",
     },
@@ -109,9 +184,31 @@ export async function verifyRegistration(
     response: RegistrationResponseJSON;
     label?: string;
   },
+  currentDeviceTokenHash?: string | null,
 ) {
   assertRole(actor, "student");
   const { rpID, origin } = webauthnConfig();
+
+  if (currentDeviceTokenHash) {
+    const [existingBrowserBinding] = await db
+      .select({ userId: schema.deviceBinding.userId })
+      .from(schema.deviceBinding)
+      .where(eq(schema.deviceBinding.tokenHash, currentDeviceTokenHash))
+      .limit(1);
+    if (existingBrowserBinding && existingBrowserBinding.userId !== actor.id) {
+      throw forbidden(
+        "This browser is already linked to another student account. Ask an administrator to reset the device binding.",
+      );
+    }
+  }
+
+  const policy = evaluateRegistrationPolicy({
+    authenticatorAttachment: input.response.authenticatorAttachment,
+    transports: input.response.response?.transports,
+  });
+  if (!policy.ok) {
+    throw badRequest(policy.reason);
+  }
 
   const [challengeRow] = await db
     .select()
@@ -171,46 +268,7 @@ export async function verifyRegistration(
     throw conflict("This passkey is already registered.", "passkey_exists");
   }
 
-  const cleanLabel = (input.label ?? "").trim().slice(0, 60) || "Passkey";
-  const publicKeyBase64Url = Buffer.from(credential.publicKey).toString("base64url");
-
-  await db.insert(schema.passkeyCredential).values({
-    id: credential.id,
-    userId: actor.id,
-    publicKey: publicKeyBase64Url,
-    counter: credential.counter,
-    transports: credential.transports ?? null,
-    rpId: rpID,
-    label: cleanLabel,
-  });
-
-  return {
-    verified: true,
-    id: credential.id,
-    label: cleanLabel,
-  };
-}
-
-export async function removePasskey(actor: Actor, credentialId: string) {
-  assertRole(actor, "student");
-  const { rpID } = webauthnConfig();
-
-  const deleted = await db
-    .delete(schema.passkeyCredential)
-    .where(
-      and(
-        eq(schema.passkeyCredential.id, credentialId),
-        eq(schema.passkeyCredential.userId, actor.id),
-      ),
-    )
-    .returning({ id: schema.passkeyCredential.id });
-
-  if (deleted.length === 0) {
-    throw notFound("Passkey not found.");
-  }
-
-  // If the student removed their last passkey for this RP ID, revoke active capture grants.
-  const remaining = await db
+  const [alreadyHasPasskey] = await db
     .select({ id: schema.passkeyCredential.id })
     .from(schema.passkeyCredential)
     .where(
@@ -221,11 +279,41 @@ export async function removePasskey(actor: Actor, credentialId: string) {
     )
     .limit(1);
 
-  if (remaining.length === 0) {
-    await db.delete(schema.captureGrant).where(eq(schema.captureGrant.userId, actor.id));
+  if (alreadyHasPasskey) {
+    throw conflict(
+      "You already have a registered passkey. Ask an administrator to reset your binding first.",
+      "passkey_exists",
+    );
   }
 
-  return { ok: true };
+  const cleanLabel = (input.label ?? "").trim().slice(0, 60) || "This Device (Platform Passkey)";
+  const publicKeyBase64Url = Buffer.from(credential.publicKey).toString("base64url");
+  const rawDeviceToken = randomToken();
+  const tokenHash = hashDeviceToken(rawDeviceToken);
+
+  await db.transaction(async (tx) => {
+    await tx.insert(schema.passkeyCredential).values({
+      id: credential.id,
+      userId: actor.id,
+      publicKey: publicKeyBase64Url,
+      counter: credential.counter,
+      transports: credential.transports ?? ["internal"],
+      rpId: rpID,
+      label: cleanLabel,
+    });
+    await tx.insert(schema.deviceBinding).values({
+      id: randomUUID(),
+      userId: actor.id,
+      tokenHash,
+    });
+  });
+
+  return {
+    verified: true,
+    id: credential.id,
+    label: cleanLabel,
+    rawDeviceToken,
+  };
 }
 
 export async function adminResetPasskeys(admin: Actor, studentId: string) {
@@ -244,6 +332,7 @@ export async function adminResetPasskeys(admin: Actor, studentId: string) {
   await db.delete(schema.passkeyCredential).where(eq(schema.passkeyCredential.userId, studentId));
   await db.delete(schema.passkeyChallenge).where(eq(schema.passkeyChallenge.userId, studentId));
   await db.delete(schema.captureGrant).where(eq(schema.captureGrant.userId, studentId));
+  await db.delete(schema.deviceBinding).where(eq(schema.deviceBinding.userId, studentId));
 
   return { ok: true };
 }

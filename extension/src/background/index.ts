@@ -20,6 +20,7 @@ type Stored = {
   token?: string;
   name?: string;
   email?: string;
+  boundEmail?: string;
   lastCapture?: LastCapture;
   history?: CaptureRecord[];
   unlockedTabs?: Record<string, number>;
@@ -28,9 +29,11 @@ type Stored = {
 const sessionStore = chrome.storage.session ?? chrome.storage.local;
 
 const store = {
-  get: () => chrome.storage.local.get(["token", "name", "email", "lastCapture", "history"]) as Promise<Stored>,
+  get: () =>
+    chrome.storage.local.get(["token", "name", "email", "boundEmail", "lastCapture", "history"]) as Promise<Stored>,
   set: (v: Partial<Stored>) => chrome.storage.local.set(v),
   clearAuth: async () => {
+    // boundEmail is intentionally preserved across sign-out to keep 1-to-1 browser linking.
     await chrome.storage.local.remove(["token", "name", "email", "lastCapture", "history"]);
     await sessionStore.remove(["unlockedTabs"]).catch(() => {});
   },
@@ -117,6 +120,15 @@ async function authStatus(): Promise<AuthState> {
 }
 
 async function signIn(email: string, password: string): Promise<Reply<{ auth: AuthState }>> {
+  const normalizedEmail = email.trim().toLowerCase();
+  const { boundEmail } = await store.get();
+  if (boundEmail && boundEmail !== normalizedEmail) {
+    return {
+      ok: false,
+      error: `This browser extension is linked to ${boundEmail}. Ask an administrator to reset the device link before signing in with a different account.`,
+    };
+  }
+
   let res: Response;
   try {
     res = await appFetch("/api/auth/sign-in/email", {
@@ -140,7 +152,13 @@ async function signIn(email: string, password: string): Promise<Reply<{ auth: Au
   const body = await res.json().catch(() => null);
   if (!token || !body?.user) return { ok: false, error: "We couldn't sign you in. Please try again." };
   await clearTabUnlock();
-  await store.set({ token, name: body.user.name, email: body.user.email });
+  const userEmail = String(body.user.email ?? email).trim().toLowerCase();
+  await store.set({
+    token,
+    name: body.user.name,
+    email: body.user.email,
+    boundEmail: boundEmail ?? userEmail,
+  });
   return { ok: true, auth: { signedIn: true, name: body.user.name, email: body.user.email } };
 }
 
@@ -255,13 +273,16 @@ async function ensureTabCaptureGrant(
   const grant = (await grantRes.json()) as GrantRequestReply;
 
   if (grant.status === "needs_enrollment") {
+    if (grant.reason === "no_passkey") {
+      await chrome.storage.local.remove(["boundEmail"]).catch(() => {});
+    }
     await chrome.tabs.create({
       url: grant.enrollUrl || `${APP_URL}/account/security`,
       active: true,
     });
     return {
       ok: false,
-      error: "Set up your passkey on the Escapture Security page before capturing evidence.",
+      error: "Link your device passkey on the Escapture Security page before capturing evidence.",
       needsEnrollment: true,
       passkeyRequired: true,
     };
@@ -524,11 +545,13 @@ async function handle(msg: Message, sender: chrome.runtime.MessageSender): Promi
     case "auth:status": {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       const tabUnlockedUntil = tab?.id ? await getTabUnlock(tab.id) : null;
+      const saved = await store.get();
       return {
         ok: true,
         auth: await authStatus(),
-        lastCapture: (await store.get()).lastCapture ?? null,
-        history: (await store.get()).history ?? [],
+        lastCapture: saved.lastCapture ?? null,
+        history: saved.history ?? [],
+        boundEmail: saved.boundEmail ?? null,
         tabUnlockedUntil,
       };
     }

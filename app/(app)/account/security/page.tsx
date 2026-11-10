@@ -7,7 +7,7 @@ export const instant = false;
 
 export default async function AccountSecurityPage() {
   const user = await pageUser(["student"]);
-  const { items, rpId, hasMismatchedPasskeys } = await listPasskeys(user);
+  const { items, rpId, hasMismatchedPasskeys, hasDeviceBinding } = await listPasskeys(user);
 
   return (
     <div className="flex flex-col gap-6">
@@ -18,7 +18,7 @@ export default async function AccountSecurityPage() {
           Passkeys &amp; security
         </h1>
         <p className="max-w-2xl text-base text-muted">
-          Protect your evidence captures with Windows Hello, Google Password Manager, or a hardware security key. A passkey check unlocks capturing in a Facebook tab for 15 minutes.
+          Link your account 1-to-1 with this laptop using Windows Hello, Touch ID, or Chrome Passkey. Captures can only be unlocked from your linked browser.
         </p>
       </div>
 
@@ -26,6 +26,7 @@ export default async function AccountSecurityPage() {
         initialItems={items}
         rpId={rpId}
         hasMismatchedPasskeys={hasMismatchedPasskeys}
+        hasDeviceBinding={hasDeviceBinding}
       />
     </div>
   );
