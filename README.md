@@ -4,7 +4,7 @@
 
 Escapture helps university students who are being cyberbullied on Facebook keep evidence of what happened, build a case from it, and bring it to their school's case reviewers when they are ready.
 
-Live app: **https://escapture.vercel.app**
+Live app: **https://escapture-live.vercel.app**
 
 <!-- DEMO VIDEO: add the link here, e.g. [Watch the 3-minute demo](https://...) -->
 
