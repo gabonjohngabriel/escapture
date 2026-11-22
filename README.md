@@ -2,123 +2,121 @@
 
 **Keep a record of what happened.**
 
-Escapture helps university students who are being cyberbullied on Facebook keep evidence of what happened, build a case from it, and bring it to their school's case reviewers when they are ready.
+Escapture helps university students dealing with cyberbullying on Facebook save reliable evidence, organize it into a case, and share it with their school's reviewers whenever they're ready.
 
-Live app: **https://escapture-live.vercel.app**
+**Live app:** [escapture-live.vercel.app](https://escapture-live.vercel.app)
 
 <!-- DEMO VIDEO: add the link here, e.g. [Watch the 3-minute demo](https://...) -->
 
 ![The Escapture home page](docs/screenshots/home.png)
 
-## Project description
+## Why Escapture?
 
-A post can be edited or deleted within minutes, and a screenshot is easy to fake, so even a genuine one gets doubted. Students end up keeping evidence in a camera roll, retelling the story to everyone who asks, and reporting with material the school can't easily check.
+Online posts can be edited or deleted in seconds, and regular screenshots are easy to fake—which makes it hard for schools to trust them. Students end up juggling screenshots in their camera roll and repeating their story over and over.
 
-Escapture gives each side what it needs:
+Escapture makes the process safer and clearer for everyone:
 
-- **Students** capture a Facebook post or Messenger conversation with the Escapture Chrome extension. Before saving, the extension checks whether the page was edited in the browser and refuses to capture if it was. The capture is saved as a frozen, script-free copy in the student's private vault, with a SHA-256 hash and a capture time recorded by the server.
-- **The student stays in control.** Nothing reaches the school until the student escalates a case. They choose what goes in it, who helps build it, and when to send it.
-- **Reviewers** (for example, a student affairs office) get an organized case: a title, a description, and evidence they can open, each item labelled _Captured with tamper checks_, with its hash and capture time. They review the case, add the other side's evidence when it arrives, and record how the case ended.
+- **For students:** Use our Chrome extension to save a Facebook post or Messenger chat. Before saving, the extension checks that the page hasn't been tampered with in the browser. Your capture is stored in a private vault with a timestamp and a unique digital fingerprint (SHA-256 hash).
+- **You stay in control:** Nothing is sent to the school until you decide to submit a case. You choose what evidence to include, who can help you build it, and when to send it.
+- **For school reviewers:** Reviewers (like the Student Affairs Office) receive an organized case with a title, summary, and evidence marked _Captured with tamper checks_. They can review the evidence, attach responses from the other party, and record the final outcome.
 
-Escapture supports the university's own process and doesn't replace it. It doesn't decide who is right.
+Escapture supports your university's existing process—it doesn't replace it or decide who is right.
 
-The pilot is built for Bulacan State University: students sign up with their `@ms.bulsu.edu.ph` email.
+*Pilot version built for Bulacan State University (students sign up with their `@ms.bulsu.edu.ph` email).*
 
-## Features
+## What you can do
 
-### For students
+### Students
 
-- **Tamper-checked capture (Chrome extension).** Pick a post, or pick the messages you want from a conversation, then capture. The extension refuses a page that was edited through browser developer tools, page editing mode, userscripts or another extension. Every capture is hashed and uploaded straight to your vault.
-- **Private vault.** Your evidence, readable as the original post or conversation, shown in a sandboxed viewer that runs no scripts. Each item shows its hash and capture time, and can be re-checked against the stored file at any time.
-- **Sharing you control.** Share an item with another Escapture user by email, or through a password-protected link. You can see who has access, remove anyone, and list and revoke your links.
-- **Cases.** Gather evidence into a case with a title and description. Invite people you trust to add evidence from their own vaults. Everyone on a draft sees who else is there and edits it together, live.
-- **Deliberate escalation.** Before escalating, you see a preview of exactly what reviewers will see: every person and every item. Once escalated, the case is locked, so it can't be edited or withdrawn, and its evidence can't be deleted while the case is open.
-- **Status and notifications.** Follow your case from Escalated to Under Review to Closed, read the reviewer's closing note, and get notified in the app when anything changes.
-- **Your evidence after a case closes.** Reviewers lose access when a case closes, and the case keeps only a record of each item (title, kind, capture time, owner and hash). You can rename or delete your evidence again.
+- **Save posts and chats safely:** Use the Chrome extension to capture a Facebook post or pick specific Messenger messages. If someone edited the page using browser tools or extensions, Escapture blocks the capture.
+- **Private vault:** View your saved evidence safely without any active scripts running. Every item includes its capture time and digital fingerprint so it can be verified anytime.
+- **Controlled sharing:** Share items with other Escapture users by email or via a password-protected link. You can see who has access and revoke it whenever you want.
+- **Build cases together:** Group your evidence into a case with a title and description. You can invite trusted friends or witnesses to add their own evidence in real time.
+- **Submit when ready:** Before sending a case to reviewers, you'll see an exact preview of what they will receive. Once submitted, the case is locked so nothing can be altered or deleted while it's open.
+- **Track progress:** Follow your case from _Escalated_ to _Under Review_ to _Closed_, get in-app notifications, and read the reviewer's closing note.
+- **Keep your privacy after closing:** Once a case is closed, reviewers lose access to your files. Only a basic record remains on the case, and you can rename or delete your evidence again.
 
-### For reviewers
+### Reviewers
 
-- **Dashboard.** Counts of open cases by status and a weekly chart of escalations.
-- **Review Board.** Every escalated case in one table, with search, filters (assigned to me, unassigned, has collaborators, has flagged words, time period) and the latest activity.
-- **Flagged words.** A case whose title or description contains a word from the word bank (for example self-harm or threat terms, in English and Filipino) shows those words on the board and the case page. Flags help reviewers notice a case. They never rank cases and never decide anything, and students never see them.
-- **Case review.** Open the evidence the student attached, start the review, and close the case with a note of the actions taken. The student and their collaborators can see the note.
-- **The other side.** Attach evidence other people shared with you, such as the accused student's own capture of the full conversation. Those attachments stay separate from the reporter's evidence, and the reporter doesn't see them.
-- **Case Archives.** Look up closed cases and their records.
+- **Overview dashboard:** See open case counts and weekly submission trends at a glance.
+- **Review Board:** Browse all submitted cases in one place with search and filters (assigned to me, unassigned, has collaborators, has flagged words, or date range).
+- **Flagged words:** Cases mentioning urgent terms (such as self-harm or threats in English or Filipino) are highlighted so reviewers can spot them quickly. Students never see these flags, and they don't automatically rank or judge a case.
+- **Case review:** Inspect attached evidence, mark a case as under review, and close it with a summary of actions taken.
+- **Include the other side:** Attach evidence shared by the other party (such as the accused student's full chat capture). These stay separate and hidden from the reporting student.
+- **Case Archives:** Look up closed cases and their records anytime.
 
-### For administrators
+### Administrators
 
-- **Reviewer accounts.** Create a reviewer and get a one-time setup link to pass on, so only the reviewer ever knows their password. Deactivate and reactivate accounts.
-- **Assignment.** Assign one or more reviewers to a case. They're notified, but any reviewer can still act on any case.
-- **Word bank.** Add or remove flagged words. Cases are re-checked straight away.
-- **Full review access.** Administrators can do everything a reviewer can.
+- **Manage reviewers:** Create reviewer accounts with a one-time setup link (so only they know their password), and activate or deactivate accounts as needed.
+- **Assign cases:** Assign reviewers to specific cases and notify them, while still allowing any reviewer to step in.
+- **Manage flagged words:** Add or remove words from the flag list—cases update automatically.
+- **Full access:** Admins have all reviewer permissions as well.
 
-### Built-in safeguards
+### Built-in safety & privacy
 
-- Every permission is checked on the server, never only in the interface.
-- Uploads are re-hashed by the server, and a mismatch is rejected.
-- Captured pages are treated as untrusted. They are served with a sandbox policy and shown only in a sandboxed frame.
-- Row-level security is on for every database table, and sign-in and the API are rate-limited.
-- Escapture describes captures as _tamper-checked_, never _tamper-proof_ or _verified_.
+- All permissions are enforced on the server, not just in the browser.
+- Uploaded files are re-checked by the server; tampered uploads are rejected.
+- Saved pages open in a strict, isolated viewer so they can never run harmful code.
+- Database tables use row-level security, and sign-ins/APIs are rate-limited.
+- Captures are honestly labeled as _tamper-checked_, never _tamper-proof_.
 
 <!-- SCREENSHOT: vault with captured items -->
 <!-- SCREENSHOT: extension popup and element picker on a Facebook post -->
 <!-- SCREENSHOT: Review Board with flagged words -->
 
-## Setup
+## Quick local setup
 
-These steps run Escapture on your own computer with demo accounts and data. No Supabase or Vercel account is needed: evidence files are stored on local disk.
+Run Escapture on your own computer with built-in demo accounts. No external cloud accounts are needed—files save directly to your machine.
 
-### Requirements
+### What you need
 
 - **Node.js** 20.9 or newer
 - **pnpm** 11 (`npm install -g pnpm`)
-- **Docker Desktop**, running, for the local Postgres database
-- **Google Chrome**, for the extension
+- **Docker Desktop** (running, for the local database)
+- **Google Chrome** (for the extension)
 
-### 1. Install and configure
+### 1. Download and configure
 
 ```bash
-git clone https://github.com/shnflrsc/escapture.git
+git clone [https://github.com/shnflrsc/escapture.git](https://github.com/shnflrsc/escapture.git)
 cd escapture
 pnpm install
 ```
 
-Copy the example settings file:
+Copy the example environment file:
 
 ```bash
+# macOS / Linux
 cp .env.example .env.local
-```
 
-On Windows PowerShell:
-
-```powershell
+# Windows PowerShell
 Copy-Item .env.example .env.local
 ```
 
-Open `.env.local` and set these three lines. Leave the rest as they are.
+Open `.env.local` and update these three lines (leave the rest as-is):
 
-```
+```env
 DATABASE_URL=postgres://postgres:postgres@localhost:54329/safetrail
 DIRECT_URL=postgres://postgres:postgres@localhost:54329/safetrail
-BETTER_AUTH_SECRET=<a long random string>
+BETTER_AUTH_SECRET=<paste-generated-secret-here>
 ```
 
-To generate a secret:
+Generate a random secret for `BETTER_AUTH_SECRET`:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
 ```
 
-### 2. Start the database and the app
+### 2. Start the app
 
 ```bash
-pnpm db:local     # starts Postgres in Docker on port 5432
-pnpm db:migrate   # creates the tables
-pnpm db:seed      # adds demo accounts, evidence and cases
-pnpm dev          # http://localhost:3000
+pnpm db:local     # starts Postgres in Docker
+pnpm db:migrate   # sets up database tables
+pnpm db:seed      # creates demo accounts and sample data
+pnpm dev          # starts the app at http://localhost:3000
 ```
 
-`pnpm db:seed` prints the demo accounts and their shared password:
+`pnpm db:seed` will print the shared password for these demo accounts:
 
 | Role                      | Email                                                  |
 | ------------------------- | ------------------------------------------------------ |
@@ -128,45 +126,46 @@ pnpm dev          # http://localhost:3000
 | Student (collaborator)    | `jules.demo@ms.bulsu.edu.ph`                           |
 | Student (the other party) | `alex.demo@ms.bulsu.edu.ph`                            |
 
-Open http://localhost:3000 and sign in as any of them.
+Open [http://localhost:3000](http://localhost:3000) and sign in with any account above.
 
-### 3. Build and load the extension
+### 3. Install the Chrome extension
 
 ```bash
 pnpm ext:build
 ```
 
-The build points the extension at the app address in `.env.local` (http://localhost:3000 by default). It prints the extension's ID, `idlfmehfilgnnlgpiokgpanpjdfnejnd`, which is fixed by `extension/key.json`. `.env.example` already trusts that ID.
+This builds the extension pointing to `http://localhost:3000` with a fixed ID (`idlfmehfilgnnlgpiokgpanpjdfnejnd`) that's already trusted by `.env.example`.
 
-1. Open `chrome://extensions` and turn on **Developer mode** (top right).
-2. Click **Load unpacked** and choose the `extension/dist` folder.
-3. Pin **Escapture** to the toolbar, open it, and sign in with a student account, for example Maya.
+1. Open `chrome://extensions` in Chrome and turn on **Developer mode** (top right).
+2. Click **Load unpacked** and select the `extension/dist` folder.
+3. Pin **Escapture** to your toolbar, open it, and sign in with a student account (like Maya).
 
-### 4. Capture something
+### 4. Try capturing evidence
 
 The extension works on `facebook.com` and `messenger.com`.
 
-1. **Reload the Facebook tab** after installing or reloading the extension. The tamper guard only watches pages loaded after the extension starts.
-2. Open a post or a Messenger conversation, open the extension and click **Capture this page**.
-3. **For a post:** click anywhere in it. The whole post is outlined. Use **Wider** or **Narrower** if needed, then **Capture this post**.
-4. **For messages:** click each message you want (Shift-click selects a range), or use **Select all loaded messages**, then **Capture**. Only messages loaded on screen can be captured, so scroll up first to include earlier ones.
-5. The capture appears in your vault at http://localhost:3000/vault.
+1. **Refresh your Facebook tab** after installing the extension so the tamper guard can start watching the page.
+2. Open a post or Messenger chat, click the Escapture icon, and select **Capture this page**.
+3. **For a post:** Click anywhere on the post. Adjust the selection with **Wider** or **Narrower**, then click **Capture this post**.
+4. **For messages:** Click the messages you want (hold Shift to select a range) or click **Select all loaded messages**, then hit **Capture**. *(Scroll up first if you need older messages.)*
+5. View your saved capture at [http://localhost:3000/vault](http://localhost:3000/vault).
 
-**Without a Facebook account:** run `pnpm fixtures:serve` and capture from the fake pages at http://localhost:4100/fake-facebook-post.html or http://localhost:4100/fake-messenger.html.
+> **No Facebook account?** Run `pnpm fixtures:serve` and test on our sample pages:  
+> [http://localhost:4100/fake-facebook-post.html](http://localhost:4100/fake-facebook-post.html) or [http://localhost:4100/fake-messenger.html](http://localhost:4100/fake-messenger.html)
+>
+> **Want to test the tamper check?** Right-click the post text, click **Inspect**, change the text in DevTools, and try capturing—Escapture will block it.
 
-**To see the tamper check refuse a capture:** on one of those pages, right-click the post text, choose **Inspect**, edit the text in the Elements panel, then try to capture it.
+### Try the full workflow
 
-### Try the full journey
+1. Sign in as **Maya**, create a case from the vault, attach evidence, and add a description.
+2. Click **Escalate**, check the preview, and confirm.
+3. Sign in as **reviewer1** in another browser profile and open the case on the Review Board.
+4. Click **Start review**, then **Close case** with a short closing note.
+5. Switch back to **Maya** to see the _Closed_ status, notification, and closing note.
 
-1. As **Maya**, create a case from the vault, attach evidence, and add a description.
-2. Click **Escalate**, read the preview and confirm.
-3. Sign in as **reviewer1** in another browser profile. The case is on the Review Board.
-4. Open it, click **Start review**, then **Close case** and write a note.
-5. Back as Maya, the case shows _Closed_ with the reviewer's note, and a notification.
+### Adding new accounts
 
-### Creating more accounts
-
-Students can register at `/sign-up` with an `@ms.bulsu.edu.ph` email. Reviewers can't sign up. An administrator creates them on the **Reviewer accounts** page, or from the command line:
+Students can sign up at `/sign-up` using an `@ms.bulsu.edu.ph` email. Reviewers must be created by an admin on the **Reviewer accounts** page, or via the terminal:
 
 ```bash
 pnpm admin:create-user --email someone@example.com --name "Full Name" --password "at-least-8-chars" --role reviewer
@@ -174,57 +173,52 @@ pnpm admin:create-user --email someone@example.com --name "Full Name" --password
 
 ## Tech stack
 
-- **Web app:** Next.js 16 (App Router), React 19, TypeScript and Tailwind CSS v4.
-- **Data:** Postgres with Drizzle ORM. Supabase hosts the database and evidence storage in production; Docker runs the database in development.
-- **Sign-in:** Better Auth, with email and password, and bearer tokens for the extension.
-- **Validation:** Zod.
-- **Extension:** Chrome Manifest V3, bundled with esbuild.
-- **Hosting:** Vercel.
-- **Tests:** Vitest, plus an end-to-end API smoke test.
+- **Web app:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4
+- **Database & storage:** PostgreSQL with Drizzle ORM (Supabase in production, Docker locally)
+- **Authentication:** Better Auth (email/password + bearer tokens for the extension)
+- **Validation:** Zod
+- **Chrome extension:** Manifest V3 bundled with esbuild
+- **Hosting:** Vercel
+- **Testing:** Vitest + end-to-end API smoke test
 
-## Testing
+## Running tests
 
 ```bash
-pnpm typecheck
-pnpm lint
-pnpm test        # unit tests
-pnpm smoke       # end-to-end walkthrough through the API; needs `pnpm dev` running
+pnpm typecheck   # check TypeScript types
+pnpm lint        # run linter
+pnpm test        # run unit tests
+pnpm smoke       # run full end-to-end API test (requires `pnpm dev` running)
 ```
 
-- **Unit tests** cover:
-    - who may do what, for every role and case status;
-    - the escalation preview check;
-    - hashing and link passwords;
-    - the email-domain rule and request validation;
-    - flagged-word matching;
-    - a guard that fails if any API route skips the sign-in check.
-- **The smoke test** creates fresh accounts and walks the whole product: sign-up, uploads with hash checking, sharing and links, cases and collaborators, escalation and locking, reviewer-only access, reviewer attachments staying hidden from the reporter, closing, notifications and flagged words.
+- **Unit tests** verify permissions, escalation previews, file hashing, link passwords, email domain rules, flagged-word matching, and API authentication guards.
+- **Smoke test** simulates a full user journey from sign-up and evidence upload to case escalation, reviewer handling, closing, and notifications.
 
 ## Project structure
 
-```
+```text
 app/
-  (marketing)/     home, Terms of Service, Privacy Policy, Contact
-  (auth)/          sign in, register
-  (public)/        shared links, reviewer account setup
-  (app)/           vault, cases, notifications, review, admin
-  api/             route handlers: validate, call a service, return
+  (marketing)/     Home, Terms, Privacy Policy, Contact
+  (auth)/          Sign in, Sign up
+  (public)/        Shared links, Reviewer setup
+  (app)/           Vault, Cases, Notifications, Review Board, Admin
+  api/             API routes
 server/
-  authz.ts         every permission decision
-  services/        evidence, sharing, cases, review, flags, notifications
-  db/              database schema and client
-  storage.ts       evidence file storage (Supabase, or local disk)
-components/        interface components
-extension/         the Escapture Chrome extension
-drizzle/           database migrations
-fixtures/          fake Facebook pages for testing capture
-scripts/           seed, create-user, smoke test
+  authz.ts         Permission checks
+  services/        Core business logic (evidence, sharing, cases, review, flags, notifications)
+  db/              Database schema and client
+  storage.ts       File storage (Supabase or local disk)
+components/        Reusable UI components
+extension/         Escapture Chrome extension
+drizzle/           Database migrations
+fixtures/          Sample Facebook/Messenger pages for testing
+scripts/           Seed, user creation, and smoke test scripts
 ```
 
 ## Team
 
-**Team Echelon**
+**Team Esgabture**
 
-- **Hezekiah Christal Dionisio**, Team Lead: project direction, coordination and the core concept.
-- **Darl Shanen Floresca**, Lead Developer: full-stack implementation and system architecture.
-- **Kyle Acuña**, Front-End and UI/UX Designer: interface and experience design, and pitch video.
+- **Hezekiah Christal Dionisio** — Team Lead: project direction, coordination, and core concept.
+- **Darl Shanen Floresca** — Lead Developer: full-stack implementation and system architecture.
+- **Kyle Acuña** — Front-End and UI/UX Designer: interface and experience design, and pitch video.
+- **John Gabriel Gabon** — Front-End and UI/UX Designer: interface and experience design.
